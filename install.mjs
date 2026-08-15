@@ -1,38 +1,33 @@
-// Wires the status line and the hooks into ~/.claude/settings.json, and takes
-// them back out again with --uninstall.
+// Registers the hooks with every coding agent you have, and takes them back
+// out again with --uninstall.
+//
+// Claude Code and Codex both run command hooks, with the same event names and
+// the same JSON on stdin, so the same handler serves both — see src/agents.mjs.
+// They differ only in where the registration lives:
+//
+//   Claude   ~/.claude/settings.json    hooks are one key among many
+//   Codex    ~/.codex/hooks.json        the whole file is hooks
+//
+// Both take the same `{ hooks: { Event: [{ hooks: [{ type, command }] }] } }`
+// shape underneath, which is why this is one loop rather than two installers.
 //
 // Our entries are recognised by the command they run — our launcher plus one of
 // our scripts — so uninstalling only removes what we added and leaves anything
 // else in the file alone.
+//
+// Usage: node install.mjs [--claude|--codex] [--uninstall] [--no-verbs]
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { ROOT } from './src/config.mjs'
-
-const SETTINGS = join(homedir(), '.claude', 'settings.json')
-const BACKUP = `${SETTINGS}.pixel-runner-backup`
+import { AGENTS, chosen, eventsFor, isStale } from './src/agents.mjs'
 
 const RUNNER = `"${join(ROOT, 'bin', 'run.sh')}"`
 const ACTIVITY_COMMAND = `${RUNNER} on-activity.mjs`
 
-// Notification is here for the turns that end by Claude asking you something
-// rather than by finishing. PreToolUse has already said "working" and no
-// PostToolUse is ever coming, so without this the sprite runs for as long as
-// the question sits unanswered.
-const HOOK_EVENTS = [
-  'UserPromptSubmit',
-  'PreToolUse',
-  'PostToolUse',
-  'Notification',
-  'Stop',
-  'SessionStart',
-  'SessionEnd',
-]
-
 // Replacing the verbs entirely keeps the spinner line on theme with the sprite.
 // Claude Code picks one per turn, so these do not animate — they just stop the
-// sprite sitting under an unrelated word.
+// sprite sitting under an unrelated word. Claude-only: Codex has no equivalent.
 const SPINNER_VERBS = {
   mode: 'replace',
   verbs: [
@@ -51,23 +46,6 @@ const SPINNER_VERBS = {
 
 const uninstalling = process.argv.includes('--uninstall')
 const skipVerbs = process.argv.includes('--no-verbs')
-
-const read = () => {
-  try {
-    return JSON.parse(readFileSync(SETTINGS, 'utf8'))
-  } catch {
-    return {}
-  }
-}
-
-const write = (document) => {
-  // ~/.claude may not exist yet. Writing straight into it threw ENOENT with a
-  // node stack trace and — because this runs at the top level of a script that
-  // ends `process.exit(0)` — still exited 0, so `npm run setup` reported the
-  // step as done having written nothing at all.
-  mkdirSync(dirname(SETTINGS), { recursive: true })
-  writeFileSync(SETTINGS, `${JSON.stringify(document, null, 2)}\n`)
-}
 
 // Ours are recognised by the shape of the command we write: our launcher, then
 // one of our scripts.
@@ -106,76 +84,104 @@ try {
   writeFileSync(join(ROOT, '.state', 'node-path'), `${process.execPath}\n`)
 } catch {}
 
-const settings = read()
-
-if (existsSync(SETTINGS) && !existsSync(BACKUP)) {
-  copyFileSync(SETTINGS, BACKUP)
-  console.log(`  backed up your settings to ${BACKUP}`)
+const read = (file) => {
+  try {
+    return JSON.parse(readFileSync(file, 'utf8'))
+  } catch {
+    // Missing is ordinary. Corrupt is not worth failing over either — the
+    // alternative is refusing to install because something else wrote bad JSON,
+    // and the backup below means the original is still recoverable.
+    return {}
+  }
 }
 
-if (uninstalling) {
-  if (isOurCommand(settings.statusLine?.command)) {
-    delete settings.statusLine
-    console.log('  removed the status line')
-  } else {
-    console.log('  status line was not ours, left alone')
+const write = (file, document) => {
+  // The directory may not exist yet. Writing straight into it threw ENOENT with
+  // a node stack trace and — because this runs at the top level of a script that
+  // ends `process.exit(0)` — still exited 0, so `npm run setup` reported the
+  // step as done having written nothing at all.
+  mkdirSync(dirname(file), { recursive: true })
+  writeFileSync(file, `${JSON.stringify(document, null, 2)}\n`)
+}
+
+const targets = chosen()
+
+if (targets.length === 0) {
+  const stale = AGENTS.filter(isStale)
+
+  console.error('  no coding agent found — install Claude Code or Codex first')
+
+  // The state that makes a directory check look like a working detector: the
+  // config folder is there from some earlier life, the program is not.
+  for (const agent of stale) {
+    console.error(`  (${agent.dir()} exists, but there is no ${agent.name} on your PATH)`)
   }
 
-  for (const event of HOOK_EVENTS) {
-    if (!settings.hooks?.[event]) continue
+  process.exit(1)
+}
 
-    const kept = withoutOurs(settings.hooks[event])
+for (const agent of targets) {
+  const file = agent.file()
+  const backup = `${file}.pixel-runner-backup`
+  const events = eventsFor(agent)
+  const document = read(file)
 
-    if (kept.length) settings.hooks[event] = kept
-    else delete settings.hooks[event]
+  if (existsSync(file) && !existsSync(backup)) {
+    copyFileSync(file, backup)
+    console.log(`  ${agent.name}: backed up to ${backup}`)
   }
 
-  if (settings.hooks && Object.keys(settings.hooks).length === 0) delete settings.hooks
+  if (uninstalling) {
+    // Claude's status line lives beside the hooks in the same file. Codex has
+    // no such key, so this simply never matches there.
+    if (isOurCommand(document.statusLine?.command)) delete document.statusLine
 
-  if (JSON.stringify(settings.spinnerVerbs) === JSON.stringify(SPINNER_VERBS)) {
-    delete settings.spinnerVerbs
-    console.log('  restored the default spinner verbs')
+    for (const event of events) {
+      if (!document.hooks?.[event]) continue
+
+      const kept = withoutOurs(document.hooks[event])
+
+      if (kept.length) document.hooks[event] = kept
+      else delete document.hooks[event]
+    }
+
+    if (document.hooks && Object.keys(document.hooks).length === 0) delete document.hooks
+
+    if (JSON.stringify(document.spinnerVerbs) === JSON.stringify(SPINNER_VERBS)) delete document.spinnerVerbs
+
+    write(file, document)
+    console.log(`  ${agent.name}: removed from ${file}`)
+
+    continue
   }
 
-  write(settings)
-  console.log('\n  Done. Restart Claude Code.\n')
-  process.exit(0)
+  // No status line. The sprite lives in its own pane now, and interruptions are
+  // caught from the transcript rather than from a status line heartbeat — so
+  // there is nothing left for it to do, and leaving one installed would only
+  // suppress the agent's own footer hints.
+  if (isOurCommand(document.statusLine?.command)) delete document.statusLine
+
+  document.hooks = document.hooks ?? {}
+
+  for (const event of events) {
+    document.hooks[event] = [
+      ...withoutOurs(document.hooks[event]),
+      { hooks: [{ type: 'command', command: ACTIVITY_COMMAND, timeout: 5 }] },
+    ]
+  }
+
+  // Claude-only, and only when it is the whole file we are writing. Codex has
+  // no spinner to theme, and putting an unknown key in its hooks file would be
+  // rude at best.
+  if (!skipVerbs && agent.shape === 'settings') document.spinnerVerbs = SPINNER_VERBS
+
+  write(file, document)
+  console.log(`  ${agent.name}: ${events.length} hooks -> ${file}`)
 }
 
-// There used to be a guard here refusing to install until `npm run build` had
-// written build/frames.json. Those frames are read by exactly one file,
-// bin/statusline.mjs, and the status line is no longer installed — the block
-// below removes it if it finds one. So the guard was demanding a build for a
-// feature this script switches off four lines later.
-//
-// It made a fresh clone impossible to install. `npm run setup` reported the
-// first two steps done and stopped at the third with "run npm run build first",
-// and the four commands the README listed before that had the same hole. It
-// only ever worked on a machine that had run the build back when the status
-// line was the whole project.
-
-// No status line. The sprite lives in its own pane now, and interruptions are
-// caught from the transcript rather than from a status line heartbeat — so
-// there is nothing left for it to do, and leaving one installed would only
-// suppress Claude Code's own footer hints.
-if (isOurCommand(settings.statusLine?.command)) {
-  delete settings.statusLine
-}
-
-settings.hooks = settings.hooks ?? {}
-
-for (const event of HOOK_EVENTS) {
-  settings.hooks[event] = [
-    ...withoutOurs(settings.hooks[event]),
-    { hooks: [{ type: 'command', command: ACTIVITY_COMMAND, timeout: 5 }] },
-  ]
-}
-
-if (!skipVerbs) settings.spinnerVerbs = SPINNER_VERBS
-
-write(settings)
-
-console.log(`  hooks        -> ${HOOK_EVENTS.join(', ')}`)
-console.log(`  spinner verbs-> ${skipVerbs ? 'left alone' : `${SPINNER_VERBS.verbs.length} themed verbs`}`)
-console.log('\n  Done. Restart Claude Code to load the hooks.')
-console.log(`  Undo with: node ${join(ROOT, 'install.mjs')} --uninstall\n`)
+console.log(
+  uninstalling
+    ? `\n  Done. Restart ${targets.map((agent) => agent.label).join(' and ')}.\n`
+    : `\n  Done. Restart ${targets.map((agent) => agent.label).join(' and ')} to load the hooks.` +
+        `\n  Undo with: node ${join(ROOT, 'install.mjs')} --uninstall\n`,
+)

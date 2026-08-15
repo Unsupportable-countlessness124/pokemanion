@@ -19,6 +19,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { ROOT } from './config.mjs'
 import { SPECIES_ENV, names } from './roster.mjs'
+import { chosen } from './agents.mjs'
 
 // Do not rename these to match the project. They are not a label, they are the
 // handle on a block already written into people's ~/.zshrc: install finds the
@@ -32,16 +33,30 @@ import { SPECIES_ENV, names } from './roster.mjs'
 const BEGIN = '# >>> pixel-runner >>>'
 const END = '# <<< pixel-runner <<<'
 
-export const snippet = () => {
-  const residents = names().map((name) => `--${name}`).join('|')
+// One function per agent you have, both inside the same markers.
+//
+// Not one block each. The markers are the handle on what is already in your
+// shell file — install finds the old block by them and replaces it, `--remove`
+// finds it to take it out — so a second pair would orphan every existing
+// install. That is the bug install.mjs had from matching the project's old
+// name, and it is not worth repeating for the sake of tidiness.
+export const snippet = (agents = null) => {
+  const wrappers = (agents ?? chosen()).map((agent) => agent.name)
 
   return `${BEGIN}
-# Summon a specific one: claude --pikachu, claude --resume --ash
-# Or any of the others:  claude --flygon      (fetched the first time)
-# Pick from a list:      claude --pokemon
-# Roll the dice:         claude --random
+${wrappers.map((name) => `# Summon a specific one: ${name} --pikachu, ${name} --resume --ash`).join('\n')}
+# Or any of the others:  --flygon      (fetched the first time)
+# Pick from a list:      --pokemon
+# Roll the dice:         --random
 # Remove with: node ${join(ROOT, 'src', 'shell.mjs')} --remove
-claude() {
+${wrappers.map((name) => wrapper(name)).join('\n\n')}
+${END}`
+}
+
+const wrapper = (agent) => {
+  const residents = names().map((name) => `--${name}`).join('|')
+
+  return `${agent}() {
   local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try pixel_runner_hint
   for pixel_runner_arg in "$@"; do
     case "$pixel_runner_arg" in
@@ -95,12 +110,11 @@ claude() {
   fi
 
   if [ -n "$pixel_runner_species" ]; then
-    ${SPECIES_ENV}="$pixel_runner_species" command claude "\${pixel_runner_args[@]}"
+    ${SPECIES_ENV}="$pixel_runner_species" command ${agent} "\${pixel_runner_args[@]}"
   else
-    command claude "\${pixel_runner_args[@]}"
+    command ${agent} "\${pixel_runner_args[@]}"
   fi
-}
-${END}`
+}`
 }
 
 // Everything between the markers, so installing twice replaces rather than
@@ -155,17 +169,27 @@ const write = (body) => {
 if (process.argv[1] && process.argv[1].endsWith('shell.mjs')) {
   const existing = existsSync(RC) ? readFileSync(RC, 'utf8') : ''
 
+  const agents = chosen()
+  const wrappers = agents.map((agent) => agent.name)
+
   if (process.argv.includes('--remove')) {
     write(withoutBlock(existing))
-    console.log(`\n  removed from ${RC}\n  open a new terminal, or run: unset -f claude\n`)
+    console.log(
+      `\n  removed from ${RC}\n  open a new terminal, or run: ${wrappers.map((name) => `unset -f ${name}`).join('; ') || 'unset -f claude'}\n`,
+    )
   } else if (process.argv.includes('--install')) {
+    if (agents.length === 0) {
+      console.error('\n  no coding agent found — install Claude Code or Codex first\n')
+      process.exit(1)
+    }
+
     const cleaned = withoutBlock(existing).replace(/\s*$/, '')
 
-    write(`${cleaned}\n\n${snippet()}\n`)
+    write(`${cleaned}\n\n${snippet(agents)}\n`)
     console.log(
-      `\n  added to ${RC}\n` +
+      `\n  added to ${RC}  (${wrappers.join(', ')})\n` +
         `  backup at ${RC}.pixel-runner-backup\n\n` +
-        `  ${names().map((name) => `claude --${name}`).join('\n  ')}\n\n` +
+        `  ${names().slice(0, 4).map((name) => `${wrappers[0]} --${name}`).join('\n  ')}\n  ...and ${names().length - 4} more\n\n` +
         `  open a new terminal, or run: source ${RC}\n`,
     )
   } else {

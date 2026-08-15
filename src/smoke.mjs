@@ -36,6 +36,7 @@ const MODULES = [
   'assigned',
   'ghostty',
   'hint',
+  'agents',
 ]
 
 const results = []
@@ -615,6 +616,45 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
             (hook) => String(hook?.command ?? '').includes('run.sh') && String(hook?.command ?? '').includes('on-activity.mjs'),
           ),
         ).length
+
+    // Codex registers the same hooks in a file of its own. Everything else
+    // about it is identical — same event names, same JSON on stdin, same field
+    // names — which is why bin/on-activity.mjs serves both unchanged.
+    {
+      const codexHome = mkdtempSync(join(tmpdir(), 'pokemanion-codex-'))
+
+      try {
+        const wrote = spawnSync(process.execPath, ['install.mjs', '--codex'], {
+          cwd: ROOT,
+          encoding: 'utf8',
+          env: { ...process.env, HOME: codexHome },
+        })
+        const file = join(codexHome, '.codex', 'hooks.json')
+        const document = JSON.parse(read(file, 'utf8'))
+        const events = Object.keys(document.hooks ?? {})
+
+        check('codex hooks land in ~/.codex/hooks.json', wrote.status === 0 && events.length === 7, events.length + ' events')
+        // Claude calls it Notification; Codex calls it PermissionRequest. Both
+        // mean "waiting on you", and registering the wrong one means the sprite
+        // runs while the agent sits on a question.
+        check('and use PermissionRequest, not Notification', events.includes('PermissionRequest') && !events.includes('Notification'))
+        // Codex has no spinner to theme, and an unknown key in its hooks file
+        // would be rude at best.
+        check('and carry no spinner verbs', !document.spinnerVerbs)
+
+        const gone = spawnSync(process.execPath, ['install.mjs', '--codex', '--uninstall'], {
+          cwd: ROOT,
+          encoding: 'utf8',
+          env: { ...process.env, HOME: codexHome },
+        })
+
+        check('and come back out again', gone.status === 0 && !JSON.parse(read(file, 'utf8')).hooks)
+      } catch (error) {
+        check('codex install', false, error.message.split('\n')[0])
+      } finally {
+        rmSync(codexHome, { recursive: true, force: true })
+      }
+    }
 
     const installed = run('install.mjs', { env: { HOME: home } })
     const after = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))

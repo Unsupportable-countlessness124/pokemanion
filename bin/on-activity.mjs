@@ -9,6 +9,16 @@ import { closeWindow, openWindow } from '../src/companion.mjs'
 const WORKING = new Set(['UserPromptSubmit', 'PreToolUse', 'PostToolUse'])
 const IDLE = new Set(['Stop', 'SessionEnd', 'SessionStart'])
 
+// The same state under two names. Claude Code calls it Notification, Codex
+// calls it PermissionRequest, and both mean the agent has stopped to ask you
+// something — which is not working, whatever the last tool hook said.
+//
+// Everything else about the two is identical: same event names, same JSON on
+// stdin, same field names, same exit-2-to-block. This file needed no other
+// change to serve both, which is the only reason Codex support is a config
+// question rather than a port.
+const WAITING = new Set(['Notification', 'PermissionRequest'])
+
 const read = () => {
   try {
     return JSON.parse(readFileSync(0, 'utf8'))
@@ -276,7 +286,7 @@ try {
     // A new session gets a sprite of its own, unless one is already up for it
     // — or unless it is a background agent, which has no terminal to put one in.
     if (event === 'SessionStart' && loadConfig().autoWindow) openWindow(session, payload.source ?? null)
-  } else if (event === 'Notification') {
+  } else if (WAITING.has(event)) {
     // Claude wants something from you, so it is not working — whatever the last
     // tool hook said. The transcript is kept so the sprite can go on watching
     // it, and the tool cleared so nothing counts as still in flight.

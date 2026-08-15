@@ -1,8 +1,8 @@
 # pokemanion
 
-A Pokémon lives in a terminal pane beside every Claude Code session. It rests
-while Claude is waiting on you and animates while Claude is working, so you can
-tell what a session is doing from across the room without reading the screen.
+A Pokémon lives in a terminal pane beside every Claude Code or Codex session. It
+rests while the agent is waiting on you and animates while it is working, so you
+can tell what a session is doing from across the room without reading the screen.
 
 14 ship with it, 1252 more can be summoned by name, and there is a Pokédex.
 
@@ -15,12 +15,13 @@ opens the split by driving Ghostty through AppleScript. It needs `chafa`
 If `chafa` or Ghostty are missing, run **`npm run deps`** first — it installs
 both via Homebrew. Then run **`npm run setup`**, which is the whole install: it
 checks the prerequisites, downloads the sprites, renders them, registers the
-hooks in `~/.claude/settings.json`, adds a `claude()` wrapper to `~/.zshrc`, and
-sets the Ghostty resize keybind the pane needs. Safe to run more than once.
+hooks for whichever agents it finds — Claude Code, Codex, or both — adds the
+matching shell wrapper, and sets the Ghostty resize keybind the pane needs.
+Safe to run more than once.
 
 Then tell them the things the script cannot do for them:
 
-1. **Restart Claude Code** — it reads the hooks at startup.
+1. **Restart the agent** (Claude Code and/or Codex) — hooks load at startup.
 2. **Restart Ghostty** — it reads its config at startup.
 3. **Open a new terminal**, or `source ~/.zshrc`.
 4. **System Settings → Privacy & Security → Accessibility → enable Ghostty.**

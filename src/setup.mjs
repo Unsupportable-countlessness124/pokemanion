@@ -21,6 +21,7 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { ROOT } from './config.mjs'
+import { AGENTS, chosen, isStale } from './agents.mjs'
 
 const DIM = '[2m'
 const BOLD = '[1m'
@@ -76,9 +77,30 @@ if (!/(zsh|bash)$/.test(process.env.SHELL ?? '')) {
   ])
 }
 
+// Which agents this is for, decided here so every message below can name them
+// rather than assuming Claude. `--claude` / `--codex` force it; otherwise it is
+// whichever binaries are actually on the machine.
+const agents = chosen()
+
+if (agents.length === 0) {
+  const stale = AGENTS.filter(isStale)
+
+  blockers.push([
+    'no coding agent found',
+    stale.length > 0
+      ? `install Claude Code or Codex — ${stale.map((agent) => agent.dir()).join(', ')} exists, but the program does not`
+      : 'install Claude Code or Codex first',
+  ])
+}
+
 say()
-say(`  ${BOLD}pokemanion${RESET}${DIM} — a Pokemon beside every Claude Code session${RESET}`)
+say(`  ${BOLD}pokemanion${RESET}${DIM} — a Pokemon beside every coding session${RESET}`)
 say()
+
+if (agents.length > 0) {
+  say(`  ${DIM}found:${RESET} ${agents.map((agent) => agent.label).join(', ')}`)
+  say()
+}
 
 if (blockers.length > 0) {
   for (const [what, fix] of blockers) say(`  ${RED}✗${RESET} ${what}\n    ${DIM}${fix}${RESET}`)
@@ -99,8 +121,8 @@ if (warnings.length > 0) say()
 const steps = [
   ['downloading sprites', ['src/roster.mjs'], 'the 14 that ship with it'],
   ['rendering them for your pane', ['src/warm.mjs'], 'once, so a session starts instantly'],
-  ['registering the hooks', ['install.mjs'], 'into ~/.claude/settings.json'],
-  ['adding the claude() wrapper', ['src/shell.mjs', '--install'], 'into ~/.zshrc, for the launch flags'],
+  ['registering the hooks', ['install.mjs'], `into ${agents.map((agent) => `~/.${agent.name}`).join(' and ')}`],
+  [`adding the ${agents.map((agent) => `${agent.name}()`).join(' and ')} wrapper`, ['src/shell.mjs', '--install'], 'for the launch flags'],
   // Without this the pane still opens — at half the window height, because the
   // keystroke that collapses it is bound to nothing. That read as a layout bug
   // for anyone but the one machine where the keybind had been added by hand.
@@ -142,7 +164,7 @@ for (const [label, args, why] of steps) {
 say()
 say(`  ${GREEN}installed.${RESET} three things left, and none of them is optional:`)
 say()
-say(`    ${BOLD}1.${RESET} restart Claude Code    ${DIM}it reads the hooks at startup${RESET}`)
+say(`    ${BOLD}1.${RESET} restart ${agents.map((agent) => agent.label).join(" and ")}${" ".repeat(Math.max(1, 14 - agents.map((a) => a.label).join(" and ").length))}${DIM}it reads the hooks at startup${RESET}`)
 say(`    ${BOLD}2.${RESET} restart Ghostty        ${DIM}it reads its config at startup${RESET}`)
 say(`    ${BOLD}3.${RESET} open a new terminal    ${DIM}or: source ~/.zshrc${RESET}`)
 say()
@@ -150,9 +172,9 @@ say(`  ${DIM}and once, by hand: System Settings > Privacy & Security > Accessibi
 say(`  ${DIM}> enable Ghostty. Opening a split means pressing keys, and macOS will${RESET}`)
 say(`  ${DIM}not let anything press keys until you allow it.${RESET}`)
 say()
-say(`  ${DIM}then a Pokemon appears beside your next session. it rests while Claude${RESET}`)
-say(`  ${DIM}waits and animates while it works.${RESET}`)
+say(`  ${DIM}then a Pokemon appears beside your next session. it rests while the${RESET}`)
+say(`  ${DIM}agent waits and animates while it works.${RESET}`)
 say()
-say(`  ${DIM}type${RESET} --pokemon ${DIM}at Claude to see the roster,${RESET} --random ${DIM}to be handed one,${RESET}`)
+say(`  ${DIM}type${RESET} --pokemon ${DIM}at your agent to see the roster,${RESET} --random ${DIM}to be handed one,${RESET}`)
 say(`  ${DIM}or${RESET} --dex pikachu ${DIM}to look one up. ${RESET}npm run doctor${DIM} if anything looks wrong.${RESET}`)
 say()

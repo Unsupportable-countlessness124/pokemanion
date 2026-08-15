@@ -16,6 +16,7 @@ import { FRAMES_FILE, ROOT, loadConfig } from './config.mjs'
 import { speciesInUse, windowIsRunning } from './companion.mjs'
 import { available, fetchedGuests, knownCount, pickFor } from './roster.mjs'
 import { guestCost } from './prune.mjs'
+import { AGENTS, isInstalled, isStale } from './agents.mjs'
 
 const GREEN = '\x1b[32m'
 const RED = '\x1b[31m'
@@ -101,32 +102,43 @@ check('Ghostty', () => ({
   detail: existsSync('/Applications/Ghostty.app') ? 'installed' : 'not installed',
 }))
 
-check('Claude settings wiring', () => {
-  const file = join(homedir(), '.claude', 'settings.json')
+// One line per agent, whether or not you have it. An agent you do not use
+// reporting "not installed" is information; leaving it out entirely would make
+// "is it wired up?" unanswerable for whichever one you do have.
+for (const agent of AGENTS) {
+  check(`${agent.label} hooks`, () => {
+    if (!isInstalled(agent)) {
+      return {
+        ok: true,
+        detail: isStale(agent) ? `not installed — ${agent.dir()} exists but the program does not` : 'not installed',
+      }
+    }
 
-  if (!existsSync(file)) return { ok: false, detail: 'no ~/.claude/settings.json' }
+    const file = agent.file()
 
-  const settings = JSON.parse(readFileSync(file, 'utf8'))
-  const statusLine = String(settings.statusLine?.command ?? '')
-  const events = Object.entries(settings.hooks ?? {})
-    .filter(([, groups]) =>
-      // Matched on where this project actually is, not on what it is called.
-      // Checking for the literal name meant renaming the folder would report
-      // every hook as missing while they all worked perfectly.
-      groups.some((group) => (group.hooks ?? []).some((hook) => String(hook.command).includes(ROOT))),
-    )
-    .map(([event]) => event)
+    if (!existsSync(file)) return { ok: false, detail: `no ${file} — run npm run install-statusline` }
 
-  const needed = ['SessionStart', 'UserPromptSubmit', 'PreToolUse', 'Stop']
-  const missing = needed.filter((event) => !events.includes(event))
+    const document = JSON.parse(readFileSync(file, 'utf8'))
+    const events = Object.entries(document.hooks ?? {})
+      .filter(([, groups]) =>
+        // Matched on where this project actually is, not on what it is called.
+        // Checking for the literal name meant renaming the folder would report
+        // every hook as missing while they all worked perfectly.
+        groups.some((group) => (group.hooks ?? []).some((hook) => String(hook.command).includes(ROOT))),
+      )
+      .map(([event]) => event)
 
-  return {
-    ok: missing.length === 0,
-    detail: missing.length
-      ? `hooks missing: ${missing.join(', ')} — run npm run install-statusline`
-      : `${events.length} hooks registered${statusLine.includes(ROOT) ? ', status line wired' : ''}`,
-  }
-})
+    const needed = ['SessionStart', 'UserPromptSubmit', 'PreToolUse', 'Stop']
+    const missing = needed.filter((event) => !events.includes(event))
+
+    return {
+      ok: missing.length === 0,
+      detail: missing.length
+        ? `hooks missing: ${missing.join(', ')} — run npm run install-statusline`
+        : `${events.length} hooks registered in ${file.replace(homedir(), '~')}`,
+    }
+  })
+}
 
 check('sprite window', () => {
   const sizeFile = join(ROOT, '.state', 'window.size')

@@ -2,10 +2,10 @@
 
 # pokemanion
 
-**Your Pokémon companion for Claude Code.**
+**Your Pokémon companion for Claude Code and Codex.**
 
-One lives in a pane beside every session: it rests while Claude waits, and does
-something else while Claude works — so you can tell from the corner of your eye
+One lives in a pane beside every session: it rests while the agent waits, and
+does something else while it works — so you can tell from the corner of your eye
 whether anything is happening.
 
 [![CI](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml)
@@ -139,10 +139,12 @@ package manager for you — if you have neither, it prints the route for each:
 Ghostty ships a [`.dmg`](https://ghostty.org/download), and chafa builds
 [from source](https://hpjansson.org/chafa/download/).
 
-`setup` downloads the sprites, renders them, registers the hooks in
-`~/.claude/settings.json`, adds the `claude()` wrapper to `~/.zshrc`, and sets
-the one Ghostty keybind the pane needs. It checks its prerequisites first and
-stops without touching anything if one is missing. Safe to run again.
+`setup` looks at what you have — **Claude Code, Codex, or both** — and wires up
+each one it finds. It downloads the sprites, renders them, registers the hooks,
+adds a `claude()` and/or `codex()` wrapper to your shell file, and sets the one
+Ghostty keybind the pane needs. Force a choice with `-- --claude` or
+`-- --codex`. It checks its prerequisites first and stops without touching
+anything if one is missing. Safe to run again.
 
 Then four things it cannot do for you:
 
