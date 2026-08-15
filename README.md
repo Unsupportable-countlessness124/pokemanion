@@ -1,9 +1,20 @@
+<div align="center">
+
 # pokemanion
 
-**Your Pokémon companion for Claude Code.** One lives in a pane beside every
-session: it rests while Claude waits, and does something else while Claude
-works — so you can tell from the corner of your eye whether anything is
-happening.
+**Your Pokémon companion for Claude Code.**
+
+One lives in a pane beside every session: it rests while Claude waits, and does
+something else while Claude works — so you can tell from the corner of your eye
+whether anything is happening.
+
+[![CI](https://github.com/<you>/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/<you>/pokemanion/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen.svg)](https://nodejs.org)
+[![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](package.json)
+[![Platform](https://img.shields.io/badge/tested%20on-macOS%20%2B%20Ghostty-lightgrey.svg)](#what-it-needs)
+
+</div>
 
 <table>
 <tr>
@@ -38,6 +49,11 @@ seconds. Everything is local: no account, no backend, nothing about you leaving
 the machine.
 
 <br clear="left">
+
+**[What it needs](#what-it-needs) · [Install](#install) · [Commands](#commands)
+· [Your own sprites](#your-own-sprites) · [Residents and
+guests](#residents-and-guests) · [Settings](#settings) ·
+[Design notes](docs/design.md)**
 
 ## What it needs
 
@@ -237,3 +253,20 @@ anyone, and nothing here is sold.
   terminal can actually draw.
 - [docs/known-issues.md](docs/known-issues.md) — where the working/waiting
   detection frays, and the features that are built but deliberately dormant.
+
+## Contributing
+
+Issues and pull requests welcome, particularly:
+
+- **A sprite that reads better than one in the roster.** Bring the numbers —
+  `docs/design.md` says how they are measured, and the bar is scale ≤ 1.8x with
+  ≥ 24 frames at the size the pane draws.
+- **A Linux path.** Everything but the pane-opening is portable Node; it needs
+  a way to open a split that is not AppleScript.
+- **A bash version of the `claude()` wrapper**, generated the way
+  `src/shell.mjs` generates the zsh one.
+
+`npm test` before you push — it is 37 checks and takes under a second.
+
+If you drew one of the sprites here and would rather it were not, open an issue
+and it goes. See [ATTRIBUTION.md](ATTRIBUTION.md).

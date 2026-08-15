@@ -33,6 +33,7 @@
     "choose": "node src/choose.mjs",
     "prune": "node src/prune.mjs",
     "dex": "node src/dex.mjs",
-    "attribution": "node src/attribution.mjs"
+    "attribution": "node src/attribution.mjs",
+    "test": "node src/smoke.mjs"
   }
 }
