@@ -148,10 +148,16 @@ anything if one is missing. Safe to run again.
 
 Then four things it cannot do for you:
 
-1. **Restart Claude Code** — it reads the hooks at startup.
+1. **Restart your agent** — Claude Code and Codex both read hooks at startup.
 2. **Restart Ghostty** — it reads its config at startup.
 3. **Open a new terminal**, or `source ~/.zshrc`.
 4. **Allow Ghostty in Accessibility** — [see above](#what-it-needs), once.
+
+**Codex will ask you to trust the hooks**, and should — they are commands it is
+about to run for you, and they sit in `~/.codex/hooks.json` where you can read
+them first. It stores a hash per hook, so it asks again whenever one changes:
+after updating this project, expect one more prompt. Until you answer it, Codex
+runs no hooks and the sprite simply will not react.
 
 A pane should appear beside your next session.
 
