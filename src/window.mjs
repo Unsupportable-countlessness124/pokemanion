@@ -44,6 +44,29 @@ const rows = Number(rowsArg) || 4
 // Claim the window, so the SessionStart hook knows not to open a second one.
 const PID_FILE = join(STATE_DIR, `window-${sessionArg ?? 'default'}.pid`)
 
+// A note left by closeWindow when the session ended before this pane had
+// written its pid. Opening a pane takes a second or two — split the terminal,
+// type a command, boot node — and a session that ends inside that window found
+// nothing to kill. The pane then finished starting with nobody left to own it
+// and ran forever, a sprite for a session that no longer exists.
+//
+// Checked here and on every poll, because the note can arrive at either moment.
+const CLOSED_FILE = join(STATE_DIR, `window-${sessionArg ?? 'default'}.closed`)
+
+const wasClosed = () => {
+  try {
+    if (!existsSync(CLOSED_FILE)) return false
+
+    unlinkSync(CLOSED_FILE)
+
+    return true
+  } catch {
+    return false
+  }
+}
+
+if (wasClosed()) process.exit(0)
+
 try {
   mkdirSync(STATE_DIR, { recursive: true })
   writeFileSync(PID_FILE, String(process.pid))
@@ -631,6 +654,11 @@ let target = false
 let evolving = []
 
 const tick = () => {
+  // The session may have ended while this pane was still starting, in which
+  // case closeWindow left a note rather than a signal — it had no pid to send
+  // one to. Exiting here is what stops an orphaned sprite outliving its session.
+  if (wasClosed()) process.exit(0)
+
   checkSpecies()
 
   const now = isWorking()

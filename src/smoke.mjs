@@ -529,6 +529,41 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     rmSync(stub, { recursive: true, force: true })
   }
 
+  // 1d. A pane that outlives the session that opened it.
+  //
+  //     Opening one takes a second or two — split the terminal, type a command,
+  //     boot node — and for that stretch the pane exists with no pid file. A
+  //     session ending inside that window found nothing to kill and returned,
+  //     and the pane finished starting with nobody left to own it: a sprite for
+  //     a session that no longer exists, holding a Pokemon it never released.
+  //     That is how a second Pikachu appears beside a Gengar.
+  //
+  //     closeWindow leaves a note when it has no pid to signal. This is that
+  //     note being honoured by a pane that starts afterwards.
+  {
+    const { closeWindow, closedFileFor } = await import('./companion.mjs')
+    const orphan = 'smoke-orphan-0001'
+
+    rmSync(closedFileFor(orphan), { force: true })
+    closeWindow(orphan)
+
+    check('closing a pane that has not started yet leaves a note', existsSync(closedFileFor(orphan)))
+
+    const started = spawnSync(process.execPath, ['src/window.mjs', '4', `--session=${orphan}`], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      timeout: 8000,
+      env: { ...process.env, TERM: 'dumb' },
+    })
+
+    check('and a pane starting later reads it and exits', started.status === 0, `exit ${started.status}`)
+    check('and the note is cleared afterwards', !existsSync(closedFileFor(orphan)))
+
+    rmSync(closedFileFor(orphan), { force: true })
+    const { STATE_DIR: sd } = await import('./config.mjs')
+    rmSync(join(sd, `window-${orphan}.pid`), { force: true })
+  }
+
   // 2. The installer, on the one path that is safe to run: a missing
   //    prerequisite. With no PATH there is no chafa, so it must stop at the
   //    preflight having written nothing. This is the promise the file makes in

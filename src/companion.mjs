@@ -62,6 +62,8 @@ export const windowIsRunning = (id) => {
 // Closing is a signal to the sprite, not to the pane. The sprite exits, its
 // shell was replaced by it via exec, and Ghostty closes the pane when its shell
 // goes — so the whole strip disappears with the session that owned it.
+export const closedFileFor = (id) => join(STATE_DIR, `window-${safe(id)}.closed`)
+
 export const closeWindow = (id) => {
   const pid = readPid(id)
 
@@ -69,7 +71,25 @@ export const closeWindow = (id) => {
   // Pokemon whether or not there was still a pane holding it.
   releaseSpecies(id)
 
-  if (!pid) return false
+  if (!pid) {
+    // No pid yet does not mean no pane. Opening one means splitting a terminal,
+    // typing a command into it and waiting for node to boot — a second or two
+    // during which the pane exists but has not written its pid. A session that
+    // starts and ends inside that window (a one-shot `claude -p`, or quitting
+    // straight after launch) finds nothing to kill, and the pane finishes
+    // starting a moment later with nobody left to own it. It then runs forever:
+    // a sprite for a session that is gone, holding a Pokemon it never claimed
+    // back, which is how a second Pikachu appears beside your Gengar.
+    //
+    // So leave a note instead. The pane looks for it as it starts and on every
+    // poll, and exits if it finds one.
+    try {
+      mkdirSync(STATE_DIR, { recursive: true })
+      writeFileSync(closedFileFor(id), String(Date.now()))
+    } catch {}
+
+    return false
+  }
 
   try {
     process.kill(pid, 'SIGTERM')
