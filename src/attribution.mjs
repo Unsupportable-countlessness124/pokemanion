@@ -51,9 +51,19 @@ const usage = () => {
     for (const file of readdirSync(join(ROOT, dir))) {
       if (!file.endsWith('.mjs')) continue
 
+      // Comment lines stripped first: a sprite named in a comment as "the
+      // alternative we did not use" is not a use, and counting it reported two
+      // files as live that nothing draws.
       const text = readFileSync(join(ROOT, dir, file), 'utf8')
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('//'))
+        .join('\n')
 
       for (const asset of readdirSync(join(ROOT, 'assets'))) {
+        // Skipped when a roster entry already accounts for it — roster.mjs
+        // naming the file it points at is the same fact said twice.
+        if (map.has(asset) && file === 'roster.mjs') continue
+
         if (text.includes(`assets/${asset}`)) note(asset, `${label} (${file})`)
       }
     }
@@ -63,6 +73,8 @@ const usage = () => {
     const config = readFileSync(join(ROOT, 'config.json'), 'utf8')
 
     for (const asset of readdirSync(join(ROOT, 'assets'))) {
+      if (map.has(asset)) continue
+
       if (config.includes(`assets/${asset}`)) note(asset, 'config.json')
     }
   } catch {}

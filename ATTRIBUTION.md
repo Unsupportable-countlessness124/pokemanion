@@ -39,30 +39,23 @@ unlisted rather than silently going unnamed.
 
 | file | used for |
 | --- | --- |
-| `1-gen5-static.png` | kept, not currently used |
-| `2-running.gif` | kept, not currently used |
-| `3-standing.gif` | pikachu resting, the pane (roster.mjs), config.json |
-| `4-waving.gif` | kept, not currently used |
-| `5-follower-sheet.png` | kept, not currently used |
-| `6-charmander-ow.png` | kept, not currently used |
-| `7-charmander-icon.png` | kept, not currently used |
+| `3-standing.gif` | pikachu resting |
 | `8-pikachu-ow.png` | config.json |
-| `9-pikachu-run.gif` | pikachu working, the pane (roster.mjs), config.json |
-| `10-ash-standing.gif` | ash resting, the pane (roster.mjs) |
-| `11-ash-running.gif` | ash working, the pane (roster.mjs) |
-| `12-psyduck-running.gif` | psyduck working, the pane (roster.mjs) |
-| `13-psyduck-pikachu.gif` | the pane (roster.mjs) |
-| `14-charizard.gif` | charizard resting, the pane (roster.mjs) |
-| `15-charizard-shiny.gif` | the pane (roster.mjs) |
-| `16-charizard-firing.gif` | charizard working, the pane (roster.mjs) |
+| `9-pikachu-run.gif` | pikachu working |
+| `10-ash-standing.gif` | ash resting |
+| `11-ash-running.gif` | ash working |
+| `12-psyduck-running.gif` | psyduck working |
+| `14-charizard.gif` | charizard resting |
+| `15-charizard-shiny.gif` | kept, not currently used |
+| `16-charizard-firing.gif` | charizard working |
 | `17-pokeball.gif` | the pane (window.mjs) |
-| `18-meowth-jumping.gif` | meowth working, the pane (roster.mjs) |
-| `19-gengar-moving.gif` | gengar working, the pane (roster.mjs) |
+| `18-meowth-jumping.gif` | meowth working |
+| `19-gengar-moving.gif` | gengar working |
 | `20-pokeball-floating.gif` | the pane (dex.mjs) |
-| `21-cubone.gif` | cubone resting, the pane (roster.mjs) |
-| `22-cubone-swinging.gif` | cubone working, the pane (roster.mjs) |
+| `21-cubone.gif` | cubone resting |
+| `22-cubone-swinging.gif` | cubone working |
 
-22 files.
+15 files.
 
 <!-- /files -->
 

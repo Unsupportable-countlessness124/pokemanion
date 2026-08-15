@@ -106,6 +106,39 @@ them and blocks the prompt, so they cost no turn and no tokens:
 A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
 question and reaches Claude untouched.
 
+Punctuation is forgiven, and form names work as written: `--ho-oh` finds
+`hooh`, `--rotom-wash` and `--charizard-megax` are exactly themselves.
+
+### Everything you can run
+
+| command | what it does |
+| --- | --- |
+| `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
+| `npm run roster` | download any missing resident sprites (`-- --refresh` to redo them) |
+| `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
+| `npm run prune` | evict guests now (`-- --dry` to see what would go) |
+| `npm run dex` | the Pokedex, from a terminal: `-- fire`, `-- 25`, `-- current`, `-- random` |
+| `npm run watch` | print the working/waiting decision the pane is making, live |
+| `npm run attribution` | regenerate the credits list (`-- --check` to fail if stale) |
+| `npm run shell -- --install` | add the `claude()` wrapper to `~/.zshrc` (`--remove` to undo) |
+| `npm run install-statusline` | register the hooks (`npm run uninstall-statusline` to undo) |
+| `npm run window` | run a pane by hand, for debugging |
+| `npm run build` | rebuild the status-line frames from `config.json` |
+
+`doctor` and `watch` are the two worth remembering. `doctor` answers "is this
+set up right", and `watch` answers "why is the sprite doing that" — it prints
+the same decision the pane is making and what it rested on.
+
+The rest are tools for tuning how a sprite is drawn, from working out what a
+terminal can render — `preview`, `compare`, `sizes`, `bakeoff`, `use`,
+`preset`, `fontcheck`, `cellcheck`, and `for-ghostty` / `for-terminal` /
+`for-exact` / `for-small`. [docs/design.md](docs/design.md) is what they are
+for. **`preset` and the `for-*` ones write to `config.json`** rather than just
+reporting, which is easy to trigger by accident while poking around.
+
+`choose` and `companion` are internal: the shell wrapper and the hooks call
+them, and there is no reason to run them by hand.
+
 ## Your own sprites
 
 Any GIF works. Drop it in `assets/` and point a roster entry at it:
