@@ -141,9 +141,10 @@ have it — so the sprite may take a minute to appear the very first time.
 
 Two things it deliberately does not do. **Ghostty** it leaves alone: it is a GUI
 app that can ask for a password, and the pane is a Ghostty split, so anyone who
-can see a pane already has it. And the **launch flags** need a shell function
-that only the clone route installs — so `claude --pikachu` will not work, though
-everything typed *inside* a session will.
+can see a pane already has it — if you do not, nothing appears, and the next
+command you type says so. And the **launch flags** need a shell function that
+only the clone route installs, so `claude --pikachu` will not work — everything
+typed *inside* a session will.
 
 **From a clone**, which is the full version:
 

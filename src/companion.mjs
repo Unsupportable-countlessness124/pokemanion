@@ -173,6 +173,23 @@ const logSplit = (id, detail) => {
 }
 
 const openSplit = (rows, shrink, grow, id, species) => {
+  // Before driving AppleScript at an application that may not exist.
+  //
+  // Without this, a machine with no Ghostty gets the whole keystroke dance and
+  // then "Can't get application (-1728)" written to a stderr nobody reads — so
+  // the symptom is a session that starts and simply never grows a pane, with no
+  // clue anywhere. The plugin route makes that likely rather than exotic:
+  // installing it takes two commands and neither of them checks anything.
+  //
+  // -1728 was also not in the list of errors the handler below recognises, so
+  // it did not even get the one message it might have produced.
+  if (!existsSync('/Applications/Ghostty.app')) {
+    console.error('pokemanion: Ghostty is not installed — the pane is a Ghostty split. https://ghostty.org')
+    logSplit(id, { step: 'no Ghostty' })
+
+    return false
+  }
+
   // System Events types a keystroke string one character at a time, so the
   // length of this command is paid for in wall clock — the full node
   // invocation ran to 134 characters, close to a second of watching it appear.

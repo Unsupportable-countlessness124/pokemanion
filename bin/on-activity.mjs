@@ -244,7 +244,27 @@ try {
       // Exit 2 blocks the prompt and erases it, and shows this to you as the
       // reason. That is what keeps `--pikachu` from being sent to Claude as a
       // message and answered as one.
-      process.stderr.write(`${describe(asked, pool, current, knownCount() - pool.length)}\n`)
+      // The one place we can actually reach someone.
+      //
+      // Every other channel is a hook whose output goes nowhere: SessionStart
+      // writes to a stderr nobody reads, and a pane that never opens looks the
+      // same as one you did not ask for. A blocked prompt is different — its
+      // stderr is shown to you, in the conversation, as the reason.
+      //
+      // So if the two things the sprite cannot work without are missing, this
+      // is where to say so. Only when something is actually wrong, and only on
+      // a command that was going to answer anyway.
+      const { hasGhostty } = await import('../src/bootstrap.mjs')
+      const { spawnSync: probe } = await import('node:child_process')
+      const missing = [
+        hasGhostty() ? null : 'Ghostty — the pane is a Ghostty split (https://ghostty.org)',
+        probe('command', ['-v', 'chafa'], { shell: true }).status === 0 ? null : 'chafa — it draws the sprite (brew install chafa)',
+      ].filter(Boolean)
+
+      process.stderr.write(
+        `${describe(asked, pool, current, knownCount() - pool.length)}\n` +
+          (missing.length > 0 ? `\nno pane yet, missing:\n  ${missing.join('\n  ')}\n` : ''),
+      )
       process.exit(2)
     }
   }
@@ -321,9 +341,13 @@ try {
       if (!existsSync(done)) {
         try {
           const { install } = await import('../src/ghostty.mjs')
-          const { bootstrapChafa } = await import('../src/bootstrap.mjs')
+          const { bootstrapChafa, hasGhostty } = await import('../src/bootstrap.mjs')
 
-          install()
+          // Only if Ghostty is actually here. Writing a config file for an
+          // application someone does not have is litter, and it would sit in
+          // ~/.config waiting to confuse them later.
+          if (hasGhostty()) install()
+
           bootstrapChafa()
           mkdirSync(STATE_DIR, { recursive: true })
           writeFileSync(done, new Date().toISOString())

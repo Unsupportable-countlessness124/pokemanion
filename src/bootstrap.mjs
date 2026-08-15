@@ -25,11 +25,17 @@
 // pane at all already has it.
 
 import { spawn, spawnSync } from 'node:child_process'
-import { appendFileSync, mkdirSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { STATE_DIR } from './config.mjs'
 
 const have = (command) => spawnSync('command', ['-v', command], { shell: true, encoding: 'utf8' }).status === 0
+
+// The pane is a Ghostty split, so this is the difference between the sprite
+// working and nothing happening at all. Checked in several places rather than
+// assumed, because the failure without it is silent: AppleScript answers
+// "Can't get application" with error -1728 and the hook has nowhere to say so.
+export const hasGhostty = () => existsSync('/Applications/Ghostty.app')
 
 const note = (what) => {
   try {
