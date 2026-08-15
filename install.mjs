@@ -1,8 +1,9 @@
 // Wires the status line and the hooks into ~/.claude/settings.json, and takes
 // them back out again with --uninstall.
 //
-// Our entries are recognised by the path they run, so uninstalling only removes
-// what we added and leaves anything else in the file alone.
+// Our entries are recognised by the command they run — our launcher plus one of
+// our scripts — so uninstalling only removes what we added and leaves anything
+// else in the file alone.
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
@@ -69,8 +70,28 @@ const write = (document) => {
   writeFileSync(SETTINGS, `${JSON.stringify(document, null, 2)}\n`)
 }
 
-const isOurs = (group) =>
-  (group?.hooks ?? []).some((hook) => String(hook?.command ?? '').includes('pixel-runner'))
+// Ours are recognised by the shape of the command we write: our launcher, then
+// one of our scripts.
+//
+// This used to look for the literal string `pixel-runner`, which is this
+// project's old name and, by coincidence, the folder it was developed in. It
+// matched on exactly one machine. Anyone who cloned the repo got a folder
+// called `pokemanion`, so nothing they had installed was ever recognised as
+// ours: re-running the installer stacked a second full set of hooks instead of
+// replacing the first, and `--uninstall` removed nothing while printing that it
+// had. CI found it because its checkout is not named after the old project.
+//
+// Both halves are required. `run.sh` alone would be too broad, and a script
+// name alone would match a hook someone else happened to name the same.
+const OUR_SCRIPTS = ['on-activity.mjs', 'statusline.mjs']
+
+const isOurCommand = (command) => {
+  const text = String(command ?? '')
+
+  return text.includes('run.sh') && OUR_SCRIPTS.some((script) => text.includes(script))
+}
+
+const isOurs = (group) => (group?.hooks ?? []).some((hook) => isOurCommand(hook?.command))
 
 const withoutOurs = (groups) => (groups ?? []).filter((group) => !isOurs(group))
 
@@ -82,7 +103,7 @@ if (existsSync(SETTINGS) && !existsSync(BACKUP)) {
 }
 
 if (uninstalling) {
-  if (String(settings.statusLine?.command ?? '').includes('pixel-runner')) {
+  if (isOurCommand(settings.statusLine?.command)) {
     delete settings.statusLine
     console.log('  removed the status line')
   } else {
@@ -119,7 +140,7 @@ if (!existsSync(FRAMES_FILE)) {
 // caught from the transcript rather than from a status line heartbeat — so
 // there is nothing left for it to do, and leaving one installed would only
 // suppress Claude Code's own footer hints.
-if (String(settings.statusLine?.command ?? '').includes('pixel-runner')) {
+if (isOurCommand(settings.statusLine?.command)) {
   delete settings.statusLine
 }
 

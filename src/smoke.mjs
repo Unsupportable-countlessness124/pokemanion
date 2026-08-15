@@ -359,10 +359,18 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   }
 
   try {
+    // The same shape install.mjs recognises: our launcher plus one of our
+    // scripts. Counting by the old 'pixel-runner' string would have made this
+    // test agree with the bug — it only ever matched because the development
+    // folder happens to carry the project's old name.
     const ours = (settings) =>
       Object.values(settings.hooks ?? {})
         .flat()
-        .filter((group) => JSON.stringify(group).includes('pixel-runner')).length
+        .filter((group) =>
+          (group?.hooks ?? []).some(
+            (hook) => String(hook?.command ?? '').includes('run.sh') && String(hook?.command ?? '').includes('on-activity.mjs'),
+          ),
+        ).length
 
     const installed = run('install.mjs', { env: { HOME: home } })
     const after = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
