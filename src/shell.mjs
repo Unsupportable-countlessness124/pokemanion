@@ -42,7 +42,7 @@ export const snippet = () => {
 # Roll the dice:         claude --random
 # Remove with: node ${join(ROOT, 'src', 'shell.mjs')} --remove
 claude() {
-  local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try
+  local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try pixel_runner_hint
   for pixel_runner_arg in "$@"; do
     case "$pixel_runner_arg" in
       --pokemon|--pokemons)
@@ -64,6 +64,15 @@ claude() {
           pixel_runner_species="$pixel_runner_try"
         else
           pixel_runner_args+=("$pixel_runner_arg")
+          # Passed through either way — this only mentions a near miss. It is
+          # deliberately quiet: the helper answers at one edit of difference,
+          # which is enough for --charizrd and silent for every flag Claude
+          # actually has. --version is two edits from Persian, which is exactly
+          # the kind of thing that must not be shouted at you on launch.
+          pixel_runner_hint=\$(${join(ROOT, 'bin', 'run.sh')} src/hint.mjs "\${pixel_runner_try}" 2>/dev/null)
+          if [ -n "\$pixel_runner_hint" ]; then
+            printf '  pokemanion: no such Pokemon "%s" — did you mean --%s?\\n' "\$pixel_runner_try" "\$pixel_runner_hint" >&2
+          fi
         fi
         ;;
       *)

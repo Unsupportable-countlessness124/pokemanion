@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ROOT } from './config.mjs'
-import { available, resolveName } from './roster.mjs'
+import { allNames, available, resolveName } from './roster.mjs'
 
 // `--pokemon` and its plural list; `--<name>` switches. Anything else that
 // looks like a bare flag is a typo worth answering, since the alternative is
@@ -93,6 +93,78 @@ export const unregistered = (word) => {
   return { name: row.n, num: row.d, title: row.n.replace(/(^|-)([a-z])/g, (_, dash, letter) => (dash ? '-' : '') + letter.toUpperCase()) }
 }
 
+// The closest real name to something that matched nothing.
+//
+// Levenshtein, capped. The cap is what keeps this from being annoying: over
+// fourteen hundred names, *something* is always within four edits of anything
+// you type, and a confident wrong guess is worse than no guess. One edit for
+// short names, two for longer ones, and never more than a third of the word —
+// so `pikchu` finds Pikachu and `--resume` finds nothing at all, which matters
+// because the shell wrapper hands unknown flags to Claude and must not start
+// second-guessing `--resume`.
+const distance = (a, b, cap) => {
+  if (Math.abs(a.length - b.length) > cap) return cap + 1
+
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i)
+
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i]
+    let best = i
+
+    for (let j = 1; j <= b.length; j++) {
+      const value = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      )
+
+      current[j] = value
+      best = Math.min(best, value)
+    }
+
+    // Every path through this row already costs more than the cap allows.
+    if (best > cap) return cap + 1
+
+    previous = current
+  }
+
+  return previous[b.length]
+}
+
+export const nearest = (word, { pool = null, maxEdits = 2 } = {}) => {
+  const key = String(word ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+
+  if (key.length < 3) return null
+
+  const cap = Math.min(key.length <= 5 ? 1 : maxEdits, Math.floor(key.length / 3), maxEdits)
+
+  if (cap < 1) return null
+
+  const candidates = pool ?? [...allNames(), ...UNREGISTERED.map((row) => row.n)]
+  const residents = new Set(available())
+
+  let best = null
+  let bestAt = cap + 1
+
+  for (const name of candidates) {
+    const flat = name.replace(/[^a-z0-9]/g, '')
+
+    if (flat === key) return name
+
+    const at = distance(key, flat, cap)
+
+    // Ties broken towards a resident. `pikchu` is one edit from both Pichu and
+    // Pikachu, and whichever the list reaches first is not an argument — the one
+    // sitting in the pane every day is the better guess.
+    if (at < bestAt || (at === bestAt && residents.has(name) && !residents.has(best))) {
+      bestAt = at
+      best = name
+    }
+  }
+
+  return bestAt <= cap ? best : null
+}
+
 // What the user probably meant, when `--dex <something>` matched nothing.
 //
 // The command is strict on purpose — one spelling is easier to remember than
@@ -106,20 +178,35 @@ export const unregistered = (word) => {
 export const suggest = (query, pool = available()) => {
   const text = String(query ?? '').trim()
 
-  // Only leading dashes are ever a mistake. A trailing one is real syntax —
-  // `--dex pikachu-` asks for every Pikachu form — so a query that only differs
-  // by its tail is not a typo and gets no suggestion.
-  const stripped = text.replace(/^-+/, '')
-
-  if (!stripped || stripped === text) return null
+  if (!text) return null
 
   // Worth suggesting only if the corrected form actually leads somewhere.
   // Pointing at a second miss is worse than saying nothing.
-  const word = stripped.toLowerCase()
-  const leadsSomewhere =
-    word === 'current' || word === 'random' || pool.includes(word) || Boolean(resolveName(word)) || /^\d+$/.test(word)
+  const leadsSomewhere = (value) => {
+    const word = value.toLowerCase()
 
-  return leadsSomewhere ? `--dex ${stripped}` : null
+    return word === 'current' || word === 'random' || pool.includes(word) || Boolean(resolveName(word)) || /^\d+$/.test(word)
+  }
+
+  // Already a valid query. Whatever went wrong is not the spelling, so there is
+  // nothing to correct — `--dex current` with no pane claimed lands here.
+  //
+  // Leading dashes disqualify it from being "already valid" even though
+  // `resolveName` would happily strip them: `--dex --pikachu` did not match, and
+  // pointing at `--dex pikachu` is the entire job.
+  if (!text.startsWith('-') && leadsSomewhere(text)) return null
+
+  // Only leading dashes are ever a mistake. A trailing one is real syntax —
+  // `--dex pikachu-` asks for every Pikachu form — so it is left on.
+  const stripped = text.replace(/^-+/, '')
+
+  if (stripped && stripped !== text && leadsSomewhere(stripped)) return `--dex ${stripped}`
+
+  // Not a dash problem, then — a spelling one. `--dex pikchu` should land in
+  // the same place `--pikchu` does.
+  const close = nearest(stripped)
+
+  return close ? `--dex ${close}` : null
 }
 
 // Written to stderr, which is what Claude Code shows when a hook blocks a
@@ -154,6 +241,10 @@ export const describe = (result, pool = available(), current = null, extra = 0) 
       `${UNREGISTERED.length} species are missing for that reason.\n\n${list}${rest}`
     )
   }
+
+  const close = nearest(result.word)
+
+  if (close) return `no such one: ${result.word}\n\ndid you mean: --${close}\n\n${list}${rest}`
 
   return `no such one: ${result.word}\n\n${list}${rest}`
 }

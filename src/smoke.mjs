@@ -35,6 +35,7 @@ const MODULES = [
   'shell',
   'assigned',
   'ghostty',
+  'hint',
 ]
 
 const results = []
@@ -120,6 +121,26 @@ check('nonsense is not mistaken for one', unregistered('zzznope') === null)
 check(
   'and none of them is also summonable',
   !['urshifu', 'sirfetchd', 'chespin'].some((name) => isKnown(name)),
+)
+
+// Misspellings, which are the common case everywhere else.
+const { nearest } = await import('./switch.mjs')
+
+check('a typo finds its Pokemon', nearest('charizrd') === 'charizard')
+// One edit from both Pichu and Pikachu; the resident is the better guess.
+check('a tie goes to the resident', nearest('pikchu') === 'pikachu')
+check('gibberish gets nothing', nearest('zzznope') === null)
+check('and two letters are too few to guess from', nearest('pi') === null)
+
+// The wrapper runs this against flags meant for Claude itself, so a false
+// positive there talks over a real command. `--version` is two edits from
+// Persian, which is why the outside check is capped at one.
+const CLAUDE_FLAGS = ['resume', 'continue', 'print', 'model', 'help', 'version', 'verbose', 'debug', 'ide', 'settings', 'agents', 'fast']
+
+check(
+  `no Claude flag is mistaken for a Pokemon (${CLAUDE_FLAGS.length} checked)`,
+  CLAUDE_FLAGS.every((flag) => nearest(flag, { maxEdits: 1 }) === null),
+  CLAUDE_FLAGS.filter((flag) => nearest(flag, { maxEdits: 1 })).join(', '),
 )
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 

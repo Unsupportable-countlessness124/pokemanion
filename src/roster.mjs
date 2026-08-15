@@ -206,6 +206,10 @@ const SPRITE_URL = (name, shiny = false) => `${GEN5}${shiny ? '-shiny' : ''}/${n
 // would have quietly eaten.
 const KNOWN = new Set(JSON.parse(readFileSync(join(ROOT, 'assets', 'gen5-names.json'), 'utf8')))
 
+// Every name the sprite folder has, for anything that needs to search the set
+// rather than ask about one member of it — the "did you mean" matcher, mostly.
+export const allNames = () => [...KNOWN]
+
 // What someone types, turned into what the folder calls it.
 //
 // The folder strips punctuation out of names — Ho-Oh is `hooh`, Porygon-Z is
