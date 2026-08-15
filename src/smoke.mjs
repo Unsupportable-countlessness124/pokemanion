@@ -148,6 +148,21 @@ check(
 )
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
+// Every path this writes into a shell command has to be quoted, because the
+// repo may sit somewhere with a space in it — ~/Documents/My Projects is an
+// ordinary place to put things. Unquoted, `claude --random` died with
+// "no such file or directory: /Users/you/My" and the typo hint silently
+// stopped working, while `claude --pikachu` kept working, which is the worst
+// possible spread of symptoms to debug from.
+{
+  const { snippet } = await import('./shell.mjs')
+  const text = snippet()
+  const paths = [...text.matchAll(/(^|[^"$(])(\/[^\s"']*\/(?:bin\/run\.sh|gen5-names\.json))/gm)]
+
+  check('every path in the shell wrapper is quoted', paths.length === 0, paths.map((row) => row[2]).join(', '))
+  check('and the wrapper still references the launcher', text.includes(`"${join(ROOT, 'bin', 'run.sh')}"`))
+}
+
 // What a session was given, and getting it back.
 //
 // The bug this guards: the species was never stored, only recomputed from

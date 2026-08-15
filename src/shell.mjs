@@ -60,7 +60,7 @@ claude() {
         # it is somebody else's flag and is passed straight through — which is
         # what keeps --resume, --continue and the rest working.
         pixel_runner_try="\${pixel_runner_arg#--}"
-        if grep -qi "\\"\${pixel_runner_try}\\"" ${join(ROOT, 'assets', 'gen5-names.json')} 2>/dev/null; then
+        if grep -qi "\\"\${pixel_runner_try}\\"" "${join(ROOT, 'assets', 'gen5-names.json')}" 2>/dev/null; then
           pixel_runner_species="$pixel_runner_try"
         else
           pixel_runner_args+=("$pixel_runner_arg")
@@ -69,7 +69,7 @@ claude() {
           # which is enough for --charizrd and silent for every flag Claude
           # actually has. --version is two edits from Persian, which is exactly
           # the kind of thing that must not be shouted at you on launch.
-          pixel_runner_hint=\$(${join(ROOT, 'bin', 'run.sh')} src/hint.mjs "\${pixel_runner_try}" 2>/dev/null)
+          pixel_runner_hint=\$("${join(ROOT, 'bin', 'run.sh')}" src/hint.mjs "\${pixel_runner_try}" 2>/dev/null)
           if [ -n "\$pixel_runner_hint" ]; then
             printf '  pokemanion: no such Pokemon "%s" — did you mean --%s?\\n' "\$pixel_runner_try" "\$pixel_runner_hint" >&2
           fi
@@ -84,14 +84,14 @@ claude() {
   # --random beats the menu: asking for a surprise and then being shown a list
   # to choose from would be answering a question nobody asked.
   if [ -n "$pixel_runner_random" ] && [ -z "$pixel_runner_species" ]; then
-    pixel_runner_species="$(${join(ROOT, 'bin', 'run.sh')} src/choose.mjs --random)" || return $?
+    pixel_runner_species="$("${join(ROOT, 'bin', 'run.sh')}" src/choose.mjs --random)" || return $?
   fi
 
   # The picker writes the chosen name to stdout and the list to the terminal,
   # so this captures the answer without swallowing what you are reading. A
   # non-zero exit means you backed out, and then Claude should not start either.
   if [ -n "$pixel_runner_menu" ] && [ -z "$pixel_runner_species" ]; then
-    pixel_runner_species="$(${join(ROOT, 'bin', 'run.sh')} src/choose.mjs)" || return $?
+    pixel_runner_species="$("${join(ROOT, 'bin', 'run.sh')}" src/choose.mjs)" || return $?
   fi
 
   if [ -n "$pixel_runner_species" ]; then

@@ -145,8 +145,12 @@ const openSplit = (rows, shrink, grow, id, species) => {
   // invocation ran to 134 characters, close to a second of watching it appear.
   // Writing it to a script and typing the script's path instead is the same
   // command in a sixth of the keystrokes.
+  // Quoted, because this is a shell command and the repo may be somewhere with
+  // a space in it — `~/Documents/My Projects/pokemanion` is an ordinary place to
+  // put things, and unquoted it becomes two arguments and a pane that never
+  // starts.
   const full =
-    `exec ${process.execPath} ${join(ROOT, 'src', 'window.mjs')} ${rows} --session=${safe(id)}` +
+    `exec "${process.execPath}" "${join(ROOT, 'src', 'window.mjs')}" ${rows} --session=${safe(id)}` +
     (species ? ` --species=${species}` : '')
 
   // Not tmpdir(): on macOS that is a forty character path under /var/folders,
