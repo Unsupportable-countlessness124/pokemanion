@@ -19,6 +19,15 @@ import { prepare } from './prepare.mjs'
 import { sharedBounds } from './render.mjs'
 import { ROSTER, busyFile, idleFile, isFetched } from './roster.mjs'
 
+// Width, not height — and that is not a style choice.
+//
+// GitHub rewrites every image in a README with `style="height: auto;
+// max-height: Npx"`, so a height attribute can only ever shrink an image, never
+// enlarge one. A 38x46 Psyduck rendered at 46px however large the number said,
+// while a 600x640 animation beside it obeyed its cap and towered over it. Three
+// rounds of raising the number changed nothing, because nothing was being
+// applied. Width has no such override.
+//
 // How tall the <img> must be for the *character* to land at this size.
 //
 // Two corrections, and the second is easy to miss. Frames are padded by wildly
@@ -32,7 +41,7 @@ import { ROSTER, busyFile, idleFile, isFetched } from './roster.mjs'
 // and rendered at 56 next to Psyduck's 64.
 //
 // The typical height of the body in a single frame is what actually matches.
-const TARGET = 64
+const TARGET = 66
 
 const bodyHeight = (image) => {
   const heights = image.frames
@@ -61,12 +70,15 @@ const bodyHeight = (image) => {
   return heights[Math.floor(heights.length / 2)] ?? image.height
 }
 
-const displayHeight = (path) => {
+const displayWidth = (path) => {
   try {
     const raw = read(path)
     const image = prepare(decodeSprite(raw) ?? decodeGif(raw), 0, null)
 
-    return Math.round((TARGET * image.height) / bodyHeight(image))
+    const frameHeight = (TARGET * image.height) / bodyHeight(image)
+
+    // Converted to a width at the end, because that is the attribute that works.
+    return Math.round((frameHeight * image.width) / image.height)
   } catch {
     return TARGET
   }
@@ -82,8 +94,8 @@ const row = (entry) => {
 
   return (
     `| **${entry.name}**<br><sub>${kind}</sub> ` +
-    `| <img src="${rel(idleFile(entry.name))}" height="${displayHeight(idleFile(entry.name))}" alt="${entry.name} resting"> ` +
-    `| <img src="${rel(busyFile(entry.name))}" height="${displayHeight(busyFile(entry.name))}" alt="${entry.name} working"> |`
+    `| <img src="${rel(idleFile(entry.name))}" width="${displayWidth(idleFile(entry.name))}" alt="${entry.name} resting"> ` +
+    `| <img src="${rel(busyFile(entry.name))}" width="${displayWidth(busyFile(entry.name))}" alt="${entry.name} working"> |`
   )
 }
 
