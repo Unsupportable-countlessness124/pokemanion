@@ -40,6 +40,20 @@ if (process.platform !== 'darwin') {
   blockers.push(['this is macOS only', 'the pane is opened by driving Ghostty through AppleScript'])
 }
 
+// package.json says node >= 20, but `engines` is advice npm does not enforce
+// unless it is asked to. Without this an old node reaches the sprite renderer
+// and dies somewhere far from the cause, which reads as the project being
+// broken rather than the runtime being too old.
+const NODE_MINIMUM = 20
+const nodeMajor = Number(process.versions.node.split('.')[0])
+
+if (Number.isFinite(nodeMajor) && nodeMajor < NODE_MINIMUM) {
+  blockers.push([
+    `node ${process.versions.node} is too old — this needs ${NODE_MINIMUM} or newer`,
+    'brew upgrade node, or nvm install --lts, then run this again',
+  ])
+}
+
 if (spawnSync('chafa', ['--version'], { encoding: 'utf8' }).status !== 0) {
   // npm run deps knows the routes that do not involve Homebrew, so point at it
   // rather than repeating them here and having two places to keep right.

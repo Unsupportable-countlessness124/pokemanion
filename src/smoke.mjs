@@ -191,6 +191,18 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
   put(join(withBashrc, '.bashrc'), '')
 
+  // Intel Macs put Homebrew under /usr/local, Apple Silicon under
+  // /opt/homebrew. run.sh has to know both, since it hunts for an interpreter
+  // by absolute path when the PATH is trimmed. Only one file in the project
+  // mentions an architecture-specific path at all, and this is it.
+  {
+    const { readFileSync: slurp } = await import('node:fs')
+    const runner = slurp(join(ROOT, 'bin', 'run.sh'), 'utf8')
+
+    check('run.sh knows the Apple Silicon brew path', runner.includes('/opt/homebrew/bin/node'))
+    check('and the Intel one', runner.includes('/usr/local/bin/node'))
+  }
+
   check('zsh installs into .zshrc', rcFile('/bin/zsh', bare2).endsWith('.zshrc'))
   check('bash installs into a bash file', rcFile('/bin/bash', bare2).endsWith('.bash_profile'))
   check('and prefers one that already exists', rcFile('/bin/bash', withBashrc).endsWith('.bashrc'))
