@@ -666,6 +666,38 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       afterRandom === before ? 'pane untouched' : 'pane was overwritten',
     )
 
+    // The plugin hello: once, then never. Once is a useful message; twice is a
+    // hook that eats your prompts, and the flag being deleted before the message
+    // is written rather than after is the whole reason it cannot be twice.
+    {
+      const greetSession = 'smoke-greet-0001'
+      const flag = join(STATE_DIR, 'greet')
+      const nodePath = join(STATE_DIR, 'node-path')
+      const hadNodePath = existsSync(nodePath) ? read(nodePath, 'utf8') : null
+
+      mkdirSync(STATE_DIR, { recursive: true })
+      writeFileSync(flag, '')
+      rmSync(nodePath, { force: true })
+
+      const say = (prompt) =>
+        run('bin/on-activity.mjs', {
+          input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', session_id: greetSession, prompt }),
+        })
+
+      const first = say('an ordinary question')
+      const second = say('an ordinary question')
+
+      check(
+        'the plugin hello blocks one prompt and then never again',
+        first.status === 2 && /Accessibility/.test(first.stderr) && second.status === 0 && !/Accessibility/.test(second.stderr),
+        `first exit ${first.status}, second exit ${second.status}`,
+      )
+
+      rmSync(flag, { force: true })
+      rmSync(sessionStateFile(greetSession), { force: true })
+      if (hadNodePath !== null) writeFileSync(nodePath, hadNodePath)
+    }
+
     // Naming the one on screen is the same question as `--dex current`, and used
     // to be answered somewhere else entirely just because it was asked by name.
     // Naming a different one still belongs in the conversation — a card in the

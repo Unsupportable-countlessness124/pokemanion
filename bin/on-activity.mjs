@@ -2,7 +2,7 @@
 // whether to animate. Writes one small file and exits; it must never be the
 // reason a prompt is slow, so everything here is best effort.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { STATE_DIR, clearState, loadConfig, readState, writeState } from '../src/config.mjs'
 import { closeWindow, openWindow } from '../src/companion.mjs'
@@ -83,6 +83,44 @@ try {
   // prompt is about to be blocked, so no turn is starting and saying one did
   // would leave the sprite running against a turn that never happened.
   if (event === 'UserPromptSubmit') {
+    // The one hello, on the first prompt after an install that had no setup step.
+    //
+    // A plugin registers the hooks and stops there. What is left are three things
+    // no plugin can do: restart the agent so it reads its new hooks, restart
+    // Ghostty so it reads its new keybind, and allow Ghostty in Accessibility so
+    // macOS stops blocking the keystroke that opens the split. Skip that last one
+    // and the install is perfect, no pane ever appears, and nothing anywhere says
+    // why.
+    //
+    // Blocking a prompt is the only channel that reaches anyone — a hook that
+    // exits 0 writes to a stderr nobody reads. So this spends exactly one prompt,
+    // once, and deletes its flag before printing rather than after: a crash on the
+    // next line then costs the message instead of repeating it forever.
+    const greeting = join(STATE_DIR, 'greet')
+
+    if (existsSync(greeting)) {
+      try {
+        rmSync(greeting, { force: true })
+      } catch {}
+
+      const { hasGhostty } = await import('../src/bootstrap.mjs')
+
+      process.stderr.write(
+        'pokemanion is installed.\n\n' +
+          'Three things it cannot do for you:\n\n' +
+          '  1. Restart this agent — it reads its hooks at startup\n' +
+          '  2. Restart Ghostty — it reads its config at startup\n' +
+          '  3. System Settings > Privacy & Security > Accessibility > enable Ghostty\n' +
+          '     Opening the pane means pressing keys, and macOS blocks that until you\n' +
+          '     allow it. Without this no pane appears at all.\n\n' +
+          (hasGhostty() ? '' : 'Ghostty is missing — the pane is a Ghostty split: https://ghostty.org\n\n') +
+          'Then send that message again and a Pokemon should be sitting beside it.\n' +
+          'Type --pokemon to see who ships, or --random to roll one.\n\n' +
+          'Shown once.\n',
+      )
+      process.exit(2)
+    }
+
     const { parse, describe } = await import('../src/switch.mjs')
     const { available, ensure, knownCount } = await import('../src/roster.mjs')
     const { speciesFileFor } = await import('../src/companion.mjs')
@@ -362,6 +400,14 @@ try {
           bootstrapChafa()
           mkdirSync(STATE_DIR, { recursive: true })
           writeFileSync(done, new Date().toISOString())
+
+          // Ask for the hello, but only where nobody has been told any of this
+          // already. `npm run setup` prints the same three steps when it
+          // finishes and records the node it found; that file is the tell, and
+          // its absence means the hooks arrived by plugin, where nothing was
+          // printed anywhere. Interrupting someone who has just read the list is
+          // how a helpful message becomes a nag.
+          if (!existsSync(join(STATE_DIR, 'node-path'))) writeFileSync(join(STATE_DIR, 'greet'), '')
         } catch {}
       }
 

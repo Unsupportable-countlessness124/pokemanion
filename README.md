@@ -151,10 +151,14 @@ not work — everything typed *inside* a session will.
 It still needs [the four things no script can do](#then-four-things), the same
 as the clone route — **restarting your agent and Ghostty, and allowing Ghostty
 in Accessibility**. That last one is not optional: without it macOS blocks the
-keystroke that opens the split, and no pane appears at all. On Codex, read [the
-two things specific to it](#two-things-specific-to-codex) as well — you will be
-asked to trust the hooks, and the pane arrives at your first message rather than
-at launch.
+keystroke that opens the split, and no pane appears at all. **It will tell you
+this itself**: the first message you send after installing is answered with the
+list instead of being sent, once and never again, because a hook that lets your
+prompt through has no way to say anything to you. Send it again afterwards.
+
+On Codex, also read [the two things specific to it](#two-things-specific-to-codex)
+— you will be asked to trust the hooks, and the pane arrives at your first
+message rather than at launch.
 
 **From a clone**, which is the full version:
 
