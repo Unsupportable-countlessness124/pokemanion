@@ -157,9 +157,27 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 {
   const { snippet } = await import('./shell.mjs')
   const text = snippet()
-  const paths = [...text.matchAll(/(^|[^"$(])(\/[^\s"']*\/(?:bin\/run\.sh|gen5-names\.json))/gm)]
 
-  check('every path in the shell wrapper is quoted', paths.length === 0, paths.map((row) => row[2]).join(', '))
+  // Every occurrence of the repo path, and whether a quote sits immediately
+  // before it. Matching on the path itself rather than on a shape — the first
+  // attempt used a regex for "a slash not preceded by a quote", which matched
+  // the middle of /Users/adbhut and reported four failures against correct code.
+  const bare = []
+
+  for (const file of [join(ROOT, 'bin', 'run.sh'), join(ROOT, 'assets', 'gen5-names.json')]) {
+    let at = text.indexOf(file)
+
+    while (at !== -1) {
+      // A comment line is prose, not a command, and needs no quoting.
+      const lineStart = text.lastIndexOf('\n', at) + 1
+
+      if (text[at - 1] !== '"' && !text.slice(lineStart, at).trimStart().startsWith('#')) bare.push(file)
+
+      at = text.indexOf(file, at + 1)
+    }
+  }
+
+  check('every path in the shell wrapper is quoted', bare.length === 0, `${bare.length} bare: ${[...new Set(bare)].join(', ')}`)
   check('and the wrapper still references the launcher', text.includes(`"${join(ROOT, 'bin', 'run.sh')}"`))
 }
 
