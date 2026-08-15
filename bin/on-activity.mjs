@@ -159,7 +159,7 @@ try {
           // An exact name, or a single answer, gets the card; several get the
           // table. The same split the command line makes, because it is about
           // the shape of the answer rather than where it is being read.
-          if (found.length === 0) {
+          if (found.length === 0 && !hit) {
             const { suggest, unregistered } = await import('../src/switch.mjs')
             const meant = suggest(asked.query, pool)
             // Spelled correctly, drawn never. Worth saying, because "nothing
@@ -173,7 +173,11 @@ try {
             )
           } else if (hit || found.length === 1) {
             const row = hit ? entry(hit) : found[0]
-            const others = found.filter((other) => other.name !== row.name).length
+            // Forms, not everything that matched — the same count the command
+            // line makes, and wrong here for the same reason: the follow-up it
+            // offers searches the prefix, so a match without that prefix is
+            // something that line cannot find.
+            const others = found.filter((other) => other.name.startsWith(`${row.name}-`)).length
 
             process.stderr.write(
               `${detail(row, false)}\n` +

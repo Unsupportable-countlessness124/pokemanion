@@ -30,11 +30,44 @@ const RESET = '\x1b[0m'
 // name -> [dex number, display name, "Type/Type"]
 const DEX = JSON.parse(readFileSync(join(ROOT, 'assets', 'gen5-dex.json'), 'utf8'))
 
+// The residents who are not Pokemon.
+//
+// Ash is the only one, and he is the whole reason this exists. The dex is built
+// from Showdown's pokedex, which has no trainers in it, so `--dex ash` fell
+// through to a substring search and answered with Aegislash, Rapidash, Whiscash
+// and eight other names that merely contain "ash" — while the one resident
+// actually called Ash was not among them. Something you can summon should be
+// something you can look up.
+//
+// `pane` is written separately rather than wrapped from `blurb` because the
+// pane is a few cells wide and sizes itself to its longest line. Four short
+// lines belong there; four sentences do not.
+const OFF_DEX = {
+  ash: {
+    title: 'Ash Ketchum',
+    blurb:
+      'A young Pokémon Trainer from Pallet Town whose lifelong dream is to become a ' +
+      'Pokémon Master. Accompanied by his loyal partner Pikachu, he starred in the ' +
+      'anime for 25 seasons before finally achieving his goal of becoming a world champion.',
+    facts: [
+      ['from', 'Pallet Town'],
+      ['partner', 'Pikachu'],
+    ],
+    pane: ['Pallet Town', 'partner Pikachu', '25 seasons, champion'],
+  },
+}
+
+const BLANK = { num: 0, types: '', height: 0, weight: 0, colour: '', abilities: '' }
+
 export const entry = (name) => {
-  const key = resolveName(name) ?? name
+  const key = resolveName(name) ?? String(name ?? '').trim().toLowerCase()
+  const off = OFF_DEX[key]
+
+  if (off) return { name: key, ...BLANK, ...off }
+
   const found = DEX[key]
 
-  if (!found) return { name: key, num: 0, title: key, types: '', height: 0, weight: 0, colour: '', abilities: '' }
+  if (!found) return { name: key, title: key, ...BLANK }
 
   return {
     name: key,
@@ -135,6 +168,10 @@ export const exactMatch = (query) => {
   // back as `pikachu` and answers with the very card you were leaving.
   if (text.endsWith('-')) return null
 
+  // Before name resolution, which only knows the sprite folder and so has never
+  // heard of a trainer.
+  if (OFF_DEX[text]) return text
+
   const name = resolveName(text)
 
   return name && DEX[name] ? name : null
@@ -182,9 +219,44 @@ export const render = (rows, limit = 40, colour = true) => {
 // The long form, for when there is exactly one answer — a search that landed on
 // a single Pokemon, or a random pick. A row in a table is the right shape for
 // scanning twenty results and the wrong shape for looking at one.
+// Greedy, at a width that suits a chat message rather than a terminal — this
+// card is read in both, and the narrower of the two wins.
+const wrap = (text, width = 66) => {
+  const lines = []
+  let line = ''
+
+  for (const word of text.split(' ')) {
+    if (line && line.length + 1 + word.length > width) {
+      lines.push(line)
+      line = word
+    } else line = line ? `${line} ${word}` : word
+  }
+
+  if (line) lines.push(line)
+
+  return lines
+}
+
 export const detail = (row, colour = true) => {
   const paint = (code, text) => (colour ? `${code}${text}${RESET}` : text)
   const status = statusOf(row.name)
+
+  // Someone with a description instead of a dex number. The fact table is the
+  // wrong shape for him — type, size and ability are all "unknown", which reads
+  // as a broken record rather than as a person.
+  if (row.blurb) {
+    const facts = [...(row.facts ?? []), ['sprite', status]]
+
+    return (
+      `  ${paint(BOLD, row.title)}\n\n` +
+      wrap(row.blurb)
+        .map((line) => `    ${line}`)
+        .join('\n') +
+      '\n\n' +
+      facts.map(([label, value]) => `    ${paint(DIM, label.padEnd(8))}${value}`).join('\n') +
+      `\n\n  ${paint(YELLOW, `--${row.name}`)} to summon it`
+    )
+  }
 
   const facts = [
     ['no.', row.num ? `#${row.num}` : 'not in the dex'],
@@ -209,12 +281,15 @@ export const detail = (row, colour = true) => {
 // Everything the long card says, minus the labels — at a glance beside the
 // Pokemon itself, the labels are the part you can infer.
 export const paneCard = (row, rows = 4) =>
-  [
-    `${row.title}  #${row.num || '?'}`,
-    [row.types, row.colour].filter(Boolean).join('  '),
-    row.height ? `${row.height}m  ${row.weight}kg` : '',
-    row.abilities,
-  ]
+  (row.pane
+    ? [row.title, ...row.pane]
+    : [
+        `${row.title}  #${row.num || '?'}`,
+        [row.types, row.colour].filter(Boolean).join('  '),
+        row.height ? `${row.height}m  ${row.weight}kg` : '',
+        row.abilities,
+      ]
+  )
     .filter(Boolean)
     .slice(0, rows)
 
@@ -284,7 +359,14 @@ if (process.argv[1] && process.argv[1].endsWith('dex.mjs')) {
   } else {
     const found = search(query)
 
-    if (found.length === 0) {
+    // Asked before the empty-search bail rather than after it: someone who is
+    // not in the dex has nothing to substring-match against, so the later order
+    // would report "nothing matches" for a name that resolves perfectly well.
+    // "ash" happens to match eleven Pokemon and would have survived either way,
+    // which is exactly the kind of luck not to build on.
+    const hit = exactMatch(query)
+
+    if (found.length === 0 && !hit) {
       // Imported here rather than at the top: switch.mjs imports from this
       // file, and pulling it in at module scope would close the circle.
       const { suggest } = await import('./switch.mjs')
@@ -299,11 +381,15 @@ if (process.argv[1] && process.argv[1].endsWith('dex.mjs')) {
     }
 
     // An exact name, or a single answer, gets the card. Several get the table.
-    const hit = exactMatch(query)
-
     if (hit || found.length === 1) {
       const row = hit ? entry(hit) : found[0]
-      const others = found.filter((other) => other.name !== row.name).length
+
+      // Forms, not merely the other things that matched. The follow-up this
+      // prints is `dex -- <name>-`, which searches the prefix, so anything that
+      // does not carry the prefix is not something that line can find: `--dex
+      // mew` counted Mewtwo as a form of Mew and pointed at `mew-`, which
+      // answers with nothing, and `--dex ash` counted Aegislash and Whiscash.
+      const others = found.filter((other) => other.name.startsWith(`${row.name}-`)).length
       const card = detail(row)
 
       console.log(card)

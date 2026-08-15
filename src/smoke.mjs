@@ -88,6 +88,21 @@ check('an exact name is a lookup', exactMatch('pikachu') === 'pikachu')
 check('a trailing dash is a search', exactMatch('pikachu-') === null)
 check('the dice only roll real Pokemon', Array.from({ length: 50 }, pickRandom).every((name) => entry(name).num > 0))
 
+// Ash is a resident the pokedex has never heard of, so every part of the dex
+// reaches him by a different route than the other twelve.
+const { detail, paneCard } = await import('./dex.mjs')
+
+check('a resident who is not a Pokemon is still a lookup', exactMatch('ash') === 'ash')
+check('and has a description rather than an empty fact table', detail(entry('ash'), false).includes('Pallet Town'))
+check('and never rolls on the dice', !Array.from({ length: 50 }, pickRandom).includes('ash'))
+check('his pane card fits the pane', paneCard(entry('ash')).every((line) => line.length <= 24))
+
+// "N other forms" points at a prefix search, so anything without the prefix is
+// not a form and the follow-up cannot find it. --dex mew counted Mewtwo.
+const forms = (name) => search(name).filter((row) => row.name.startsWith(`${name}-`)).length
+
+check('forms are counted by prefix, not by matching', forms('mew') === 0 && forms('pikachu') > 5)
+
 // The commands, parsed the way the hook parses them.
 const { parse } = await import('./switch.mjs')
 
