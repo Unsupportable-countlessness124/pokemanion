@@ -1,8 +1,21 @@
 # Attribution
 
-The code here is MIT (see LICENSE). The artwork is not, and none of it is mine.
-This file says what came from where, because shipping someone's work without
-naming them is the part that is actually rude.
+## What the licence covers
+
+The MIT licence in [LICENSE](LICENSE) applies to the **source code**: everything
+in `src/`, `bin/`, `docs/`, `install.mjs`, and the configuration and
+documentation files.
+
+**It does not cover the artwork.** The sprites in `assets/` are not mine to
+license and are not MIT. They are included so the project works when cloned,
+under what is normally treated as fan use.
+
+If you are reusing this project, the code is yours to take freely. The sprites
+are not — bring your own, or fetch them yourself, which is what `npm run roster`
+already does for most of them.
+
+The rest of this file says what came from where, because shipping someone's work
+without naming them is the part that is actually rude.
 
 ## Pokemon sprites
 

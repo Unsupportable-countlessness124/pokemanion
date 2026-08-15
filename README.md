@@ -289,7 +289,8 @@ decision the pane is making and what it rested on.
 
 ## Licence and artwork
 
-The **code** is MIT — see [LICENSE](LICENSE).
+The **code** is MIT — see [LICENSE](LICENSE), and
+[ATTRIBUTION.md](ATTRIBUTION.md) for exactly what that covers.
 
 The **artwork is not mine and is not covered by it.** The Gen-5 sprites are
 Game Freak's; the hand-picked GIFs are fan art found online. They ship with the

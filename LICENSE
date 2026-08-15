@@ -19,21 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
----
-
-WHAT THIS COVERS
-
-The licence above applies to the source code of this project: everything in
-src/, bin/, docs/, install.mjs, and the configuration and documentation files.
-
-IT DOES NOT COVER THE ARTWORK.
-
-The sprites in assets/ are not mine to license and are not MIT. They are
-included so the project works when cloned, under what is normally treated as
-fan use. See ATTRIBUTION.md for what came from where.
-
-If you are reusing this project, the code is yours to take freely. The sprites
-are not — bring your own, or fetch them yourself, which is what `npm run roster`
-already does for most of them.
