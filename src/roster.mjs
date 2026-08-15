@@ -67,7 +67,7 @@ export const POKEMON_DIR = join(ROOT, 'assets', 'pokemon')
 export const ROSTER = [
   // The one everything was built around, using the sprites chosen for it. Not
   // evolved: Raichu would be a change to Pikachu, and Pikachu does not change.
-  { name: 'pikachu', dex: 25, idle: 'assets/3-standing.gif', busy: 'assets/9-pikachu-run.gif', busySpeed: 1 },
+  { name: 'pikachu', idle: 'assets/3-standing.gif', busy: 'assets/9-pikachu-run.gif', busySpeed: 1 },
   // Not a Pokemon and not from PokeAPI — supplied by hand, and the only entry
   // whose two halves are of the trainer rather than of a Pokemon. Standing
   // while it waits, running while it works. Its run is already a run cycle at
@@ -90,11 +90,9 @@ export const ROSTER = [
   // Charizard makes, where the fire fills the empty half of the pane.
   //
   // `card` is what a resident who is not a Pokemon needs, and the only extra
-  // field one of them needs anywhere. Not `dex`, which is taken: Pikachu carries
-  // `dex: 25`, a number, and reusing the name made every lookup of Pikachu
-  // return a row with no title at all. The pokedex is built from Showdown's
-  // data, which has no trainers in it, so without this `--dex ash` has nothing
-  // to answer with. Everything else — summoning, the launch flag, the picker,
+  // field one of them needs anywhere. The pokedex is built from Showdown's data,
+  // which has no trainers in it, so without this `--dex ash` has nothing to
+  // answer with. Everything else — summoning, the launch flag, the picker,
   // "did you mean" — reads the roster and needs nothing added.
   {
     name: 'ash',
