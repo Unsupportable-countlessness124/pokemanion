@@ -200,12 +200,20 @@ npm run dex                  # summary, and what is on disk
 npm run dex -- charizard     # by name
 npm run dex -- dragon        # by type
 npm run dex -- 25            # by dex number
+npm run dex -- current       # what the panes are showing now
+npm run dex -- random        # be shown something
 ```
+
+`current` reads the claim files rather than the roster, because that is the only
+thing that knows: a pane may have been switched, handed a guest, or rolled at
+random since it opened. Inside Claude it answers for *that* session; in a
+terminal it lists every pane that is up.
 
 and the same from inside Claude, which costs no turn:
 
 ```
 --dex          --dex ghost          --dex 149          --dex random
+--dex current  # the stats of whatever this pane is showing right now
 ```
 
 A search with exactly one answer — or `random` — gets the long form instead of

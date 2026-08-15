@@ -102,8 +102,22 @@ try {
               `${render(here, 40, false)}\n\n--dex <name|type|number> to search\n`,
           )
         } else {
-          const found = search(asked.query)
-          const hit = exactMatch(asked.query)
+          // `--dex current` means this pane, not "whatever panes exist" — the
+          // session asking already knows which Pokemon it is holding, so it
+          // answers with that one's card rather than a list of every window.
+          const asking = asked.query.trim().toLowerCase()
+          const mine = asking === 'current' ? current : null
+
+          // Without a claim of its own, "current" has no answer. Falling back
+          // to a search would list what *other* windows are holding, under a
+          // word that promises this one.
+          if (asking === 'current' && !mine) {
+            process.stderr.write('no Pokemon claimed for this session yet\n')
+            process.exit(2)
+          }
+
+          const found = mine ? [entry(mine)] : search(asked.query)
+          const hit = mine ?? exactMatch(asked.query)
 
           // An exact name, or a single answer, gets the card; several get the
           // table. The same split the command line makes, because it is about

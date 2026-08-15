@@ -18,6 +18,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ROOT } from './config.mjs'
 import { fetchedGuests, isResident, names, resolveName } from './roster.mjs'
+import { speciesInUse } from './companion.mjs'
 import { loadSprite } from './sprite.mjs'
 
 const DIM = '\x1b[2m'
@@ -77,9 +78,11 @@ export const search = (query) => {
 
   if (!text) return []
 
-  // Safe as a keyword: nothing is named "random" and it is not a type, so it
-  // cannot shadow a real search.
+  // Safe as keywords: nothing is named "random" or "current", and neither is a
+  // type, so they cannot shadow a real search.
   if (text === 'random') return [entry(pickRandom())]
+
+  if (text === 'current') return currentlyOut().map(entry)
 
   if (/^\d+$/.test(text)) {
     const num = Number(text)
@@ -102,6 +105,17 @@ export const search = (query) => {
   return loose
 }
 
+// Whatever the panes are showing right now, newest claim first.
+//
+// Read from the claim files rather than from the roster, because that is the
+// only thing that knows: the pane may have been switched with `--squirtle`,
+// handed a guest, or rolled at random since it opened.
+export const currentlyOut = () => {
+  const held = [...speciesInUse()]
+
+  return held.filter((name) => DEX[name] || resolveName(name))
+}
+
 // Did the query name one Pokemon outright?
 //
 // This exists because searching for the famous ones was the worst case:
@@ -113,7 +127,7 @@ export const exactMatch = (query) => {
   const text = String(query ?? '').trim().toLowerCase()
 
   // Numbers, types and the dice are genuine searches, not names.
-  if (!text || text === 'random' || /^\d+$/.test(text) || TYPES.has(text)) return null
+  if (!text || text === 'random' || text === 'current' || /^\d+$/.test(text) || TYPES.has(text)) return null
 
   // A trailing dash asks for the forms — `pikachu-` means Pikachu-Alola and the
   // rest, which is what the card itself suggests typing. Without this it is not
@@ -255,7 +269,11 @@ if (process.argv[1] && process.argv[1].endsWith('dex.mjs')) {
     const found = search(query)
 
     if (found.length === 0) {
-      console.log(`  ${DIM}nothing matches "${query}"${RESET}\n`)
+      console.log(
+        query.trim().toLowerCase() === 'current'
+          ? `  ${DIM}no sprite pane is running${RESET}\n`
+          : `  ${DIM}nothing matches "${query}"${RESET}\n`,
+      )
       process.exit(1)
     }
 
