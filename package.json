@@ -34,6 +34,7 @@
     "prune": "node src/prune.mjs",
     "dex": "node src/dex.mjs",
     "attribution": "node src/attribution.mjs",
-    "test": "node src/smoke.mjs"
+    "test": "node src/smoke.mjs",
+    "gallery": "node src/gallery.mjs"
   }
 }

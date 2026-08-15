@@ -55,6 +55,30 @@ the machine.
 guests](#residents-and-guests) · [Settings](#settings) ·
 [Design notes](docs/design.md)**
 
+<details>
+<summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
+
+<br>
+
+<!-- gallery -->
+
+| | | | |
+| --- | --- | --- | --- |
+| **pikachu** <br> <sub>own animation</sub> | <img src="docs/gallery/pikachu.png" width="230"> | **ash** <br> <sub>own animation</sub> | <img src="docs/gallery/ash.png" width="230"> |
+| **charmander** <br> <sub>its shiny</sub> | <img src="docs/gallery/charmander.png" width="230"> | **squirtle** <br> <sub>its shiny</sub> | <img src="docs/gallery/squirtle.png" width="230"> |
+| **bulbasaur** <br> <sub>its shiny</sub> | <img src="docs/gallery/bulbasaur.png" width="230"> | **eevee** <br> <sub>its shiny</sub> | <img src="docs/gallery/eevee.png" width="230"> |
+| **munchlax** <br> <sub>its shiny</sub> | <img src="docs/gallery/munchlax.png" width="230"> | **haunter** <br> <sub>its shiny</sub> | <img src="docs/gallery/haunter.png" width="230"> |
+| **psyduck** <br> <sub>own animation</sub> | <img src="docs/gallery/psyduck.png" width="230"> | **jigglypuff** <br> <sub>its shiny</sub> | <img src="docs/gallery/jigglypuff.png" width="230"> |
+| **charizard** <br> <sub>own animation</sub> | <img src="docs/gallery/charizard.png" width="230"> | **meowth** <br> <sub>own animation</sub> | <img src="docs/gallery/meowth.png" width="230"> |
+| **gengar** <br> <sub>own animation</sub> | <img src="docs/gallery/gengar.png" width="230"> | **cubone** <br> <sub>own animation</sub> | <img src="docs/gallery/cubone.png" width="230"> |
+
+<!-- /gallery -->
+
+Ten of them work as their own shiny — the same animation recoloured, with a
+white flash at the switch. Four were given animations of their own.
+
+</details>
+
 ## What it needs
 
 **Node ≥ 20** (no dependencies), **chafa** (`brew install chafa`), and a
