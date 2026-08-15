@@ -31,7 +31,7 @@ whether anything is happening.
 <tr>
   <td align="center"><img src="assets/3-standing.gif" width="72" alt="Pikachu standing"></td>
   <td align="center"><img src="assets/9-pikachu-run.gif" width="94" alt="Pikachu working"></td>
-  <td>Pikachu charges lightning in its cheeks, then runs. It is the one everything else was tuned against.</td>
+  <td>Pikachu charges lightning in its cheeks, then runs.</td>
 </tr>
 <tr>
   <td align="center"><img src="assets/pokemon/psyduck/idle.gif" width="55" alt="Psyduck standing"></td>
