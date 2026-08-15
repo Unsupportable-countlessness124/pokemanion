@@ -307,7 +307,24 @@ export const openWindow = (id, source = null) => {
 
   if (isBackgroundAgent(id, source)) return false
 
-  if (windowIsRunning(id)) return false
+  // A pane is already up for this session — resuming one whose window never
+  // closed. Nothing needs opening, but an explicit ask still has to land, and
+  // returning here is how `claude --resume --random` used to do nothing at all.
+  //
+  // Writing the claim is the whole switch: the pane watches that file and picks
+  // it up within a frame or two, exactly as `--random` does mid-session.
+  if (windowIsRunning(id)) {
+    const asked = requestedSpecies()
+
+    if (asked) {
+      try {
+        mkdirSync(STATE_DIR, { recursive: true })
+        writeFileSync(speciesFileFor(id), asked)
+      } catch {}
+    }
+
+    return false
+  }
 
   const rows = config.windowRows ?? 3
   const species = chooseSpecies(id, config)
