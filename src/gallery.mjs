@@ -21,20 +21,52 @@ import { ROSTER, busyFile, idleFile, isFetched } from './roster.mjs'
 
 // How tall the <img> must be for the *character* to land at this size.
 //
-// A fixed height is wrong, because these frames are padded by wildly different
-// amounts: Psyduck's supplied animation is a 600x640 canvas with the Pokemon
-// filling barely half its height, so `height="64"` drew a 34px Psyduck next to
-// a 64px one. Measuring the artwork inside the frame is the only way they come
-// out the same size.
+// Two corrections, and the second is easy to miss. Frames are padded by wildly
+// different amounts — Psyduck's supplied animation is a 600x640 canvas with the
+// Pokemon filling barely half its height — so a fixed height draws a 34px
+// Psyduck beside a 64px one.
+//
+// But measuring the *union* of all frames is wrong too: it grows to cover
+// wherever the character moves, so anything that bobs or jumps measures taller
+// than it is and comes out too small. Cubone's body is 38px inside a 43px union
+// and rendered at 56 next to Psyduck's 64.
+//
+// The typical height of the body in a single frame is what actually matches.
 const TARGET = 64
+
+const bodyHeight = (image) => {
+  const heights = image.frames
+    .map((frame) => {
+      let top = -1
+      let bottom = -1
+
+      for (let y = 0; y < image.height; y++) {
+        for (let x = 0; x < image.width; x++) {
+          if (frame.pixels[(y * image.width + x) * 4 + 3] <= 128) continue
+
+          if (top < 0) top = y
+
+          bottom = y
+          break
+        }
+      }
+
+      return bottom - top + 1
+    })
+    .filter((height) => height > 0)
+    .sort((a, b) => a - b)
+
+  // The median rather than the mean: one frame where the sprite is mid-blink or
+  // half off the bottom should not set the size for the whole animation.
+  return heights[Math.floor(heights.length / 2)] ?? image.height
+}
 
 const displayHeight = (path) => {
   try {
     const raw = read(path)
     const image = prepare(decodeSprite(raw) ?? decodeGif(raw), 0, null)
-    const box = sharedBounds(image.frames, image.width, image.height)
 
-    return Math.round(TARGET / (box.height / image.height))
+    return Math.round((TARGET * image.height) / bodyHeight(image))
   } catch {
     return TARGET
   }
