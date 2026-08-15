@@ -110,11 +110,14 @@ export const ROSTER = [
   // the left edge like everything else, its body would jump eleven columns
   // sideways the moment Claude started working.
   //
-  // `flipBusy` mirrors it: body on the left where the resting sprite is, fire
-  // going right across the empty pane. The alternative, `align: 'right'`, also
-  // holds the body still but parks Charizard against the far edge while every
-  // other Pokemon sits at the near one. Mirroring costs a facing direction and
-  // keeps the layout; pinning costs the layout and keeps the facing.
+  // The file itself is mirrored — `npm run flip` — rather than flipped as it
+  // loads. It has to be: GitHub strips `style` from images, so a README cannot
+  // mirror anything, and Charizard was facing one way there and the other way
+  // in the pane. One flipped file, and the two agree.
+  //
+  // The mirroring is what puts the body on the left where the resting sprite
+  // is, with the fire going right across the empty pane. Drawn as it came, its
+  // body sat at the right-hand end and jumped eleven columns on every switch.
   //
   // No `transition`. Breathing fire is the same Charizard doing something, not
   // one sprite becoming another, and a white flash would announce a change that
@@ -124,7 +127,6 @@ export const ROSTER = [
     idle: 'assets/14-charizard.gif',
     busy: 'assets/16-charizard-firing.gif',
     busySpeed: 1,
-    flipBusy: true,
   },
   // Was working as its own shiny — same animation, pink paws — until a jump
   // turned up. It moves 78% of itself per frame against the resting sprite's

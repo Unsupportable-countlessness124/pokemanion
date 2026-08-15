@@ -105,7 +105,7 @@ const table = [
   BEGIN,
   '',
   '| | resting | working |',
-  '| --- | --- | --- |',
+  '| --- | :---: | :---: |',
   ...present.map(row),
   '',
   END,

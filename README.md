@@ -23,28 +23,28 @@ whether anything is happening.
   <th align="left">&nbsp;</th>
 </tr>
 <tr>
-  <td><img src="assets/14-charizard.gif" width="66" alt="Charizard standing"></td>
-  <td><img src="assets/16-charizard-firing.gif" width="201" alt="Charizard working"></td>
+  <td align="center"><img src="assets/14-charizard.gif" width="66" alt="Charizard standing"></td>
+  <td align="center"><img src="assets/16-charizard-firing.gif" width="201" alt="Charizard working"></td>
   <td>Charizard breathes fire across the empty half of the pane.</td>
 </tr>
 <tr>
-  <td><img src="assets/3-standing.gif" width="72" alt="Pikachu standing"></td>
-  <td><img src="assets/9-pikachu-run.gif" width="94" alt="Pikachu working"></td>
+  <td align="center"><img src="assets/3-standing.gif" width="72" alt="Pikachu standing"></td>
+  <td align="center"><img src="assets/9-pikachu-run.gif" width="94" alt="Pikachu working"></td>
   <td>Pikachu runs. It is the one everything else was tuned against.</td>
 </tr>
 <tr>
-  <td><img src="assets/pokemon/psyduck/idle.gif" width="55" alt="Psyduck standing"></td>
-  <td><img src="assets/12-psyduck-running.gif" width="121" alt="Psyduck working"></td>
+  <td align="center"><img src="assets/pokemon/psyduck/idle.gif" width="55" alt="Psyduck standing"></td>
+  <td align="center"><img src="assets/12-psyduck-running.gif" width="121" alt="Psyduck working"></td>
   <td>Psyduck throws its arms about, headache and all.</td>
 </tr>
 <tr>
-  <td><img src="assets/23-gengar.gif" width="89" alt="Gengar standing"></td>
-  <td><img src="assets/25-gengar-attack.gif" width="202" alt="Gengar attacking"></td>
+  <td align="center"><img src="assets/23-gengar.gif" width="89" alt="Gengar standing"></td>
+  <td align="center"><img src="assets/25-gengar-attack.gif" width="202" alt="Gengar attacking"></td>
   <td>Gengar fires a shadow beam across the pane.</td>
 </tr>
 <tr>
-  <td><img src="assets/21-cubone.gif" width="85" alt="Cubone standing"></td>
-  <td><img src="assets/22-cubone-swinging.gif" width="97" alt="Cubone working"></td>
+  <td align="center"><img src="assets/21-cubone.gif" width="85" alt="Cubone standing"></td>
+  <td align="center"><img src="assets/22-cubone-swinging.gif" width="97" alt="Cubone working"></td>
   <td>Cubone swings its bone.</td>
 </tr>
 </table>
@@ -73,7 +73,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 <!-- gallery -->
 
 | | resting | working |
-| --- | --- | --- |
+| --- | :---: | :---: |
 | **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" width="71" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" width="94" alt="pikachu working"> |
 | **ash**<br><sub>own animation</sub> | <img src="assets/10-ash-standing.gif" width="53" alt="ash resting"> | <img src="assets/11-ash-running.gif" width="90" alt="ash working"> |
 | **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" width="68" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" width="68" alt="charmander working"> |
@@ -84,7 +84,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **haunter**<br><sub>its shiny</sub> | <img src="assets/pokemon/haunter/idle.gif" width="108" alt="haunter resting"> | <img src="assets/pokemon/haunter/busy-shiny.gif" width="108" alt="haunter working"> |
 | **psyduck**<br><sub>own animation</sub> | <img src="assets/pokemon/psyduck/idle.gif" width="55" alt="psyduck resting"> | <img src="assets/12-psyduck-running.gif" width="121" alt="psyduck working"> |
 | **jigglypuff**<br><sub>its shiny</sub> | <img src="assets/pokemon/jigglypuff/idle.gif" width="89" alt="jigglypuff resting"> | <img src="assets/pokemon/jigglypuff/busy-shiny.gif" width="89" alt="jigglypuff working"> |
-| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" width="67" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" width="199" alt="charizard working"> |
+| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" width="67" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" width="204" alt="charizard working"> |
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" width="65" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" width="70" alt="meowth working"> |
 | **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" width="89" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" width="166" alt="gengar working"> |
 | **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" width="85" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" width="97" alt="cubone working"> |
@@ -196,6 +196,7 @@ Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 | `npm run window` | run a pane by hand, for debugging |
 | `npm run build` | rebuild the status-line frames from `config.json` |
 | `npm run recolour` | repaint one sprite's palette to match another: `-- a.gif b.gif out.gif` |
+| `npm run flip` | mirror a sprite left to right: `-- in.gif out.gif` |
 
 `doctor` and `watch` are the two worth remembering. `doctor` answers "is this
 set up right", and `watch` answers "why is the sprite doing that" — it prints
@@ -223,10 +224,15 @@ Any GIF works. Drop it in `assets/` and point a roster entry at it:
 Hand-picked files are never overwritten or re-downloaded, and they override the
 default — which is the Pokémon's own shiny palette, with a white flash between.
 
-If a supplied animation is the right Pokemon in the wrong shade — two artists
-rarely agree on a palette — `npm run recolour` repaints it to match. A GIF
-stores pixels as indices into a colour table, so its colours can be changed
-without touching a single pixel or re-encoding anything.
+Two tools for when a supplied animation is nearly right:
+
+- **`npm run recolour`** — the right Pokemon in the wrong shade. A GIF stores
+  pixels as indices into a colour table, so its colours change without touching
+  a single pixel or re-encoding anything.
+- **`npm run flip`** — facing the wrong way. This one does re-encode, because
+  mirroring moves every pixel, but it reuses the original palette so nothing is
+  lost. Flip the file rather than the drawing: GitHub strips `style` from
+  images, so a README cannot mirror anything and would disagree with the pane.
 
 Judge a candidate at the size the pane actually draws, about 68 pixels tall.
 File size lies in both directions: a 500×500 GIF that is really 40×39 upscaled
