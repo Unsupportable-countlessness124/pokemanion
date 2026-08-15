@@ -174,20 +174,6 @@ export const ROSTER = [
     busy: 'assets/22-cubone-swinging.gif',
     busySpeed: 1,
   },
-  // The only one that leaves the ground. Everything else here runs, swings or
-  // throws something; a bird crossing the pane reads as motion from much
-  // further away, which is the whole point of the thing.
-  //
-  // Its idle is the ordinary Gen-5 sprite, fetched like any other. Only the
-  // flying half is hand-picked — and it arrived on a flat white background,
-  // which the pane would have drawn as a rectangle. `npm run key` turned the
-  // background transparent by relabelling one palette index, with no
-  // re-encoding and no holes punched in the bird.
-  {
-    name: 'pidgey',
-    busy: 'assets/26-pidgey-flying.gif',
-    busySpeed: 1,
-  },
 ]
 
 // Showdown's Gen-5 animated set rather than PokeAPI's, which is the same

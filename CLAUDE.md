@@ -4,7 +4,7 @@ A Pokémon lives in a terminal pane beside every Claude Code or Codex session. I
 rests while the agent is waiting on you and animates while it is working, so you
 can tell what a session is doing from across the room without reading the screen.
 
-15 ship with it, 1237 more can be summoned by name, and there is a Pokédex.
+14 ship with it, 1238 more can be summoned by name, and there is a Pokédex.
 
 **macOS + Ghostty only.** It draws sprites using the kitty graphics protocol and
 opens the split by driving Ghostty through AppleScript. It needs `chafa`
