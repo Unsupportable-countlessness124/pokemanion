@@ -12,6 +12,7 @@ whether anything is happening.
 [![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](package.json)
+[![Agents](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-8957e5.svg)](#install)
 [![Platform](https://img.shields.io/badge/tested%20on-macOS%20%2B%20Ghostty-lightgrey.svg)](#what-it-needs)
 
 </div>
@@ -61,9 +62,9 @@ the machine.
 <br clear="left">
 
 **[What it needs](#what-it-needs) · [Install](#install) · [Commands](#commands)
-· [Your own sprites](#your-own-sprites) · [Residents and
-guests](#residents-and-guests) · [Settings](#settings) ·
-[Design notes](docs/design.md)**
+· [Troubleshooting](#if-something-looks-wrong) · [Your own
+sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
+[Settings](#settings) · [Design notes](docs/design.md)**
 
 <details>
 <summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
@@ -122,7 +123,7 @@ opens.
 
 The `claude --pikachu` wrapper works in **zsh and bash**, and installs into
 whichever you use — `~/.zshrc`, or `~/.bash_profile`/`~/.bashrc`. On any other
-shell you lose the launch flags only; everything typed *inside* Claude goes
+shell you lose the launch flags only; everything typed *inside* a session goes
 through a hook and works regardless.
 
 ## Install
@@ -134,76 +135,61 @@ npm run deps      # chafa and Ghostty — skip if you have them
 npm run setup
 ```
 
-`deps` uses Homebrew or MacPorts, whichever you have. It will not install a
-package manager for you — if you have neither, it prints the route for each:
-Ghostty ships a [`.dmg`](https://ghostty.org/download), and chafa builds
-[from source](https://hpjansson.org/chafa/download/).
+`setup` finds what you have — **Claude Code, Codex, or both** — and wires up
+each one. It fetches the sprites, renders them, registers the hooks, adds a
+`claude()` and `codex()` wrapper to your shell file, and sets the one Ghostty
+keybind the pane needs. It checks everything first and stops without touching a
+file if something is missing. Safe to run twice.
 
-`setup` looks at what you have — **Claude Code, Codex, or both** — and wires up
-each one it finds. It downloads the sprites, renders them, registers the hooks,
-adds a `claude()` and/or `codex()` wrapper to your shell file, and sets the one
-Ghostty keybind the pane needs. Force a choice with `-- --claude` or
-`-- --codex`. It checks its prerequisites first and stops without touching
-anything if one is missing. Safe to run again.
+Then four things no script can do for you:
 
-Then four things it cannot do for you:
-
-1. **Restart your agent** — Claude Code and Codex both read hooks at startup.
+1. **Restart your agent** — both read their hooks at startup.
 2. **Restart Ghostty** — it reads its config at startup.
 3. **Open a new terminal**, or `source ~/.zshrc`.
 4. **Allow Ghostty in Accessibility** — [see above](#what-it-needs), once.
 
-**Codex will ask you to trust the hooks**, and should — they are commands it is
-about to run for you, and they sit in `~/.codex/hooks.json` where you can read
-them first. It stores a hash per hook and **skips any it has not reviewed**, so after
-updating this project, run **`/hooks`** inside Codex and trust them again.
-Until you do it runs them not at all, silently, and the sprite stops reacting. Re-running `npm run setup` does not disturb this: it leaves the file
-alone when nothing has actually changed.
-
-**When the pane appears differs by agent.** Claude Code opens it the moment you
-start a session. Codex opens it when you send your **first message** — it does
-not consider a session to exist until then, and offers no earlier hook, so
-there is nothing to open one from. Not a bug either side of it.
-
-A pane should appear beside your next session.
-
-```sh
-npm run doctor                # if it doesn't
-```
-
-`doctor` is the thing to run whenever something looks wrong. It checks the hooks
-are registered, chafa is present, the frame cache matches your pane height, and
-which Pokémon are currently held.
-
-**If a sprite stutters or freezes for a second**, that is the frame cache. Frames
-are rendered per pane height, so resizing the pane — or switching to a Pokémon
-nobody has warmed — leaves it rendering on the fly. `doctor` names it exactly:
-
-```
-✘ cache matches the pane   pane is 4 rows but only 20 of 28 sprites are
-                           warmed for it — run: npm run warm -- 4
-```
-
-Run what it tells you. Warm sprites load in about **3 ms**; cold ones take
-**one to two seconds**, which is the stutter. A Pokémon summoned for the first
-time always pays that once — roughly two seconds to fetch and render — and is
-instant every time after.
+A pane should appear beside your next session. If it doesn't,
+[`npm run doctor`](#if-something-looks-wrong) says which piece is unhappy.
 
 <details>
-<summary>Doing it a piece at a time</summary>
+<summary><b>Two things specific to Codex</b></summary>
 
 <br>
 
-Each step `setup` runs is still its own command, for when only one needs
-redoing:
+**It will ask you to trust the hooks**, and it should — they are commands it is
+about to run for you, and they sit in `~/.codex/hooks.json` where you can read
+them first. Codex stores a hash per hook and skips any it has not reviewed, so
+after updating this project run **`/hooks`** inside Codex and trust them again.
+Until you do, it runs them not at all — silently — and the sprite stops
+reacting. Re-running `npm run setup` will not disturb this: it leaves the file
+alone when nothing has actually changed.
+
+**The pane appears at your first message, not at launch.** Codex does not
+consider a session to exist until you say something, and offers no earlier hook
+to open one from. Claude Code opens it the moment the session starts. That is a
+difference between the two agents rather than something either of us can fix.
+
+</details>
+
+<details>
+<summary><b>Doing it a piece at a time</b></summary>
+
+<br>
+
+Each step `setup` runs is its own command, for when only one needs redoing:
 
 ```sh
 npm run roster                  # fetch the sprites
-npm run warm                    # render them for a 4-row pane
-npm run install-statusline      # wire the hooks into ~/.claude/settings.json
-npm run shell -- --install      # add the claude() wrapper to ~/.zshrc
+npm run warm                    # render them for your pane height
+npm run install-statusline      # register the hooks with every agent found
+npm run shell -- --install      # add the claude()/codex() wrapper
 npm run ghostty -- --install    # the resize keybind, so the pane is a strip
 ```
+
+`deps` uses Homebrew or MacPorts, whichever you have, and will not install a
+package manager for you — if you have neither it prints the route for each:
+Ghostty ships a [`.dmg`](https://ghostty.org/download), and chafa builds
+[from source](https://hpjansson.org/chafa/download/).
 
 The keybind is not optional: collapsing the new split into a strip is one press
 of a large resize step, and Ghostty's built-in step is ten pixels. Without it
@@ -213,16 +199,39 @@ the pane arrives at half your window height.
 
 ### What it touches outside this folder
 
-Three files. Each is backed up before the first write, and each comes back out:
+Every file is backed up before the first write, and every one comes back out:
 
 | file | what goes in | undo |
 | --- | --- | --- |
 | `~/.claude/settings.json` | seven hooks | `npm run uninstall-statusline` |
-| `~/.zshrc` | the `claude()` wrapper | `npm run shell -- --remove` |
+| `~/.codex/hooks.json` | seven hooks | `npm run uninstall-statusline` |
+| `~/.zshrc` | the `claude()`/`codex()` wrapper | `npm run shell -- --remove` |
 | `~/.config/ghostty/config` | one resize keybind | `npm run ghostty -- --remove` |
 
-Nothing else leaves the repo. Undo those three, delete the folder, and no trace
-is left.
+Only the agents you actually have are touched. Nothing else leaves the repo —
+undo those, delete the folder, and no trace is left.
+
+## If something looks wrong
+
+```sh
+npm run doctor
+```
+
+It checks each piece on its own: hooks registered per agent, chafa present, the
+frame cache matching your pane height, and which Pokémon are currently held.
+
+**A sprite that stutters or freezes for a second** is the frame cache. Frames
+are rendered per pane height, so resizing the pane — or switching to one nobody
+has warmed — leaves it rendering on the fly. `doctor` names it exactly:
+
+```
+✘ cache matches the pane   pane is 4 rows but only 20 of 28 sprites are
+                           warmed for it — run: npm run warm -- 4
+```
+
+Warm sprites load in about **3 ms**, cold ones in **one to two seconds** — that
+is the stutter. A Pokémon summoned for the first time pays that once, roughly
+two seconds to fetch and render, and is instant every time after.
 
 ## Commands
 
@@ -374,10 +383,10 @@ cost 1–5 MB each, bounded by `guestBudgetMb` (200) and `guestKeepDays` (14).
 | `guestBudgetMb` | `200` | disk the guests may hold |
 | `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
-## How it knows Claude is working
+## How it knows the agent is working
 
 This is inference rather than a signal, and it is the part most likely to
-surprise you. Claude Code rings a hook when you submit a prompt and around each
+surprise you. Both agents ring a hook when you submit a prompt and around each
 tool — but there is **no hook for pressing escape**, so an interrupted turn
 looks identical to a running one.
 
@@ -385,6 +394,10 @@ So the pane also reads the session transcript, where an interruption leaves an
 `interruptedMessageId`, and watches whether the transcript is growing at all.
 Where that frays, and why the thresholds are what they are, is in
 [docs/known-issues.md](docs/known-issues.md).
+
+That transcript trick is Claude-specific. On Codex an interrupted turn falls
+back to the slower signal — the sprite settles in about twenty seconds rather
+than one.
 
 When the sprite is wrong at the wrong moment, `npm run watch` prints the same
 decision the pane is making and what it rested on.
