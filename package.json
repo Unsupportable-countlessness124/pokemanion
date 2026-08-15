@@ -3,7 +3,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "A sprite that runs in the Claude Code status line while Claude works.",
+  "description": "A Pokemon in a terminal pane beside every Claude Code session, resting while Claude waits and animating while it works.",
   "engines": {
     "node": ">=20"
   },
@@ -11,6 +11,8 @@
     "build": "node src/build.mjs",
     "preview": "node src/preview.mjs assets/pikachu-showdown.gif",
     "setup": "node src/setup.mjs",
+    "deps": "node src/deps.mjs",
+    "ghostty": "node src/ghostty.mjs",
     "install-statusline": "node install.mjs",
     "uninstall-statusline": "node install.mjs --uninstall",
     "compare": "node src/compare.mjs",

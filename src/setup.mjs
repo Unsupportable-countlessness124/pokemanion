@@ -82,6 +82,10 @@ const steps = [
   ['rendering them for your pane', ['src/warm.mjs'], 'once, so a session starts instantly'],
   ['registering the hooks', ['install.mjs'], 'into ~/.claude/settings.json'],
   ['adding the claude() wrapper', ['src/shell.mjs', '--install'], 'into ~/.zshrc, for the launch flags'],
+  // Without this the pane still opens — at half the window height, because the
+  // keystroke that collapses it is bound to nothing. That read as a layout bug
+  // for anyone but the one machine where the keybind had been added by hand.
+  ['setting the Ghostty resize keybind', ['src/ghostty.mjs', '--install'], 'so the pane is a strip, not half the window'],
 ]
 
 let done = 0
@@ -117,10 +121,15 @@ for (const [label, args, why] of steps) {
 }
 
 say()
-say(`  ${GREEN}installed.${RESET} two things left, and neither is optional:`)
+say(`  ${GREEN}installed.${RESET} three things left, and none of them is optional:`)
 say()
 say(`    ${BOLD}1.${RESET} restart Claude Code    ${DIM}it reads the hooks at startup${RESET}`)
-say(`    ${BOLD}2.${RESET} open a new terminal    ${DIM}or: source ~/.zshrc${RESET}`)
+say(`    ${BOLD}2.${RESET} restart Ghostty        ${DIM}it reads its config at startup${RESET}`)
+say(`    ${BOLD}3.${RESET} open a new terminal    ${DIM}or: source ~/.zshrc${RESET}`)
+say()
+say(`  ${DIM}and once, by hand: System Settings > Privacy & Security > Accessibility${RESET}`)
+say(`  ${DIM}> enable Ghostty. Opening a split means pressing keys, and macOS will${RESET}`)
+say(`  ${DIM}not let anything press keys until you allow it.${RESET}`)
 say()
 say(`  ${DIM}then a Pokemon appears beside your next session. it rests while Claude${RESET}`)
 say(`  ${DIM}waits and animates while it works.${RESET}`)

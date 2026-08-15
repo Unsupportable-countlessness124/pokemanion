@@ -34,6 +34,7 @@ const MODULES = [
   'attribution',
   'shell',
   'assigned',
+  'ghostty',
 ]
 
 const results = []
@@ -389,6 +390,70 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     check('install.mjs runs against a scratch HOME', false, error.message.split('\n')[0])
   } finally {
     rmSync(home, { recursive: true, force: true })
+  }
+
+  // The Ghostty keybind. Without it the split opens and is never collapsed, so
+  // the pane arrives at half the window height — which looks like a layout bug
+  // rather than a missing line of config, and is what everyone but the machine
+  // this was built on actually got.
+  //
+  // Run as a subprocess for the same reason as the rest: CONFIG is resolved
+  // from homedir() at import time, so only a child process can be pointed
+  // somewhere safe.
+  const ghosttyHome = mkdtempSync(join(tmpdir(), 'pokemanion-ghostty-'))
+
+  try {
+    const config = join(ghosttyHome, '.config', 'ghostty', 'config')
+    const ghostty = (...args) =>
+      spawnSync(process.execPath, ['src/ghostty.mjs', ...args], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        env: { ...process.env, HOME: ghosttyHome },
+      })
+
+    ghostty('--install')
+
+    const written = (() => {
+      try {
+        return read(config, 'utf8')
+      } catch {
+        return ''
+      }
+    })()
+
+    check(
+      'the Ghostty resize keybind is written',
+      /resize_split:down,2000/.test(written),
+      written ? 'written' : 'no config file created',
+    )
+
+    ghostty('--install')
+
+    const twice = read(config, 'utf8')
+    const count = (twice.match(/resize_split:down/g) ?? []).length
+
+    check('and not written twice', count === 1, `${count} copies`)
+
+    ghostty('--remove')
+
+    const left = read(config, 'utf8')
+
+    check('and can be removed again', !/resize_split:down/.test(left), left.trim() ? 'other lines kept' : 'empty')
+
+    // A config that already has the keybind — added by hand, as it was here —
+    // must be left exactly alone rather than gaining a second copy.
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+
+    mkdirSync(dirname(config), { recursive: true })
+    writeFileSync(config, 'keybind = super+ctrl+shift+arrow_down=resize_split:down,2000\nkeybind = super+ctrl+shift+arrow_up=resize_split:up,2000\n')
+
+    const before = read(config, 'utf8')
+
+    ghostty('--install')
+
+    check('a hand-written keybind is left alone', read(config, 'utf8') === before)
+  } finally {
+    rmSync(ghosttyHome, { recursive: true, force: true })
   }
 }
 
