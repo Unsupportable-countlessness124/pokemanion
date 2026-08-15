@@ -41,57 +41,25 @@ the machine.
 
 ## What it needs
 
-**Tested on macOS with Ghostty, and nowhere else.** Two separate things are
-going on, and they have different requirements — the part that draws the sprite
-is portable, the part that opens the pane for you is not.
+**Node ≥ 20** (no dependencies), **chafa** (`brew install chafa`), and a
+terminal that speaks the [kitty graphics
+protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) — the sprite is a
+real image, not text.
 
-| | |
-| --- | --- |
-| **Node ≥ 20** | no dependencies, nothing to install |
-| **chafa** | `brew install chafa` / `apt install chafa`. Converts frames into image escapes |
-| **a terminal that speaks the kitty graphics protocol** | the sprite is a real image, not text |
-| **macOS + Ghostty** | *only* for opening the pane automatically |
+| | draws the sprite | opens the pane for you | `claude --pikachu` |
+| --- | :---: | :---: | :---: |
+| **macOS + Ghostty** — the only tested setup | yes | yes | yes |
+| macOS + kitty, iTerm2, WezTerm, Warp | yes | no | yes |
+| Linux + kitty, Konsole | should | no | needs bash porting |
+| Alacritty, Terminal.app, Windows | no | no | no |
 
-### Which terminals can draw it
+Only the pane-opening is macOS-specific: it splits Ghostty through AppleScript.
+Everything else is portable Node. Where it says *no*, run the pane yourself in a
+second terminal — `npm run window 4 --session=<id>` — and the rest still works.
 
-The sprite is sent using [kitty's graphics
-protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/), so the terminal
-has to understand it. Per kitty's own list, these do:
-
-**kitty · Ghostty · WezTerm · Konsole · iTerm2 · Warp · st (patched)**
-
-These do not, and the pane will be blank or full of escape codes:
-**Alacritty · Terminal.app · Windows Terminal**.
-
-### What is macOS-only
-
-Only the automatic pane. `openWindow` splits Ghostty by sending keystrokes
-through AppleScript (`osascript`, System Events), looks for
-`/Applications/Ghostty.app`, and identifies login shells with a BSD `pgrep`
-pattern. None of that exists off macOS.
-
-Everything else is portable Node: the hooks, the sprite rendering, the
-Pokédex, the download and eviction of guests.
-
-So on Linux with kitty or Konsole, the honest position is: **it should work if
-you open the pane yourself**, and nobody has tried.
-
-```sh
-npm run window 4 --session=<your-session-id>
-```
-
-There is no Windows path at all — no kitty-protocol terminal in the supported
-list, and the pane logic is AppleScript.
-
-### The shell wrapper
-
-`npm run shell -- --install` writes a `claude()` function to **`~/.zshrc`**.
-zsh only. On bash the same function would work with small changes, but nothing
-generates it for you — `src/shell.mjs` is where it is written.
-
-Without the wrapper you lose `claude --pikachu` at launch. Everything typed
-*inside* Claude — `--squirtle`, `--random`, `--dex` — is handled by a hook and
-works regardless of shell.
+The `claude --pikachu` wrapper is written to `~/.zshrc`, so it is zsh-only.
+Without it you lose the launch flags; everything typed *inside* Claude goes
+through a hook and works on any shell.
 
 ## Install
 
