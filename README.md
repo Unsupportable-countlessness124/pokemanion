@@ -145,8 +145,16 @@ Two things it deliberately does not do. **Ghostty** it leaves alone: it is a GUI
 app that can ask for a password, and the pane is a Ghostty split, so anyone who
 can see a pane already has it — if you do not, nothing appears, and the next
 command you type says so. And the **launch flags** need a shell function that
-only the clone route installs, so `claude --pikachu` will not work — everything
-typed *inside* a session will.
+only the clone route installs, so `claude --pikachu` and `codex --pikachu` will
+not work — everything typed *inside* a session will.
+
+It still needs [the four things no script can do](#then-four-things), the same
+as the clone route — **restarting your agent and Ghostty, and allowing Ghostty
+in Accessibility**. That last one is not optional: without it macOS blocks the
+keystroke that opens the split, and no pane appears at all. On Codex, read [the
+two things specific to it](#two-things-specific-to-codex) as well — you will be
+asked to trust the hooks, and the pane arrives at your first message rather than
+at launch.
 
 **From a clone**, which is the full version:
 
@@ -163,6 +171,8 @@ each one. It fetches the sprites, renders them, registers the hooks, adds a
 keybind the pane needs. It checks everything first and stops without touching a
 file if something is missing. Safe to run twice.
 
+<a id="then-four-things"></a>
+
 Then four things no script can do for you:
 
 1. **Restart your agent** — both read their hooks at startup.
@@ -172,6 +182,8 @@ Then four things no script can do for you:
 
 A pane should appear beside your next session. If it doesn't,
 [`npm run doctor`](#if-something-looks-wrong) says which piece is unhappy.
+
+<a id="two-things-specific-to-codex"></a>
 
 <details>
 <summary><b>Two things specific to Codex</b></summary>
