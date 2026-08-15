@@ -54,7 +54,7 @@ unlisted rather than silently going unnamed.
 | `21-cubone.gif` | cubone resting |
 | `22-cubone-swinging.gif` | cubone working |
 | `23-gengar.gif` | gengar resting |
-| `24-gengar-shiny.gif` | gengar working |
+| `25-gengar-attack.gif` | gengar working |
 
 16 files.
 

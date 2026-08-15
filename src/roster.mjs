@@ -137,25 +137,27 @@ export const ROSTER = [
   // meant the evolved form — so this is a new entry rather than a change to
   // one. Haunter stays; they are different Pokemon and both are worth having.
   //
-  // Purple resting, grey working — its shiny. Both halves supplied, and they
-  // are a real pair: 74x63 and 42 frames each, the same poses frame for frame,
-  // so nothing shifts but the colour.
+  // Rests as itself, attacks while Claude works.
   //
-  // An earlier attempt used a supplied animation that looked like the same
-  // sprite twice — the pose barely changed, and only a frame-by-frame
-  // measurement could tell them apart, which is no use in a pane you glance at.
+  // The attack frame is 141x68 against the resting sprite's 74x63, because it
+  // is a battle scene rather than a portrait: Gengar fires a beam at a small
+  // opponent, and the frame has to be wide enough for both. Worth knowing that
+  // the second creature is in there — it is not a solo animation.
   //
-  // `transition: 'flash'` has to be said out loud here. A downloaded entry is
-  // recognised as a recolour and gets the flash for free; a hand-picked pair
-  // cannot be, and without the flash a 5.9% colour shift is easy to miss. That
-  // number undersells it the way Meowth's 6% does — the body is most of the
-  // sprite, and it goes from purple to grey.
+  // No `flipBusy`, unlike Charizard. Gengar already starts at the left of its
+  // frame and fires rightward, so it lands where the resting sprite is. The
+  // union of all frames looks like a body at the right-hand end, but that mass
+  // is the beam travelling across — per frame, the body stays put and the
+  // attack is what moves. Mirroring it would have thrown the body across the
+  // pane, which is the very thing flipping is for elsewhere.
+  //
+  // No `transition` either: an attack is Gengar doing something, not Gengar
+  // becoming something, and the white flash is kept for recolours.
   {
     name: 'gengar',
     idle: 'assets/23-gengar.gif',
-    busy: 'assets/24-gengar-shiny.gif',
+    busy: 'assets/25-gengar-attack.gif',
     busySpeed: 1,
-    transition: 'flash',
   },
   // Both halves supplied. Swings its bone while Claude works.
   //
