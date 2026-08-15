@@ -149,7 +149,10 @@ try {
           // table. The same split the command line makes, because it is about
           // the shape of the answer rather than where it is being read.
           if (found.length === 0) {
-            process.stderr.write(`nothing matches "${asked.query}"\n`)
+            const { suggest } = await import('../src/switch.mjs')
+            const meant = suggest(asked.query, pool)
+
+            process.stderr.write(`nothing matches "${asked.query}"${meant ? `\n\ndid you mean: ${meant}` : ''}\n`)
           } else if (hit || found.length === 1) {
             const row = hit ? entry(hit) : found[0]
             const others = found.filter((other) => other.name !== row.name).length

@@ -92,12 +92,21 @@ const { parse } = await import('./switch.mjs')
 check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
-// Every other command is `--something`, so `--dex --current` is what fingers
-// type. It used to search for a Pokemon literally named "--current".
-check('--dex tolerates a dashed argument', parse('--dex --current')?.query === 'current')
-// But only leading ones: a trailing dash asks for every form of a Pokemon
-// rather than the Pokemon itself, and dropping it would change the answer.
+// The argument is taken exactly as typed — one spelling to remember, not one
+// plus a set of near-misses. The help lives in the failure instead.
+check('--dex takes its argument verbatim', parse('--dex --current')?.query === '--current')
 check('and keeps a trailing dash', parse('--dex pikachu-')?.query === 'pikachu-')
+
+const { suggest } = await import('./switch.mjs')
+
+// Every other command here is `--something`, so a dash on the argument is a
+// habit rather than a misunderstanding, and `nothing matches "--current"` reads
+// as a broken command. The suggestion is what makes strictness bearable.
+check('a dashed argument is guessed at', suggest('--current') === '--dex current')
+check('so is a dashed name', suggest('--pikachu') === '--dex pikachu')
+// Silence beats a guess that leads to a second miss.
+check('nonsense gets no guess', suggest('--zzznope') === null)
+check('and a correct query needs none', suggest('current') === null)
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
 // What a session was given, and getting it back.

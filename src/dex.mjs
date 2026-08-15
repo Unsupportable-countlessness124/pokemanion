@@ -285,10 +285,15 @@ if (process.argv[1] && process.argv[1].endsWith('dex.mjs')) {
     const found = search(query)
 
     if (found.length === 0) {
+      // Imported here rather than at the top: switch.mjs imports from this
+      // file, and pulling it in at module scope would close the circle.
+      const { suggest } = await import('./switch.mjs')
+      const meant = suggest(query)
+
       console.log(
         query.trim().toLowerCase() === 'current'
           ? `  ${DIM}no sprite pane is running${RESET}\n`
-          : `  ${DIM}nothing matches "${query}"${RESET}\n`,
+          : `  ${DIM}nothing matches "${query}"${RESET}\n` + (meant ? `  ${DIM}did you mean:${RESET} npm run dex -- ${meant.slice(6)}\n` : ''),
       )
       process.exit(1)
     }

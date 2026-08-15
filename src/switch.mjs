@@ -29,15 +29,12 @@ export const parse = (prompt, pool = available()) => {
   // single-word forms. `--dex` alone is the summary; `--dex fire` searches.
   const dex = text.match(/^--dex(?:\s+(.+))?$/i)
 
-  // Leading dashes on the argument are dropped. Every other command here is
-  // `--something`, so `--dex --current` is the natural thing to type — and it
-  // used to be taken literally, searching for a Pokemon named "--current" and
-  // answering `nothing matches "--current"`, which reads as the command being
-  // broken rather than the argument being spelled a way it did not expect.
-  //
-  // Only leading ones. A trailing dash is meaningful — `--dex pikachu-` is a
-  // search for every Pikachu form rather than a lookup of Pikachu itself.
-  if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim().replace(/^-+/, '') }
+  // The argument is taken exactly as typed. `--dex --current` is a miss, not a
+  // silent correction: one way to write a command is easier to remember than
+  // one way plus a set of things that happen to also work. The miss is where
+  // the help goes — see `suggest` below, which is what turns it from a dead end
+  // into a pointer.
+  if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim() }
 
   const match = text.match(/^--([a-z][a-z0-9.:-]*)$/i)
 
@@ -58,6 +55,35 @@ export const parse = (prompt, pool = available()) => {
   if (resolved) return { kind: 'switch', name: resolved, guest: true }
 
   return { kind: 'unknown', word }
+}
+
+// What the user probably meant, when `--dex <something>` matched nothing.
+//
+// The command is strict on purpose — one spelling is easier to remember than
+// one spelling plus a set of near-misses that happen to work — so the help has
+// to live in the failure. `--dex --current` is the case that prompted this:
+// every other command here is `--something`, so the dash is a habit, and
+// `nothing matches "--current"` reads as a broken command rather than a typo.
+//
+// Returns null when there is nothing useful to say, so the caller can leave the
+// plain miss alone rather than pad it with a guess.
+export const suggest = (query, pool = available()) => {
+  const text = String(query ?? '').trim()
+
+  // Only leading dashes are ever a mistake. A trailing one is real syntax —
+  // `--dex pikachu-` asks for every Pikachu form — so a query that only differs
+  // by its tail is not a typo and gets no suggestion.
+  const stripped = text.replace(/^-+/, '')
+
+  if (!stripped || stripped === text) return null
+
+  // Worth suggesting only if the corrected form actually leads somewhere.
+  // Pointing at a second miss is worse than saying nothing.
+  const word = stripped.toLowerCase()
+  const leadsSomewhere =
+    word === 'current' || word === 'random' || pool.includes(word) || Boolean(resolveName(word)) || /^\d+$/.test(word)
+
+  return leadsSomewhere ? `--dex ${stripped}` : null
 }
 
 // Written to stderr, which is what Claude Code shows when a hook blocks a
