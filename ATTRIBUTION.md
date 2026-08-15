@@ -74,8 +74,9 @@ unlisted rather than silently going unnamed.
 | `22-cubone-swinging.gif` | cubone working |
 | `23-gengar.gif` | gengar resting |
 | `25-gengar-attack.gif` | gengar working |
+| `26-pidgey-flying.gif` | pidgey working |
 
-16 files.
+17 files.
 
 <!-- /files -->
 

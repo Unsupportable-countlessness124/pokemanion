@@ -41,6 +41,7 @@
     "test": "node src/smoke.mjs",
     "gallery": "node src/gallery.mjs",
     "recolour": "node src/recolour.mjs",
-    "flip": "node src/flip.mjs"
+    "flip": "node src/flip.mjs",
+    "key": "node src/key.mjs"
   }
 }

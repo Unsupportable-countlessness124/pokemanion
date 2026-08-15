@@ -50,7 +50,7 @@ whether anything is happening.
 </tr>
 </table>
 
-Fourteen hand-tuned residents ship with it. **1252 more** can be summoned by
+Fifteen hand-tuned residents ship with it. **1237 more** can be summoned by
 name and are fetched on the spot.
 
 <img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
@@ -67,7 +67,7 @@ sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
 [Settings](#settings) · [Design notes](docs/design.md)**
 
 <details>
-<summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
+<summary><b>All fifteen residents</b> — resting on the left, working on the right</summary>
 
 <br>
 
@@ -89,12 +89,13 @@ sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" width="65" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" width="70" alt="meowth working"> |
 | **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" width="89" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" width="166" alt="gengar working"> |
 | **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" width="85" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" width="97" alt="cubone working"> |
+| **pidgey**<br><sub>own animation</sub> | <img src="assets/pokemon/pidgey/idle.gif" width="66" alt="pidgey resting"> | <img src="assets/26-pidgey-flying.gif" width="181" alt="pidgey working"> |
 
 <!-- /gallery -->
 
 These animate — they are the sprite files themselves, not pictures of them.
-Ten work as their own shiny, the same animation recoloured with a white flash
-at the switch; four were given animations of their own.
+Seven work as their own shiny, the same animation recoloured with a white
+flash at the switch; eight were given animations of their own.
 
 </details>
 
@@ -344,11 +345,11 @@ mush. `npm run attribution` regenerates the credits list when you add one.
 
 ## Residents and guests
 
-**Residents** are the 14 in `src/roster.mjs`: hand-tuned, always on disk,
+**Residents** are the 15 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out. Pikachu goes to whoever is free to have it.
 
-**Guests** are the other 1252. They arrive when you name them — about two
+**Guests** are the other 1237. They arrive when you name them — about two
 seconds, measured: roughly 1.3s to fetch and 0.6s to render — then stay while
 you use them and load in 2 ms thereafter. They are evicted least-recently-shown
 first, and one a pane is currently showing is never evicted, however long it has

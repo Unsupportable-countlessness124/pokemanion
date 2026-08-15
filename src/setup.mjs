@@ -22,6 +22,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { ROOT } from './config.mjs'
 import { AGENTS, chosen, isStale } from './agents.mjs'
+import { ROSTER } from './roster.mjs'
 
 const DIM = '[2m'
 const BOLD = '[1m'
@@ -119,7 +120,7 @@ if (warnings.length > 0) say()
 // Kept in this order deliberately: sprites have to exist before they can be
 // rendered, and both have to exist before a hook can point at them.
 const steps = [
-  ['downloading sprites', ['src/roster.mjs'], 'the 14 that ship with it'],
+  ['downloading sprites', ['src/roster.mjs'], `the ${ROSTER.length} that ship with it`],
   ['rendering them for your pane', ['src/warm.mjs'], 'once, so a session starts instantly'],
   ['registering the hooks', ['install.mjs'], `into ${agents.map((agent) => `~/.${agent.name}`).join(' and ')}`],
   [`adding the ${agents.map((agent) => `${agent.name}()`).join(' and ')} wrapper`, ['src/shell.mjs', '--install'], 'for the launch flags'],
