@@ -50,12 +50,11 @@ unlisted rather than silently going unnamed.
 | `16-charizard-firing.gif` | charizard working |
 | `17-pokeball.gif` | the pane (window.mjs) |
 | `18-meowth-jumping.gif` | meowth working |
-| `19-gengar-moving.gif` | gengar working |
 | `20-pokeball-floating.gif` | the pane (dex.mjs) |
 | `21-cubone.gif` | cubone resting |
 | `22-cubone-swinging.gif` | cubone working |
 
-15 files.
+14 files.
 
 <!-- /files -->
 

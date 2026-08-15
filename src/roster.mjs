@@ -137,10 +137,15 @@ export const ROSTER = [
   // meant the evolved form — so this is a new entry rather than a change to
   // one. Haunter stays; they are different Pokemon and both are worth having.
   //
-  // Resting sprite downloaded like any other; the working one supplied. The two
-  // look alike at a glance, which is why it was measured: 55% change per frame
-  // against the idle's 38%.
-  { name: 'gengar', busy: 'assets/19-gengar-moving.gif', busySpeed: 1 },
+  // Works as its own shiny, which for Gengar means purple to grey. A supplied
+  // animation was tried first and looked like the same sprite twice: the pose
+  // barely changes, and only a frame-by-frame measurement could tell them
+  // apart. The shiny is the same animation recoloured — 79x65 and 60 frames
+  // either way — so the difference is the one thing you can actually see.
+  //
+  // Its 5.9% average colour shift undersells it, the same way Meowth's 6% does:
+  // the body is most of the sprite and it goes from purple to grey.
+  { name: 'gengar' },
   // Both halves supplied. Swings its bone while Claude works.
   //
   // The two were drawn by different hands and it shows: the average colour of
