@@ -53,8 +53,10 @@ unlisted rather than silently going unnamed.
 | `20-pokeball-floating.gif` | the pane (dex.mjs) |
 | `21-cubone.gif` | cubone resting |
 | `22-cubone-swinging.gif` | cubone working |
+| `23-gengar.gif` | gengar resting |
+| `24-gengar-shiny.gif` | gengar working |
 
-14 files.
+16 files.
 
 <!-- /files -->
 

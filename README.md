@@ -38,8 +38,8 @@ whether anything is happening.
   <td>Psyduck throws its arms about, headache and all.</td>
 </tr>
 <tr>
-  <td><img src="assets/pokemon/gengar/idle.gif" height="64" alt="Gengar standing"></td>
-  <td><img src="assets/pokemon/gengar/busy-shiny.gif" height="64" alt="Gengar shiny"></td>
+  <td><img src="assets/23-gengar.gif" height="64" alt="Gengar standing"></td>
+  <td><img src="assets/24-gengar-shiny.gif" height="64" alt="Gengar shiny"></td>
   <td>Gengar turns grey — its shiny — with a white flash between.</td>
 </tr>
 <tr>
@@ -86,7 +86,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **jigglypuff**<br><sub>its shiny</sub> | <img src="assets/pokemon/jigglypuff/idle.gif" height="64" alt="jigglypuff resting"> | <img src="assets/pokemon/jigglypuff/busy-shiny.gif" height="64" alt="jigglypuff working"> |
 | **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" height="64" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" height="76" alt="charizard working"> |
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" height="64" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" height="67" alt="meowth working"> |
-| **gengar**<br><sub>its shiny</sub> | <img src="assets/pokemon/gengar/idle.gif" height="64" alt="gengar resting"> | <img src="assets/pokemon/gengar/busy-shiny.gif" height="64" alt="gengar working"> |
+| **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" height="64" alt="gengar resting"> | <img src="assets/24-gengar-shiny.gif" height="64" alt="gengar working"> |
 | **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" height="64" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" height="90" alt="cubone working"> |
 
 <!-- /gallery -->

@@ -137,15 +137,26 @@ export const ROSTER = [
   // meant the evolved form — so this is a new entry rather than a change to
   // one. Haunter stays; they are different Pokemon and both are worth having.
   //
-  // Works as its own shiny, which for Gengar means purple to grey. A supplied
-  // animation was tried first and looked like the same sprite twice: the pose
-  // barely changes, and only a frame-by-frame measurement could tell them
-  // apart. The shiny is the same animation recoloured — 79x65 and 60 frames
-  // either way — so the difference is the one thing you can actually see.
+  // Purple resting, grey working — its shiny. Both halves supplied, and they
+  // are a real pair: 74x63 and 42 frames each, the same poses frame for frame,
+  // so nothing shifts but the colour.
   //
-  // Its 5.9% average colour shift undersells it, the same way Meowth's 6% does:
-  // the body is most of the sprite and it goes from purple to grey.
-  { name: 'gengar' },
+  // An earlier attempt used a supplied animation that looked like the same
+  // sprite twice — the pose barely changed, and only a frame-by-frame
+  // measurement could tell them apart, which is no use in a pane you glance at.
+  //
+  // `transition: 'flash'` has to be said out loud here. A downloaded entry is
+  // recognised as a recolour and gets the flash for free; a hand-picked pair
+  // cannot be, and without the flash a 5.9% colour shift is easy to miss. That
+  // number undersells it the way Meowth's 6% does — the body is most of the
+  // sprite, and it goes from purple to grey.
+  {
+    name: 'gengar',
+    idle: 'assets/23-gengar.gif',
+    busy: 'assets/24-gengar-shiny.gif',
+    busySpeed: 1,
+    transition: 'flash',
+  },
   // Both halves supplied. Swings its bone while Claude works.
   //
   // The two were drawn by different hands and it shows: the average colour of
