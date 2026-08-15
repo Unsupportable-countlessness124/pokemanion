@@ -118,17 +118,30 @@ export const closeWindow = (id) => {
 // delay long enough to always be safe is long enough to be visible; this waits
 // exactly as long as it needs to, and typing into the wrong pane stops being a
 // question of timing.
-const shellCount = () => {
+
+// Which login shells exist, not how many.
+//
+// This counted them and waited for the count to rise. That is only equivalent
+// while nothing else is closing: shut a tab, end another session, let a sprite
+// pane exit — any of which happens constantly around a session starting — and
+// the count drops, so the new shell merely restores it rather than exceeding
+// it. The wait then times out, concludes the split never opened, and types
+// nothing into a pane that is sitting there empty.
+//
+// Comparing the actual pids has no such blind spot: a pid that was not there
+// before is a new shell, whatever else has come and gone. The measured cost is
+// unchanged, since it is the same pgrep either way.
+const shellPids = () => {
   const probe = spawnSync('pgrep', ['-f', '^/usr/bin/login -flp'], { encoding: 'utf8' })
 
-  return (probe.stdout ?? '').trim().split('\n').filter(Boolean).length
+  return new Set((probe.stdout ?? '').trim().split('\n').filter(Boolean))
 }
 
 const waitForNewShell = (before, timeoutMs) => {
   const deadline = Date.now() + timeoutMs
 
   while (Date.now() < deadline) {
-    if (shellCount() > before) return true
+    for (const pid of shellPids()) if (!before.has(pid)) return true
 
     // pgrep itself takes a few milliseconds, which is the whole poll interval.
     spawnSync('sleep', ['0.02'])
@@ -192,7 +205,7 @@ const openSplit = (rows, shrink, grow, id, species) => {
   // instant.
   const squeeze = '        key code 125 using {command down, control down, shift down}'
 
-  const before = shellCount()
+  const before = shellPids()
 
   const split = runScript(`
     tell application "Ghostty" to activate
@@ -230,7 +243,7 @@ const openSplit = (rows, shrink, grow, id, species) => {
 
   if (!waitForNewShell(before, 6000)) {
     console.error('pokemanion: the split did not open, so nothing was typed into it')
-    logSplit(id, { step: 'no shell appeared', shellsBefore: before, waitedMs: Date.now() - waited })
+    logSplit(id, { step: 'no shell appeared', shellsBefore: before.size, waitedMs: Date.now() - waited })
 
     return false
   }
@@ -248,7 +261,7 @@ ${squeeze}
 
   logSplit(id, {
     step: result.status === 0 ? 'typed' : 'typing failed',
-    shellsBefore: before,
+    shellsBefore: before.size,
     shellAppearedMs: appeared,
     error: result.status === 0 ? null : (result.stderr ?? '').trim().slice(0, 200),
   })
