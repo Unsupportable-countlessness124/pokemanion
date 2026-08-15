@@ -1,14 +1,33 @@
 # pixel-runner
 
-An animated sprite in the Claude Code status line. It runs while Claude works
-and stands still when it doesn't.
+A Pokemon lives in a pane beside every Claude Code session. It rests while
+Claude waits and does something else while Claude works — Charizard breathes
+fire, Meowth jumps, Psyduck runs — so you can tell from the corner of your eye
+whether anything is happening.
 
 ```
-▀▄   ▄▀
-▀▀▀▀▀▀    ▄▄   Opus 5  ·  Campus-Dashboard-Event-Planner
-▀▀▀▀▀▀▀▀▀▀▀▀   █████░░░░░ 47%  context
-▀▀▀▀▀▀▀▀▀      using Bash…
-▀▀▀▀▀▀▀
+                      Charizard  #6
+  (\/)                Fire/Flying  Red
+  (oo)  ~~~~~~~>      1.7m  90.5kg
+  /||\                Blaze/Solar Power
+```
+
+Fourteen hand-tuned residents. Any of **1252 more** can be summoned by name and
+are fetched on the spot:
+
+```sh
+claude --pikachu           # start a session with a particular one
+claude --resume --random   # or be handed one
+claude --pokemon           # pick from a list
+```
+
+and from inside Claude, costing no turn and no tokens:
+
+```
+--squirtle        switch this pane
+--random          roll one
+--dex ghost       look one up
+--dex current     what is this one
 ```
 
 No dependencies. Everything — code, sprites, build output, runtime state —
@@ -21,7 +40,19 @@ worth having because of them. See [LICENSE](LICENSE) for the split and
 [ATTRIBUTION.md](ATTRIBUTION.md) for what came from where; `npm run
 attribution` regenerates that list when a sprite is added.
 
-## Why it isn't inside the spinner line
+## How it knows Claude is working
+
+It is inference, not a signal, and that is the most interesting part of this.
+Claude Code rings a hook when you submit a prompt and around each tool, but
+there is **no hook for pressing escape** — so an interrupted turn looks
+identical to a running one.
+
+So the pane also reads the session transcript, where an interruption leaves an
+`interruptedMessageId`, and watches whether the transcript is still growing at
+all. Where that frays, and why the thresholds are what they are, is written
+down in [docs/known-issues.md](docs/known-issues.md).
+
+## Why it isn't inside the spinner line (background)
 
 The obvious place for this is next to `Actioning…`, and that turns out to be
 closed off. Claude Code 2.1.221 exposes exactly three spinner settings —
