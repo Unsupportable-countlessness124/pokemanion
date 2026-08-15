@@ -137,7 +137,9 @@ through a hook and works regardless.
 
 Works in Claude Code and Codex. It registers the hooks, writes the Ghostty
 keybind, and fetches **chafa** through Homebrew in the background if you do not
-have it — so the sprite may take a minute to appear the very first time.
+have it — so the sprite may take a minute to appear the very first time. With
+no Homebrew it cannot, and says so the next time you type a command rather than
+leaving you to wonder.
 
 Two things it deliberately does not do. **Ghostty** it leaves alone: it is a GUI
 app that can ask for a password, and the pane is a Ghostty split, so anyone who

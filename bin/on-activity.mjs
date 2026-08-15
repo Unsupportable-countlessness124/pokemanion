@@ -254,11 +254,11 @@ try {
       // So if the two things the sprite cannot work without are missing, this
       // is where to say so. Only when something is actually wrong, and only on
       // a command that was going to answer anyway.
-      const { hasGhostty } = await import('../src/bootstrap.mjs')
+      const { hasGhostty, chafaFix } = await import('../src/bootstrap.mjs')
       const { spawnSync: probe } = await import('node:child_process')
       const missing = [
         hasGhostty() ? null : 'Ghostty — the pane is a Ghostty split (https://ghostty.org)',
-        probe('command', ['-v', 'chafa'], { shell: true }).status === 0 ? null : 'chafa — it draws the sprite (brew install chafa)',
+        probe('command', ['-v', 'chafa'], { shell: true }).status === 0 ? null : chafaFix(),
       ].filter(Boolean)
 
       process.stderr.write(

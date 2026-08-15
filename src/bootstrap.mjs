@@ -75,3 +75,19 @@ export const bootstrapChafa = () => {
 if (process.argv[1] && process.argv[1].endsWith('bootstrap.mjs')) {
   console.log(`\n  chafa: ${bootstrapChafa()}\n`)
 }
+
+// What to tell someone who has no chafa, given what they do have.
+//
+// "brew install chafa" is a dead end for anyone without Homebrew, and a plugin
+// user cannot conveniently run `npm run deps` to be told the alternatives — the
+// clone is buried in a plugins directory. So the advice is chosen here, from
+// what is actually on the machine.
+//
+// There is no fourth option: chafa publishes no prebuilt macOS binary, so
+// without a package manager it is a source build.
+export const chafaFix = () => {
+  if (have('brew')) return 'chafa — it draws the sprite (brew install chafa)'
+  if (have('port')) return 'chafa — it draws the sprite (sudo port install chafa)'
+
+  return 'chafa — it draws the sprite, and needs Homebrew or MacPorts to install (https://brew.sh)'
+}

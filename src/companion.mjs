@@ -190,6 +190,19 @@ const openSplit = (rows, shrink, grow, id, species) => {
     return false
   }
 
+  // And chafa, for the same reason but a worse symptom.
+  //
+  // Without it the pane opens, the renderer exits 1 on its first frame, and the
+  // split closes again — so a terminal flashes and vanishes, which is harder to
+  // interpret than nothing happening at all. Better to open nothing and say so
+  // in the log, leaving the next command someone types to explain it.
+  if (spawnSync('command', ['-v', 'chafa'], { shell: true, encoding: 'utf8' }).status !== 0) {
+    console.error('pokemanion: chafa is not installed — it renders the sprite. brew install chafa')
+    logSplit(id, { step: 'no chafa' })
+
+    return false
+  }
+
   // System Events types a keystroke string one character at a time, so the
   // length of this command is paid for in wall clock — the full node
   // invocation ran to 134 characters, close to a second of watching it appear.
