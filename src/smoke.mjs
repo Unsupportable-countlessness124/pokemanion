@@ -92,6 +92,33 @@ check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
+// Every sprite the README shows has to be committed, or the gallery is broken
+// images for anyone who clones. The residents' sprites are tracked by an
+// explicit list in .gitignore, and nothing else would notice it drifting out of
+// step with the roster.
+try {
+  const { execSync } = await import('node:child_process')
+  const tracked = new Set(execSync('git ls-files', { encoding: 'utf8' }).trim().split('\n'))
+  // `idleFile` already returns an absolute path. Passing it through join(ROOT,
+  // ...) produced a path under the repo *twice over*, which never exists — so
+  // the list came back empty and the check passed having examined nothing.
+  const shown = ROSTER.filter((entry) => existsSync(idleFile(entry.name)))
+
+  const untracked = shown
+    .flatMap((entry) => [idleFile(entry.name), busyFile(entry.name)])
+    .map((file) => file.replace(`${ROOT}/`, ''))
+    .filter((file) => !tracked.has(file))
+
+  // Counted, so it cannot pass by looking at nothing.
+  check(
+    `every resident sprite is committed (${shown.length} checked)`,
+    shown.length === ROSTER.length && untracked.length === 0,
+    untracked.join(', '),
+  )
+} catch {
+  // Not a git checkout; nothing to verify.
+}
+
 // Every asset named anywhere still exists.
 const assets = readdirSync(join(ROOT, 'assets')).filter((file) => /\.(gif|png)$/.test(file))
 

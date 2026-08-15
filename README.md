@@ -62,20 +62,28 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 
 <!-- gallery -->
 
-| | | | |
-| --- | --- | --- | --- |
-| **pikachu** <br> <sub>own animation</sub> | <img src="docs/gallery/pikachu.png" width="230"> | **ash** <br> <sub>own animation</sub> | <img src="docs/gallery/ash.png" width="230"> |
-| **charmander** <br> <sub>its shiny</sub> | <img src="docs/gallery/charmander.png" width="230"> | **squirtle** <br> <sub>its shiny</sub> | <img src="docs/gallery/squirtle.png" width="230"> |
-| **bulbasaur** <br> <sub>its shiny</sub> | <img src="docs/gallery/bulbasaur.png" width="230"> | **eevee** <br> <sub>its shiny</sub> | <img src="docs/gallery/eevee.png" width="230"> |
-| **munchlax** <br> <sub>its shiny</sub> | <img src="docs/gallery/munchlax.png" width="230"> | **haunter** <br> <sub>its shiny</sub> | <img src="docs/gallery/haunter.png" width="230"> |
-| **psyduck** <br> <sub>own animation</sub> | <img src="docs/gallery/psyduck.png" width="230"> | **jigglypuff** <br> <sub>its shiny</sub> | <img src="docs/gallery/jigglypuff.png" width="230"> |
-| **charizard** <br> <sub>own animation</sub> | <img src="docs/gallery/charizard.png" width="230"> | **meowth** <br> <sub>own animation</sub> | <img src="docs/gallery/meowth.png" width="230"> |
-| **gengar** <br> <sub>own animation</sub> | <img src="docs/gallery/gengar.png" width="230"> | **cubone** <br> <sub>own animation</sub> | <img src="docs/gallery/cubone.png" width="230"> |
+| | resting | working |
+| --- | --- | --- |
+| **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" height="64" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" height="64" alt="pikachu working"> |
+| **ash**<br><sub>own animation</sub> | <img src="assets/10-ash-standing.gif" height="64" alt="ash resting"> | <img src="assets/11-ash-running.gif" height="64" alt="ash working"> |
+| **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" height="64" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" height="64" alt="charmander working"> |
+| **squirtle**<br><sub>its shiny</sub> | <img src="assets/pokemon/squirtle/idle.gif" height="64" alt="squirtle resting"> | <img src="assets/pokemon/squirtle/busy-shiny.gif" height="64" alt="squirtle working"> |
+| **bulbasaur**<br><sub>its shiny</sub> | <img src="assets/pokemon/bulbasaur/idle.gif" height="64" alt="bulbasaur resting"> | <img src="assets/pokemon/bulbasaur/busy-shiny.gif" height="64" alt="bulbasaur working"> |
+| **eevee**<br><sub>its shiny</sub> | <img src="assets/pokemon/eevee/idle.gif" height="64" alt="eevee resting"> | <img src="assets/pokemon/eevee/busy-shiny.gif" height="64" alt="eevee working"> |
+| **munchlax**<br><sub>its shiny</sub> | <img src="assets/pokemon/munchlax/idle.gif" height="64" alt="munchlax resting"> | <img src="assets/pokemon/munchlax/busy-shiny.gif" height="64" alt="munchlax working"> |
+| **haunter**<br><sub>its shiny</sub> | <img src="assets/pokemon/haunter/idle.gif" height="64" alt="haunter resting"> | <img src="assets/pokemon/haunter/busy-shiny.gif" height="64" alt="haunter working"> |
+| **psyduck**<br><sub>own animation</sub> | <img src="assets/pokemon/psyduck/idle.gif" height="64" alt="psyduck resting"> | <img src="assets/12-psyduck-running.gif" height="64" alt="psyduck working"> |
+| **jigglypuff**<br><sub>its shiny</sub> | <img src="assets/pokemon/jigglypuff/idle.gif" height="64" alt="jigglypuff resting"> | <img src="assets/pokemon/jigglypuff/busy-shiny.gif" height="64" alt="jigglypuff working"> |
+| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" height="64" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" height="64" alt="charizard working"> |
+| **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" height="64" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" height="64" alt="meowth working"> |
+| **gengar**<br><sub>own animation</sub> | <img src="assets/pokemon/gengar/idle.gif" height="64" alt="gengar resting"> | <img src="assets/19-gengar-moving.gif" height="64" alt="gengar working"> |
+| **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" height="64" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" height="64" alt="cubone working"> |
 
 <!-- /gallery -->
 
-Ten of them work as their own shiny — the same animation recoloured, with a
-white flash at the switch. Four were given animations of their own.
+These animate — they are the sprite files themselves, not pictures of them.
+Ten work as their own shiny, the same animation recoloured with a white flash
+at the switch; four were given animations of their own.
 
 </details>
 

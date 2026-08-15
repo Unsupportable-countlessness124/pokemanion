@@ -5,11 +5,28 @@
 #   npm run warm     rebuilds the frame cache
 .state/
 
-# Downloaded sprites. Every Pokemon here came from a URL and comes back from the
-# same one, so this is a cache rather than source.
+# Downloaded sprites.
 #
-#   npm run roster   re-downloads all of them
-assets/pokemon/
+# The guests are a cache — over twelve hundred Pokemon that arrive when named
+# and are evicted when the disk is wanted — so they stay out.
+#
+# The residents are not. They are the shipped roster: pinned, hand-chosen, and
+# the reason a fresh clone works without downloading anything. They are also the
+# only way the gallery in the README can animate, since a PNG cannot.
+#
+# Adding a resident that downloads its sprites means adding a line here.
+# `npm test` fails if this list and the roster disagree.
+assets/pokemon/*
+!assets/pokemon/bulbasaur/
+!assets/pokemon/charmander/
+!assets/pokemon/eevee/
+!assets/pokemon/gengar/
+!assets/pokemon/haunter/
+!assets/pokemon/jigglypuff/
+!assets/pokemon/meowth/
+!assets/pokemon/munchlax/
+!assets/pokemon/psyduck/
+!assets/pokemon/squirtle/
 
 # Built from config.json by `npm run build`.
 build/
