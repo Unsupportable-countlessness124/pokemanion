@@ -1,0 +1,129 @@
+// `claude --pikachu`, `claude --resume --ash`.
+//
+// Claude Code owns the `claude` command and would reject an unknown flag, so
+// the flag must never reach it. A shell function of the same name gets there
+// first: it lifts out any argument naming a Pokemon, passes everything else
+// through untouched, and puts the choice in the environment — which Claude Code
+// inherits, and so do the hooks it runs, which is how the pane finds out.
+//
+// Only names in the roster are lifted. Anything else is somebody else's flag
+// and is passed along verbatim, so --resume, --continue and the rest are
+// unaffected whether they come before or after.
+//
+// Usage: npm run shell              print the function
+//        npm run shell -- --install add it to ~/.zshrc
+//        npm run shell -- --remove  take it out again
+
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
+import { ROOT } from './config.mjs'
+import { SPECIES_ENV, names } from './roster.mjs'
+
+const BEGIN = '# >>> pixel-runner >>>'
+const END = '# <<< pixel-runner <<<'
+
+export const snippet = () => {
+  const residents = names().map((name) => `--${name}`).join('|')
+
+  return `${BEGIN}
+# Summon a specific one: claude --pikachu, claude --resume --ash
+# Or any of the others:  claude --flygon      (fetched the first time)
+# Pick from a list:      claude --pokemon
+# Roll the dice:         claude --random
+# Remove with: node ${join(ROOT, 'src', 'shell.mjs')} --remove
+claude() {
+  local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try
+  for pixel_runner_arg in "$@"; do
+    case "$pixel_runner_arg" in
+      --pokemon|--pokemons)
+        pixel_runner_menu=1
+        ;;
+      --random)
+        pixel_runner_random=1
+        ;;
+      ${residents})
+        pixel_runner_species="\${pixel_runner_arg#--}"
+        ;;
+      --*)
+        # Everything the sprite folder has, which is far too many to spell out
+        # in a case pattern, so the list is consulted instead. Anything not in
+        # it is somebody else's flag and is passed straight through — which is
+        # what keeps --resume, --continue and the rest working.
+        pixel_runner_try="\${pixel_runner_arg#--}"
+        if grep -qi "\\"\${pixel_runner_try}\\"" ${join(ROOT, 'assets', 'gen5-names.json')} 2>/dev/null; then
+          pixel_runner_species="$pixel_runner_try"
+        else
+          pixel_runner_args+=("$pixel_runner_arg")
+        fi
+        ;;
+      *)
+        pixel_runner_args+=("$pixel_runner_arg")
+        ;;
+    esac
+  done
+
+  # --random beats the menu: asking for a surprise and then being shown a list
+  # to choose from would be answering a question nobody asked.
+  if [ -n "$pixel_runner_random" ] && [ -z "$pixel_runner_species" ]; then
+    pixel_runner_species="$(${join(ROOT, 'bin', 'run.sh')} src/choose.mjs --random)" || return $?
+  fi
+
+  # The picker writes the chosen name to stdout and the list to the terminal,
+  # so this captures the answer without swallowing what you are reading. A
+  # non-zero exit means you backed out, and then Claude should not start either.
+  if [ -n "$pixel_runner_menu" ] && [ -z "$pixel_runner_species" ]; then
+    pixel_runner_species="$(${join(ROOT, 'bin', 'run.sh')} src/choose.mjs)" || return $?
+  fi
+
+  if [ -n "$pixel_runner_species" ]; then
+    ${SPECIES_ENV}="$pixel_runner_species" command claude "\${pixel_runner_args[@]}"
+  else
+    command claude "\${pixel_runner_args[@]}"
+  fi
+}
+${END}`
+}
+
+// Everything between the markers, so installing twice replaces rather than
+// stacks and the roster changing is one command away from being picked up.
+const withoutBlock = (text) => {
+  const from = text.indexOf(BEGIN)
+
+  if (from === -1) return text
+
+  const to = text.indexOf(END, from)
+
+  if (to === -1) return text
+
+  return `${text.slice(0, from)}${text.slice(to + END.length)}`.replace(/\n{3,}/g, '\n\n')
+}
+
+const RC = join(homedir(), '.zshrc')
+
+const write = (body) => {
+  if (existsSync(RC)) copyFileSync(RC, `${RC}.pixel-runner-backup`)
+
+  writeFileSync(RC, body)
+}
+
+if (process.argv[1] && process.argv[1].endsWith('shell.mjs')) {
+  const existing = existsSync(RC) ? readFileSync(RC, 'utf8') : ''
+
+  if (process.argv.includes('--remove')) {
+    write(withoutBlock(existing))
+    console.log(`\n  removed from ${RC}\n  open a new terminal, or run: unset -f claude\n`)
+  } else if (process.argv.includes('--install')) {
+    const cleaned = withoutBlock(existing).replace(/\s*$/, '')
+
+    write(`${cleaned}\n\n${snippet()}\n`)
+    console.log(
+      `\n  added to ${RC}\n` +
+        `  backup at ${RC}.pixel-runner-backup\n\n` +
+        `  ${names().map((name) => `claude --${name}`).join('\n  ')}\n\n` +
+        `  open a new terminal, or run: source ${RC}\n`,
+    )
+  } else {
+    console.log(snippet())
+  }
+}

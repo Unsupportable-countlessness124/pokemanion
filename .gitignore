@@ -1,0 +1,25 @@
+# Runtime state: the frame cache, the hook log, and the pid/claim files that
+# track which pane holds which Pokemon. All of it is rebuilt on demand and the
+# cache alone is tens of megabytes.
+#
+#   npm run warm     rebuilds the frame cache
+.state/
+
+# Downloaded sprites. Every Pokemon here came from a URL and comes back from the
+# same one, so this is a cache rather than source.
+#
+#   npm run roster   re-downloads all of them
+assets/pokemon/
+
+# Built from config.json by `npm run build`.
+build/
+
+# The hand-picked sprites in assets/ are NOT ignored, and must not be. They were
+# found by hand, cannot be re-downloaded, and several are the whole reason a
+# given entry looks right — Pikachu's pair, Ash, Charizard firing, Psyduck,
+# Meowth jumping, Gengar moving, Cubone, the Pokeballs. Losing them would mean
+# losing work no command can redo.
+
+.DS_Store
+node_modules/
+*.log

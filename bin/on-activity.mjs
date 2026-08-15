@@ -1,0 +1,228 @@
+// Hook handler. Records whether Claude is working so the status line knows
+// whether to animate. Writes one small file and exits; it must never be the
+// reason a prompt is slow, so everything here is best effort.
+
+import { readFileSync } from 'node:fs'
+import { clearState, loadConfig, readState, writeState } from '../src/config.mjs'
+import { closeWindow, openWindow } from '../src/companion.mjs'
+
+const WORKING = new Set(['UserPromptSubmit', 'PreToolUse', 'PostToolUse'])
+const IDLE = new Set(['Stop', 'SessionEnd', 'SessionStart'])
+
+const read = () => {
+  try {
+    return JSON.parse(readFileSync(0, 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+try {
+  const payload = read()
+
+  // Which hooks actually fire, and when. Claude Code documents the events but
+  // not what it does with them at the edges — whether interrupting a tool still
+  // reports its PostToolUse, whether Stop fires when you press escape — and the
+  // sprite is wrong exactly when an assumption about that is wrong. `npm run
+  // watch` reads the other half; this is the hooks' own account.
+  if (process.env.PIXEL_RUNNER_LOG_HOOK || loadConfig().logHooks) {
+    const { appendFileSync, mkdirSync } = await import('node:fs')
+    const { STATE_DIR } = await import('../src/config.mjs')
+
+    try {
+      mkdirSync(STATE_DIR, { recursive: true })
+      // Session events are logged whole. They are rare, and they are the ones
+      // whose payload we have to reason about — which sessions deserve a pane
+      // is decided from what SessionStart says about itself.
+      const session = /^Session/.test(payload?.hook_event_name ?? '')
+
+      // Whether `claude --pikachu` reached this far. The flag is lifted by a
+      // shell function and carried in the environment, and every link in that
+      // chain is testable except this one — whether Claude Code hands its own
+      // environment to the hooks it runs. Recorded so it can be seen rather
+      // than assumed.
+      const asked = process.env.PIXEL_RUNNER_SPECIES ?? null
+
+      appendFileSync(
+        `${STATE_DIR}/hooks.jsonl`,
+        `${JSON.stringify(
+          session
+            ? { at: Date.now(), asked, ...payload }
+            : {
+                at: Date.now(),
+                asked,
+                event: payload?.hook_event_name,
+                session: payload?.session_id,
+                tool: payload?.tool_name ?? null,
+              },
+        )}\n`,
+      )
+    } catch {}
+  }
+
+  const event = payload?.hook_event_name
+
+  // Everything is keyed by the session that sent the hook, so two Claude
+  // windows never see each other's state.
+  const session = payload.session_id
+
+  // A prompt that is only `--pikachu` is aimed at the pane, not at Claude.
+  //
+  // Handled before anything else, and before the state is marked working: this
+  // prompt is about to be blocked, so no turn is starting and saying one did
+  // would leave the sprite running against a turn that never happened.
+  if (event === 'UserPromptSubmit') {
+    const { parse, describe } = await import('../src/switch.mjs')
+    const { available, ensure, knownCount } = await import('../src/roster.mjs')
+    const { speciesFileFor } = await import('../src/companion.mjs')
+
+    const asked = parse(payload.prompt)
+
+    if (asked) {
+      const pool = available()
+      const file = speciesFileFor(session)
+
+      let current = null
+
+      try {
+        current = readFileSync(file, 'utf8').trim() || null
+      } catch {}
+
+      // `--dex` answers and changes nothing. It is still blocked, because the
+      // point is to look something up without spending a turn on it.
+      if (asked.kind === 'dex') {
+        const { render, search, detail, entry, all } = await import('../src/dex.mjs')
+        const { fetchedGuests } = await import('../src/roster.mjs')
+
+        if (!asked.query) {
+          const here = [...pool.map(entry), ...fetchedGuests().map(entry)]
+
+          process.stderr.write(
+            `${all().length} available, ${pool.length} residents, ${fetchedGuests().length} guests on disk\n\n` +
+              `${render(here, 40, false)}\n\n--dex <name|type|number> to search\n`,
+          )
+        } else {
+          const found = search(asked.query)
+
+          // One answer gets the card, several get the table — the same split
+          // the command line makes, because it is about the shape of the
+          // answer rather than about where it is being read.
+          process.stderr.write(
+            found.length === 0
+              ? `nothing matches "${asked.query}"\n`
+              : found.length === 1
+                ? `${detail(found[0], false)}\n`
+                : `${render(found, 25, false)}\n\n${found.length} found — type --<name> to summon\n`,
+          )
+        }
+
+        process.exit(2)
+      }
+
+      // Rolled here rather than in the parser, and turned into an ordinary
+      // switch, so everything downstream — fetching, the claim, the reply — is
+      // the same code that handles a name typed out in full.
+      if (asked.kind === 'random') {
+        const { pickRandom, entry } = await import('../src/dex.mjs')
+
+        for (let attempt = 0; attempt < 5 && asked.kind === 'random'; attempt++) {
+          const pick = pickRandom()
+
+          if (ensure(pick)) {
+            const row = entry(pick)
+
+            asked.kind = 'switch'
+            asked.name = pick
+            asked.rolled = `${row.title} #${row.num || '?'} ${row.types}`
+          }
+        }
+
+        if (asked.kind === 'random') {
+          process.stderr.write('could not fetch a random one\n')
+          process.exit(2)
+        }
+      }
+
+      // A guest has to be on disk before the claim names it, because the pane
+      // refuses to switch to a species whose files are missing — and refuses
+      // silently, which would read as the command doing nothing. This is the
+      // one place a hook goes to the network, and only the first time a given
+      // Pokemon is asked for.
+      if (asked.kind === 'switch' && asked.guest && !ensure(asked.name)) {
+        process.stderr.write(`could not fetch ${asked.name}\n`)
+        process.exit(2)
+      }
+
+      // Written even when it is the name already showing. The pane reloads on
+      // any write, so asking for the one you have is how you make it pick up a
+      // sprite that changed on disk.
+      if (asked.kind === 'switch') {
+        const { mkdirSync, writeFileSync } = await import('node:fs')
+        const { STATE_DIR } = await import('../src/config.mjs')
+
+        // The pane watches this file. Writing it is the whole switch — no new
+        // window, no restart, and the claim stays correct for other terminals.
+        mkdirSync(STATE_DIR, { recursive: true })
+        writeFileSync(file, asked.name)
+      }
+
+      // Exit 2 blocks the prompt and erases it, and shows this to you as the
+      // reason. That is what keeps `--pikachu` from being sent to Claude as a
+      // message and answered as one.
+      process.stderr.write(`${describe(asked, pool, current, knownCount() - pool.length)}\n`)
+      process.exit(2)
+    }
+  }
+
+  if (WORKING.has(event)) {
+    const now = Date.now()
+    const previous = event === 'UserPromptSubmit' ? null : readState(session)
+
+    writeState(session, {
+      state: 'working',
+      at: now,
+      // When this turn began. Only a prompt starts one, and the tool hooks that
+      // follow carry it forward unchanged — so an interruption can be compared
+      // against the turn it interrupted rather than against whichever hook
+      // happened to fire last. A tool interrupted mid-run still reports its
+      // PostToolUse afterwards, and without this that lands newer than the
+      // interruption and the sprite carries on running.
+      promptAt: previous?.state === 'working' ? (previous.promptAt ?? previous.at ?? now) : now,
+      // Where Claude writes this session's transcript. Pressing escape appends
+      // an interruptedMessageId to it, which is the only trace an interruption
+      // leaves anywhere — there is no hook for it.
+      transcript: payload.transcript_path ?? null,
+      // Only PreToolUse means a tool is in flight. PostToolUse means it
+      // finished, so the tool is cleared and the heartbeat takes over deciding
+      // whether Claude is still busy.
+      tool: event === 'PreToolUse' ? (payload.tool_name ?? null) : null,
+    })
+  } else if (event === 'SessionEnd') {
+    // The sprite belongs to this session, so it goes when the session does.
+    closeWindow(session)
+    clearState(session)
+  } else if (IDLE.has(event)) {
+    writeState(session, {
+      state: 'idle',
+      at: Date.now(),
+      tool: null,
+      transcript: payload.transcript_path ?? null,
+    })
+
+    // A new session gets a sprite of its own, unless one is already up for it
+    // — or unless it is a background agent, which has no terminal to put one in.
+    if (event === 'SessionStart' && loadConfig().autoWindow) openWindow(session, payload.source ?? null)
+  } else if (event === 'Notification') {
+    // Claude wants something from you, so it is not working — whatever the last
+    // tool hook said. The transcript is kept so the sprite can go on watching
+    // it, and the tool cleared so nothing counts as still in flight.
+    writeState(session, {
+      state: 'waiting',
+      at: Date.now(),
+      tool: null,
+      transcript: payload.transcript_path ?? readState(session)?.transcript ?? null,
+    })
+  }
+} catch {}
+
+process.exit(0)
