@@ -667,16 +667,22 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     )
 
     // The plugin hello: once, then never. Once is a useful message; twice is a
-    // hook that eats your prompts, and the flag being deleted before the message
-    // is written rather than after is the whole reason it cannot be twice.
+    // hook that eats every prompt you send. Two things make it once — marking it
+    // spent before printing rather than after, and a separate "spent" file so
+    // that clearing the "owed" one cannot re-arm it on the next hook.
     {
       const greetSession = 'smoke-greet-0001'
-      const flag = join(STATE_DIR, 'greet')
+      const owed = join(STATE_DIR, 'greet')
+      const spent = join(STATE_DIR, 'greeted')
       const nodePath = join(STATE_DIR, 'node-path')
       const hadNodePath = existsSync(nodePath) ? read(nodePath, 'utf8') : null
 
+      // Nothing is planted but the conditions: no record of a setup having run,
+      // and no record of having said hello. Arming it by hand would test the
+      // printing and skip the part that decides whether to.
       mkdirSync(STATE_DIR, { recursive: true })
-      writeFileSync(flag, '')
+      rmSync(owed, { force: true })
+      rmSync(spent, { force: true })
       rmSync(nodePath, { force: true })
 
       const say = (prompt) =>
@@ -693,7 +699,8 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
         `first exit ${first.status}, second exit ${second.status}`,
       )
 
-      rmSync(flag, { force: true })
+      rmSync(owed, { force: true })
+      rmSync(spent, { force: true })
       rmSync(sessionStateFile(greetSession), { force: true })
       if (hadNodePath !== null) writeFileSync(nodePath, hadNodePath)
     }

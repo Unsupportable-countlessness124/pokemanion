@@ -73,6 +73,26 @@ try {
 
   const event = payload?.hook_event_name
 
+  // Arm the hello on the very first hook of any kind.
+  //
+  // It used to be armed by SessionStart, which cannot fire until the agent has
+  // been restarted — so the notice could only ever arrive after the restart it
+  // was asking for. Any hook will do, and the first one after `/plugin install`
+  // is usually a prompt in the session you are already in.
+  //
+  // Two files rather than one: `greet` means owed, `greeted` means spent. With
+  // only `greet`, deleting it on show would re-arm on the next hook and the
+  // notice would repeat forever.
+  const owed = join(STATE_DIR, 'greet')
+  const spent = join(STATE_DIR, 'greeted')
+
+  if (!existsSync(spent) && !existsSync(owed) && !existsSync(join(STATE_DIR, 'node-path'))) {
+    try {
+      mkdirSync(STATE_DIR, { recursive: true })
+      writeFileSync(owed, '')
+    } catch {}
+  }
+
   // Everything is keyed by the session that sent the hook, so two Claude
   // windows never see each other's state.
   const session = payload.session_id
@@ -93,14 +113,13 @@ try {
     // why.
     //
     // Blocking a prompt is the only channel that reaches anyone — a hook that
-    // exits 0 writes to a stderr nobody reads. So this spends exactly one prompt,
-    // once, and deletes its flag before printing rather than after: a crash on the
-    // next line then costs the message instead of repeating it forever.
-    const greeting = join(STATE_DIR, 'greet')
-
-    if (existsSync(greeting)) {
+    // exits 0 writes to a stderr nobody reads. So it spends exactly one prompt.
+    // Marked spent before it is printed rather than after: a crash on the next
+    // line then costs the message instead of repeating it every prompt forever.
+    if (existsSync(owed)) {
       try {
-        rmSync(greeting, { force: true })
+        writeFileSync(spent, new Date().toISOString())
+        rmSync(owed, { force: true })
       } catch {}
 
       const { hasGhostty } = await import('../src/bootstrap.mjs')
@@ -400,14 +419,6 @@ try {
           bootstrapChafa()
           mkdirSync(STATE_DIR, { recursive: true })
           writeFileSync(done, new Date().toISOString())
-
-          // Ask for the hello, but only where nobody has been told any of this
-          // already. `npm run setup` prints the same three steps when it
-          // finishes and records the node it found; that file is the tell, and
-          // its absence means the hooks arrived by plugin, where nothing was
-          // printed anywhere. Interrupting someone who has just read the list is
-          // how a helpful message becomes a nag.
-          if (!existsSync(join(STATE_DIR, 'node-path'))) writeFileSync(join(STATE_DIR, 'greet'), '')
         } catch {}
       }
 
