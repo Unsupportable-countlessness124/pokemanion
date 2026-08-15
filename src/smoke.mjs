@@ -127,6 +127,10 @@ check(
 const { nearest } = await import('./switch.mjs')
 
 check('a typo finds its Pokemon', nearest('charizrd') === 'charizard')
+// Dropped letters, which no safe edit-distance cap reaches: charzd is three
+// edits from charizard but every letter of it is there, in order.
+check('dropped letters find it too', nearest('charzd') === 'charizard')
+check('and so does a heavily clipped name', nearest('squrtl') === 'squirtle')
 // One edit from both Pichu and Pikachu; the resident is the better guess.
 check('a tie goes to the resident', nearest('pikchu') === 'pikachu')
 check('gibberish gets nothing', nearest('zzznope') === null)
@@ -135,7 +139,7 @@ check('and two letters are too few to guess from', nearest('pi') === null)
 // The wrapper runs this against flags meant for Claude itself, so a false
 // positive there talks over a real command. `--version` is two edits from
 // Persian, which is why the outside check is capped at one.
-const CLAUDE_FLAGS = ['resume', 'continue', 'print', 'model', 'help', 'version', 'verbose', 'debug', 'ide', 'settings', 'agents', 'fast']
+const CLAUDE_FLAGS = ['resume', 'continue', 'print', 'model', 'help', 'version', 'verbose', 'debug', 'ide', 'settings', 'agents', 'fast', 'chrome', 'add-dir', 'session-id', 'fork-session', 'permission-mode', 'output-format', 'allowed-tools', 'max-turns', 'no-color', 'mcp-config']
 
 check(
   `no Claude flag is mistaken for a Pokemon (${CLAUDE_FLAGS.length} checked)`,

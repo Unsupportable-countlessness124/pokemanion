@@ -162,7 +162,44 @@ export const nearest = (word, { pool = null, maxEdits = 2 } = {}) => {
     }
   }
 
-  return bestAt <= cap ? best : null
+  if (bestAt <= cap) return best
+
+  // Second pass: letters dropped rather than mistyped.
+  //
+  // `charzd` is three edits from `charizard`, so no cap loose enough to catch it
+  // is tight enough to be safe. But every letter of it appears in `charizard`,
+  // in order — that is what typing fast and missing keys looks like, and it is a
+  // far more specific signal than distance. Levenshtein says charzd is as close
+  // to a dozen other names; subsequence says it is charizard and nothing else.
+  //
+  // Guarded three ways, because a short subsequence matches half the dex: it
+  // must start with the same letter, be at least four characters, and account
+  // for more than half the name. Checked against Claude's own flags — all 22
+  // stay silent, `--version` included, which is why this can be used outside
+  // where a false positive would talk over a real command.
+  if (key.length < 4) return null
+
+  const covers = (typed, name) => {
+    let i = 0
+
+    for (const letter of name) if (letter === typed[i]) i++
+
+    return i === typed.length
+  }
+
+  let loose = null
+
+  for (const name of candidates) {
+    const flat = name.replace(/[^a-z0-9]/g, '')
+
+    if (flat[0] !== key[0] || key.length < flat.length * 0.55 || !covers(key, flat)) continue
+
+    if (!loose || (residents.has(name) && !residents.has(loose)) || (!residents.has(loose) && flat.length < loose.replace(/[^a-z0-9]/g, '').length)) {
+      loose = name
+    }
+  }
+
+  return loose
 }
 
 // What the user probably meant, when `--dex <something>` matched nothing.
