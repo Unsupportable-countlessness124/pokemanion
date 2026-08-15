@@ -1,0 +1,12 @@
+{
+  "name": "pokemanion",
+  "interface": { "displayName": "pokemanion" },
+  "plugins": [
+    {
+      "name": "pokemanion",
+      "source": { "source": "git-subdir", "url": "https://github.com/khatriadbhut/pokemanion.git", "path": "./", "ref": "main" },
+      "policy": { "installation": "AVAILABLE" },
+      "category": "Productivity"
+    }
+  ]
+}

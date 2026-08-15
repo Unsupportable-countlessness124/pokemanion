@@ -12,6 +12,15 @@ opens the split by driving Ghostty through AppleScript. It needs `chafa`
 
 ## If the user wants to install it
 
+The quickest route is the plugin, which registers the hooks and needs no clone:
+
+    /plugin marketplace add khatriadbhut/pokemanion
+    /plugin install pokemanion@pokemanion
+
+It cannot install chafa or Ghostty, and it does not add the shell wrapper — so
+ at launch will not work, though everything typed inside a
+session will. For the full thing, clone it:
+
 If `chafa` or Ghostty are missing, run **`npm run deps`** first — it installs
 both via Homebrew. Then run **`npm run setup`**, which is the whole install: it
 checks the prerequisites, downloads the sprites, renders them, registers the

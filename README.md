@@ -128,6 +128,20 @@ through a hook and works regardless.
 
 ## Install
 
+**As a plugin**, if you would rather not clone anything:
+
+```
+/plugin marketplace add khatriadbhut/pokemanion
+/plugin install pokemanion@pokemanion
+```
+
+Works in Claude Code and Codex, and registers the hooks for you. You still need
+[**chafa** and **Ghostty**](#what-it-needs) — a plugin cannot install those —
+and you lose the launch flags, since `claude --pikachu` needs a shell function
+that only the clone route installs. Everything typed *inside* a session works.
+
+**From a clone**, which is the full version:
+
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
 cd pokemanion

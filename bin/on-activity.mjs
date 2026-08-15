@@ -2,8 +2,9 @@
 // whether to animate. Writes one small file and exits; it must never be the
 // reason a prompt is slow, so everything here is best effort.
 
-import { readFileSync } from 'node:fs'
-import { clearState, loadConfig, readState, writeState } from '../src/config.mjs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { STATE_DIR, clearState, loadConfig, readState, writeState } from '../src/config.mjs'
 import { closeWindow, openWindow } from '../src/companion.mjs'
 
 const WORKING = new Set(['UserPromptSubmit', 'PreToolUse', 'PostToolUse'])
@@ -301,7 +302,34 @@ try {
 
     // A new session gets a sprite of its own, unless one is already up for it
     // — or unless it is a background agent, which has no terminal to put one in.
-    if (event === 'SessionStart' && loadConfig().autoWindow) openWindow(session, payload.source ?? null)
+    if (event === 'SessionStart' && loadConfig().autoWindow) {
+      // Installed as a plugin, nothing ran `npm run setup`, so the one Ghostty
+      // keybind the pane needs was never written — and without it the split
+      // never collapses and the sprite arrives in a pane taking half the
+      // window. That reads as broken rather than as unconfigured.
+      //
+      // Done here rather than left to the user because there is nowhere to tell
+      // them: a SessionStart hook's output goes nowhere anyone reads. It is the
+      // same idempotent write `npm run setup` performs — backed up, inside its
+      // own markers, removed by `npm run ghostty -- --remove` — and a config
+      // that already has the binding, by our hand or theirs, is left alone.
+      //
+      // Once per install. `install` is cheap when there is nothing to do, but
+      // reading one file is cheaper, and this runs on every session.
+      const done = join(STATE_DIR, 'keybind-checked')
+
+      if (!existsSync(done)) {
+        try {
+          const { install } = await import('../src/ghostty.mjs')
+
+          install()
+          mkdirSync(STATE_DIR, { recursive: true })
+          writeFileSync(done, new Date().toISOString())
+        } catch {}
+      }
+
+      openWindow(session, payload.source ?? null)
+    }
   } else if (WAITING.has(event)) {
     // Claude wants something from you, so it is not working — whatever the last
     // tool hook said. The transcript is kept so the sprite can go on watching

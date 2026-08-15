@@ -1,0 +1,19 @@
+{
+  "name": "pokemanion",
+  "version": "1.1.0",
+  "description": "A Pokemon in a terminal pane beside every session, resting while the agent waits and animating while it works.",
+  "author": { "name": "khatriadbhut", "url": "https://github.com/khatriadbhut" },
+  "homepage": "https://github.com/khatriadbhut/pokemanion",
+  "repository": "https://github.com/khatriadbhut/pokemanion",
+  "license": "MIT",
+  "keywords": ["pokemon", "sprite", "status", "terminal", "ghostty", "hooks"],
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "pokemanion",
+    "shortDescription": "A Pokemon that shows when your agent is working",
+    "longDescription": "A Pokemon lives in a terminal pane beside every session. It rests while the agent waits on you and animates while it works, so you can tell what a session is doing without reading the screen. 14 ship with it and 1238 more can be summoned by name. macOS + Ghostty.",
+    "developerName": "khatriadbhut",
+    "category": "Productivity",
+    "websiteURL": "https://github.com/khatriadbhut/pokemanion"
+  }
+}
