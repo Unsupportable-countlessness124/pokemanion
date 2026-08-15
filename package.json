@@ -10,6 +10,7 @@
   "scripts": {
     "build": "node src/build.mjs",
     "preview": "node src/preview.mjs assets/pikachu-showdown.gif",
+    "setup": "node src/setup.mjs",
     "install-statusline": "node install.mjs",
     "uninstall-statusline": "node install.mjs --uninstall",
     "compare": "node src/compare.mjs",

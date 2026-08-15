@@ -124,7 +124,15 @@ through a hook and works on any shell.
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
 cd pokemanion
+npm run setup
+```
 
+That checks what it needs, downloads the sprites, renders them, registers the
+hooks in `~/.claude/settings.json`, and adds the `claude()` wrapper to
+`~/.zshrc`. Safe to run again. If you would rather do it a piece at a time, or
+something failed and you only need to redo that part:
+
+```sh
 npm run roster                # fetch the sprites
 npm run warm                  # render them for a 4-row pane
 npm run install-statusline    # wire the hooks into ~/.claude/settings.json
