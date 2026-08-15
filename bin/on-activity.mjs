@@ -91,7 +91,7 @@ try {
       // `--dex` answers and changes nothing. It is still blocked, because the
       // point is to look something up without spending a turn on it.
       if (asked.kind === 'dex') {
-        const { render, search, detail, entry, all } = await import('../src/dex.mjs')
+        const { render, search, detail, entry, exactMatch, all } = await import('../src/dex.mjs')
         const { fetchedGuests } = await import('../src/roster.mjs')
 
         if (!asked.query) {
@@ -103,17 +103,24 @@ try {
           )
         } else {
           const found = search(asked.query)
+          const hit = exactMatch(asked.query)
 
-          // One answer gets the card, several get the table — the same split
-          // the command line makes, because it is about the shape of the
-          // answer rather than about where it is being read.
-          process.stderr.write(
-            found.length === 0
-              ? `nothing matches "${asked.query}"\n`
-              : found.length === 1
-                ? `${detail(found[0], false)}\n`
-                : `${render(found, 25, false)}\n\n${found.length} found — type --<name> to summon\n`,
-          )
+          // An exact name, or a single answer, gets the card; several get the
+          // table. The same split the command line makes, because it is about
+          // the shape of the answer rather than where it is being read.
+          if (found.length === 0) {
+            process.stderr.write(`nothing matches "${asked.query}"\n`)
+          } else if (hit || found.length === 1) {
+            const row = hit ? entry(hit) : found[0]
+            const others = found.filter((other) => other.name !== row.name).length
+
+            process.stderr.write(
+              `${detail(row, false)}\n` +
+                (others > 0 ? `\n${others} other form${others === 1 ? '' : 's'} — --dex ${row.name}-\n` : ''),
+            )
+          } else {
+            process.stderr.write(`${render(found, 25, false)}\n\n${found.length} found — type --<name> to summon\n`)
+          }
         }
 
         process.exit(2)

@@ -102,6 +102,30 @@ export const search = (query) => {
   return loose
 }
 
+// Did the query name one Pokemon outright?
+//
+// This exists because searching for the famous ones was the worst case:
+// "pikachu" matches twelve rows, eleven of them costume variants — Pikachu-Alola,
+// Pikachu-Hoenn, Pikachu-World — so the one you meant was buried in a list of
+// hats and you could never reach its card. An exact name is not a search, it is
+// a lookup, and it should answer with the thing itself.
+export const exactMatch = (query) => {
+  const text = String(query ?? '').trim().toLowerCase()
+
+  // Numbers, types and the dice are genuine searches, not names.
+  if (!text || text === 'random' || /^\d+$/.test(text) || TYPES.has(text)) return null
+
+  // A trailing dash asks for the forms — `pikachu-` means Pikachu-Alola and the
+  // rest, which is what the card itself suggests typing. Without this it is not
+  // a search at all: name resolution forgives punctuation, so `pikachu-` comes
+  // back as `pikachu` and answers with the very card you were leaving.
+  if (text.endsWith('-')) return null
+
+  const name = resolveName(text)
+
+  return name && DEX[name] ? name : null
+}
+
 export const statusOf = (name, guests = fetchedGuests()) => {
   if (isResident(name)) return 'resident'
 
@@ -235,13 +259,22 @@ if (process.argv[1] && process.argv[1].endsWith('dex.mjs')) {
       process.exit(1)
     }
 
-    // One answer gets the card; several get the table.
-    if (found.length === 1) {
-      const card = detail(found[0])
+    // An exact name, or a single answer, gets the card. Several get the table.
+    const hit = exactMatch(query)
+
+    if (hit || found.length === 1) {
+      const row = hit ? entry(hit) : found[0]
+      const others = found.filter((other) => other.name !== row.name).length
+      const card = detail(row)
 
       console.log(card)
+
+      if (others > 0) {
+        console.log(`\n  ${DIM}${others} other form${others === 1 ? '' : 's'} — npm run dex -- ${row.name}-${RESET}`)
+      }
+
       console.log()
-      await floatBall(card.split('\n').length + 1)
+      await floatBall(card.split('\n').length + (others > 0 ? 3 : 1))
     } else {
       console.log(render(found))
       console.log(`\n  ${DIM}${found.length} found — summon with claude --<name>, or --<name> inside Claude${RESET}\n`)
