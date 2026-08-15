@@ -280,6 +280,51 @@ reading the documentation.
   agents list used to split whichever Ghostty window had focus. They are
   recognised by a file in `~/.claude/jobs`.
 
+## Which Pokemon a session gets
+
+Three rules, tried in order, in `chooseSpecies`:
+
+1. **Asked for by name** — `claude --ash`, or `--ash` typed at Claude. That one,
+   always. It outranks Pikachu-comes-first, Pikachu being free, the Pokemon
+   already being out in another window, and `randomPokemon` being off.
+2. **Remembered** — what this session was given last time, if the sprite is
+   still on disk and no other pane is holding it.
+3. **The rotation** — `pickFor`: Pikachu if free, otherwise
+   `hash(sessionId) % choices.length` over the ones nobody holds.
+
+Rule 2 was missing, and its absence was a bug worth writing down because the
+symptom looked impossible: **a pane changed Pokemon with nothing typed.**
+
+The species was never stored, only recomputed. Rule 3 is stable given its
+inputs, but two of the three inputs move on their own — the set of Pokemon other
+panes hold, and the length of the list itself, which shrinks when the pruner
+evicts a guest. Count the same distance into a shorter list and you land
+somewhere else. Every session re-picks at once when the pool changes size.
+
+What made it reachable at all was that `.species` was doing two jobs:
+
+| meaning | lifetime |
+| --- | --- |
+| this pane is showing Cubone | should outlive the pane |
+| Cubone is taken, give the next terminal something else | must die with the pane |
+
+The pane deletes the file on exit — correctly, that is how Pikachu comes back
+when you close a window — and took the first meaning's answer with it. So the
+two meanings now have two files: `.species` unchanged and ephemeral,
+`assigned.json` durable and keyed by session id.
+
+Two things fell out of fixing it:
+
+- **A guest a pane is showing is no longer evicted.** Nothing touches a guest's
+  last-used stamp while it simply sits there being looked at, so a window open
+  longer than `guestKeepDays` had its own sprite deleted underneath it, and the
+  pane refuses to draw a species whose files are missing.
+- **The choice is logged.** `hooks.jsonl` recorded what was asked for by name and
+  nothing else, so a rotation pick left no trace anywhere. When one of these did
+  change on its own, the only way to explain it was to reconstruct the pick from
+  the state of the disk afterwards and hope nothing had moved in between. There
+  is now a `choose` line carrying the species and which rule produced it.
+
 ## Traps that bit more than once
 
 Written down because each of these cost real time and none of them announced
@@ -306,3 +351,14 @@ you expect, do not test for presence.
 **`node --check` does not catch a missing import.** Extracting the renderer into
 `sprite.mjs` left `MIN_DELAY` behind in `window.mjs`; the syntax check passed
 and the pane died on launch. Only running the thing found it.
+
+**A pure function of changing inputs is not a stable answer.** `pickFor` is
+deterministic and was treated as if that made it fixed. It hashes the session id
+— stable — modulo the number of available Pokemon, which is not. Deterministic
+means the same inputs give the same answer, and that is worth nothing when the
+inputs are the parts that move. If something must not change, store it.
+
+**Log the decision, not just the request.** Only explicit `--pikachu` asks were
+recorded, so the interesting case — the one nobody typed — was the one with no
+evidence. The cheapest possible line at the moment of the choice is worth more
+than any amount of reconstruction afterwards.

@@ -20,6 +20,7 @@ import { existsSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs
 import { join } from 'node:path'
 import { CACHE_VERSION, ROOT, STATE_DIR, loadConfig } from './config.mjs'
 import { POKEMON_DIR, busyFile, forget, guestsByAge, idleFile, isGuest } from './roster.mjs'
+import { speciesInUse } from './companion.mjs'
 
 const CACHE_DIR = join(STATE_DIR, 'cache')
 
@@ -122,12 +123,21 @@ export const prune = ({ dry = false, budgetMb, keepDays } = {}) => {
 
   const guests = guestsByAge().map((name) => ({ name, size: guestCost(name), at: used[name] ?? 0 }))
 
+  // A guest a pane is showing right now is not a candidate, however old the
+  // last-used stamp looks. Nothing touches that stamp while a Pokemon simply
+  // sits there being displayed, so a pane left open for a fortnight had its own
+  // sprite deleted underneath it — and the pane refuses to draw a species whose
+  // files are missing, so it would fail at the next switch to working.
+  const held = speciesInUse()
+
   const evicted = []
   let total = guests.reduce((sum, guest) => sum + guest.size, 0)
 
   // Stale first, regardless of how much room there is. A guest nobody has
   // wanted in a fortnight is not earning its disk.
   for (const guest of guests) {
+    if (held.has(guest.name)) continue
+
     if (Date.now() - guest.at <= keepMs) continue
 
     evicted.push({ ...guest, why: 'stale' })
@@ -136,9 +146,13 @@ export const prune = ({ dry = false, budgetMb, keepDays } = {}) => {
     if (!dry) forget(guest.name)
   }
 
-  // Then oldest-first until the rest fits the budget.
+  // Then oldest-first until the rest fits the budget. A held guest is skipped
+  // here too, which can leave the total over budget — correct, because the
+  // alternative is breaking a pane that is on screen to save disk.
   for (const guest of guests) {
     if (total <= budget) break
+
+    if (held.has(guest.name)) continue
 
     if (evicted.some((gone) => gone.name === guest.name)) continue
 
@@ -164,7 +178,19 @@ const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)}MB`
 
 if (process.argv[1] && process.argv[1].endsWith('prune.mjs')) {
   const dry = process.argv.includes('--dry')
-  const result = prune({ dry })
+
+  // `prune()` has always taken these; nothing on the command line could reach
+  // them, so the only way to try a different budget was to edit config.json and
+  // remember to put it back. Paired with --dry they answer "what would go?"
+  // without touching anything.
+  const flag = (name) => {
+    const found = process.argv.find((arg) => arg.startsWith(`--${name}=`))
+    const value = found ? Number(found.slice(name.length + 3)) : NaN
+
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  const result = prune({ dry, keepDays: flag('keep-days'), budgetMb: flag('budget-mb') })
 
   console.log(`\n  ${dry ? 'would free' : 'freed'}\n`)
 

@@ -187,7 +187,8 @@ Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 | `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
 | `npm run roster` | download any missing resident sprites (`-- --refresh` to redo them) |
 | `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
-| `npm run prune` | evict guests now (`-- --dry` to see what would go) |
+| `npm run prune` | evict guests now (`-- --dry` to see what would go, `-- --keep-days=0`) |
+| `npm run assigned` | which Pokemon each session was given, and why (`-- --forget` to reset) |
 | `npm run dex` | the Pokedex, from a terminal: `-- fire`, `-- 25`, `-- current`, `-- random` |
 | `npm run watch` | print the working/waiting decision the pane is making, live |
 | `npm run attribution` | regenerate the credits list (`-- --check` to fail if stale) |
@@ -246,11 +247,17 @@ pre-rendered so a session starts instantly, and the only ones the rotation hands
 out. Pikachu goes to whoever is free to have it.
 
 **Guests** are the other 1252. They arrive when you name them — about a second —
-stay while you use them, and are evicted least-recently-shown first.
+stay while you use them, and are evicted least-recently-shown first. One a pane
+is currently showing is never evicted, however long it has been sitting there.
+
+Whichever you end up with, the session keeps it. The choice is written down and
+read back when a pane reopens, so closing a window and coming back gives you the
+same Pokemon rather than a fresh roll. Naming one still overrules that, always.
 
 ```sh
 npm run prune            # evict now; happens on its own as sessions open
 npm run prune -- --dry
+npm run assigned         # what each session was given, and why
 ```
 
 The whole set pre-rendered would be about **2.7 GB** of frame cache and

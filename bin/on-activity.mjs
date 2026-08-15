@@ -193,11 +193,18 @@ try {
       if (asked.kind === 'switch') {
         const { mkdirSync, writeFileSync } = await import('node:fs')
         const { STATE_DIR } = await import('../src/config.mjs')
+        const { rememberSpecies } = await import('../src/assigned.mjs')
 
         // The pane watches this file. Writing it is the whole switch — no new
         // window, no restart, and the claim stays correct for other terminals.
         mkdirSync(STATE_DIR, { recursive: true })
         writeFileSync(file, asked.name)
+
+        // And remembered, because the claim above dies with the pane. Typing
+        // `--gengar` and having the pane come back as something else after a
+        // restart is the same bug as the rotation one, arrived at from the
+        // other direction: the switch was never written anywhere that lasts.
+        rememberSpecies(session, asked.name, asked.rolled ? 'rolled' : 'switched')
       }
 
       // Exit 2 blocks the prompt and erases it, and shows this to you as the

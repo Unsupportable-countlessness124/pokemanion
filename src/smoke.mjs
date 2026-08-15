@@ -33,6 +33,7 @@ const MODULES = [
   'choose',
   'attribution',
   'shell',
+  'assigned',
 ]
 
 const results = []
@@ -91,6 +92,171 @@ check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
+
+// What a session was given, and getting it back.
+//
+// The bug this guards: the species was never stored, only recomputed from
+// `hash(session) % choices.length`, and `choices` shrinks when a guest is
+// evicted or another terminal opens. A pane that closed and reopened came back
+// as a different Pokemon with nothing typed. Every rule below is one that had
+// to keep working while that was fixed.
+{
+  const { chooseSpecies, speciesInUse } = await import('./companion.mjs')
+  const { rememberSpecies, rememberedSpecies, forgetSession, assignments } = await import('./assigned.mjs')
+  const { available } = await import('./roster.mjs')
+
+  const id = 'smoke-assigned-0001'
+  const on = { randomPokemon: true }
+
+  // Two residents no live pane is holding, so the checks below are testing the
+  // rules rather than colliding with whatever is on screen right now.
+  const held = speciesInUse(id)
+  const free = available().filter((name) => !held.has(name) && name !== 'pikachu')
+  const [mine, other] = free
+
+  try {
+    check('a session starts with nothing remembered', (forgetSession(id), rememberedSpecies(id)) === null)
+
+    // Rule 3 — unchanged. No ask, nothing remembered, so the rotation decides.
+    const rotated = chooseSpecies(id, on, {})
+
+    check('rotation still picks when nothing is known', typeof rotated === 'string' && rotated.length > 0, rotated)
+
+    // Rule 2 — the fix. Remembered, free, so it comes back.
+    rememberSpecies(id, mine, 'test')
+
+    check('a remembered Pokemon comes back', chooseSpecies(id, on, {}) === mine, mine)
+
+    // ...and it survives the list changing underneath it, which is the exact
+    // thing that used to move the answer.
+    check(
+      'and survives the pool changing',
+      chooseSpecies(id, on, {}) === mine && chooseSpecies(id, on, {}) === chooseSpecies(id, on, {}),
+    )
+
+    // Rule 1 — unchanged, and it has to outrank rule 2.
+    check('an explicit ask still outranks it', chooseSpecies(id, on, { PIXEL_RUNNER_SPECIES: other }) === other, other)
+
+    // The whole point of rule 1: naming one you can already see elsewhere.
+    const somewhere = [...speciesInUse()][0]
+
+    if (somewhere) {
+      check(
+        'a Pokemon already out elsewhere can still be summoned by name',
+        chooseSpecies(id, on, { PIXEL_RUNNER_SPECIES: somewhere }) === somewhere,
+        somewhere,
+      )
+    }
+
+    // A guest is the case most worth remembering — you went and named it — and
+    // the one that breaks if "is this still on disk" is asked of the resident
+    // list, which is what `available()` is. That mistake restored every
+    // resident correctly and sent every guest back to the rotation.
+    const { fetchedGuests: guestsOnDisk } = await import('./roster.mjs')
+    const [aGuest] = guestsOnDisk().filter((name) => !held.has(name))
+
+    if (aGuest) {
+      rememberSpecies(id, aGuest, 'test')
+
+      check(`a remembered guest comes back too (${aGuest})`, chooseSpecies(id, on, {}) === aGuest)
+    }
+
+    // A name that is not on disk cannot be handed to the pane, which refuses to
+    // draw a species whose files are missing.
+    rememberSpecies(id, 'notarealpokemon', 'test')
+
+    check('a remembered name that is gone falls back', chooseSpecies(id, on, {}) !== 'notarealpokemon')
+
+    // Switching the whole thing off still means off.
+    rememberSpecies(id, mine, 'test')
+
+    check('randomPokemon:false still wins', chooseSpecies(id, { randomPokemon: false }, {}) === null)
+
+    // And the record stays bounded rather than growing for every session ever.
+    check('the record is an object, not a list', !Array.isArray(assignments()) && typeof assignments() === 'object')
+  } finally {
+    forgetSession(id)
+  }
+
+  check('the test session is cleaned up', rememberedSpecies(id) === null)
+
+  // The other half of the same bug. Nothing touches a guest's last-used stamp
+  // while it simply sits in a pane being looked at, so a window left open for
+  // longer than guestKeepDays had its own sprite deleted underneath it.
+  const { prune } = await import('./prune.mjs')
+  const { fetchedGuests } = await import('./roster.mjs')
+  const { speciesFileFor } = await import('./companion.mjs')
+  const [guest] = fetchedGuests()
+
+  if (guest) {
+    const { writeFileSync, unlinkSync, mkdirSync } = await import('node:fs')
+    const { STATE_DIR } = await import('./config.mjs')
+    const claim = speciesFileFor('smoke-prune-0001')
+    const gone = (result) => result.evicted.some((row) => row.name === guest)
+
+    try {
+      unlinkSync(claim)
+    } catch {}
+
+    const unheld = prune({ dry: true, keepDays: 0 })
+
+    mkdirSync(STATE_DIR, { recursive: true })
+    writeFileSync(claim, guest)
+
+    const held = prune({ dry: true, keepDays: 0 })
+
+    try {
+      unlinkSync(claim)
+    } catch {}
+
+    // Both directions, so this cannot pass by the pruner having stopped working
+    // altogether and evicting nothing at all.
+    check(`a stale guest is still evicted (${guest})`, gone(unheld))
+    check('but not one a pane is showing', !gone(held))
+  }
+
+  // The `choose` line, which is the only record of a pick nobody asked for.
+  // Checked by reading it back rather than by it not throwing, because it is
+  // wrapped in the same catch-everything the rest of the hook path uses and
+  // would fail completely silently.
+  {
+    const { logChoice } = await import('./companion.mjs')
+    const { readFileSync } = await import('node:fs')
+    const { STATE_DIR } = await import('./config.mjs')
+    const log = join(STATE_DIR, 'hooks.jsonl')
+    const before = (() => {
+      try {
+        return readFileSync(log, 'utf8').length
+      } catch {
+        return 0
+      }
+    })()
+
+    // Forced on for the duration, so this tests the writing rather than
+    // whatever `logHooks` happens to be set to on the machine running it.
+    const was = process.env.PIXEL_RUNNER_LOG_HOOK
+
+    process.env.PIXEL_RUNNER_LOG_HOOK = '1'
+    logChoice('smoke-choose-0001', 'pikachu', 'remembered')
+
+    if (was === undefined) delete process.env.PIXEL_RUNNER_LOG_HOOK
+    else process.env.PIXEL_RUNNER_LOG_HOOK = was
+
+    let row = null
+
+    try {
+      const written = readFileSync(log, 'utf8').slice(before).trim().split('\n').filter(Boolean)
+
+      row = JSON.parse(written[written.length - 1])
+    } catch {}
+
+    check(
+      'the choice is written to the hook log',
+      row?.event === 'choose' && row.species === 'pikachu' && row.why === 'remembered' && row.session === 'smoke-choose-0001',
+      row ? JSON.stringify(row) : 'nothing logged',
+    )
+  }
+}
 
 // Every sprite the README shows has to be committed, or the gallery is broken
 // images for anyone who clones. The residents' sprites are tracked by an

@@ -10,12 +10,13 @@
 // over: a pid file records the running window and a second call does nothing.
 
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { existsSync as fileExists, readdirSync } from 'node:fs'
 import { ROOT, STATE_DIR, loadConfig } from './config.mjs'
-import { pickFor, requestedSpecies } from './roster.mjs'
+import { isFetched, pickFor, requestedSpecies } from './roster.mjs'
+import { rememberSpecies, rememberedSpecies } from './assigned.mjs'
 
 // One sprite per session, so the pid is recorded per session too. A window
 // belonging to one Claude must not be closed when a different one exits.
@@ -278,7 +279,7 @@ export const isBackgroundAgent = (id, source = null) =>
 
 // Who this session gets, and the whole of that decision.
 //
-// Two rules, in this order, and the order is the point:
+// Three rules, in this order, and the order is the point:
 //
 //   1. Asked for by name — `claude --ash` — you get that one. Always. Not if
 //      it happens to be free, not unless something better is available: that
@@ -287,19 +288,88 @@ export const isBackgroundAgent = (id, source = null) =>
 //      outranks randomPokemon being switched off altogether. Naming something
 //      is not a preference to be weighed against other preferences.
 //
-//   2. Nothing asked for — the rotation. Pikachu whenever Pikachu is free,
+//   2. Not asked for now, but asked for — or picked — by this session before.
+//      You get that one back. This is the rule that was missing: without it a
+//      pane that closed and reopened ran rule 3 again, against a list that had
+//      changed underneath it, and came back as a different Pokemon with nothing
+//      typed. Sitting below rule 1 so a fresh `--ash` still overrules whatever
+//      is remembered, and below the randomPokemon switch so turning the whole
+//      thing off still means off.
+//
+//   3. Nothing to go on — the rotation. Pikachu whenever Pikachu is free,
 //      otherwise one nobody else currently holds.
 //
 // Split out from openWindow so it can be tested, because openWindow's other
 // half launches a terminal and cannot be run to find out what it would decide.
-export const chooseSpecies = (id, config = loadConfig(), env = process.env) => {
+//
+// `reason` is filled in for the caller to log. Which Pokemon a pane was given
+// used to be written down only when it was asked for by name, so a rotation
+// pick left no trace at all and a sprite that changed on its own could not be
+// explained afterwards, only reproduced.
+export const chooseSpecies = (id, config = loadConfig(), env = process.env, reason = {}) => {
   const asked = requestedSpecies(env)
 
-  if (asked) return asked
+  if (asked) {
+    reason.why = 'asked'
 
-  if (config.randomPokemon === false) return null
+    return asked
+  }
+
+  if (config.randomPokemon === false) {
+    reason.why = 'disabled'
+
+    return null
+  }
+
+  const remembered = rememberedSpecies(id)
+
+  if (remembered) {
+    // Two ways a remembered name is no longer usable. The sprite may be gone —
+    // a guest the pruner evicted while the session was closed — and the pane
+    // refuses to draw a species whose files are missing. Or another terminal
+    // may have taken it in the meantime, and two panes quietly showing the same
+    // Pokemon is the thing the rotation exists to avoid. `speciesInUse` skips
+    // this session's own claim, so a stale claim of your own never blocks you.
+    //
+    // `isFetched` rather than `available`, which is the residents alone: a guest
+    // summoned by name is exactly the case worth remembering, and testing it
+    // against the resident list would have quietly sent every one of them back
+    // to the rotation.
+    if (!isFetched(remembered)) reason.why = 'remembered, sprite gone'
+    else if (speciesInUse(id).has(remembered)) reason.why = 'remembered, taken elsewhere'
+    else {
+      reason.why = 'remembered'
+
+      return remembered
+    }
+  }
+
+  reason.why = reason.why ?? 'rotation'
 
   return pickFor(id, speciesInUse(id))
+}
+
+// Why this pane is showing what it is showing.
+//
+// The hook log already records what was asked for by name. It never recorded
+// what was actually chosen, so a rotation pick left no trace: when a pane came
+// back as a different Pokemon the only way to explain it was to reconstruct the
+// pick from the state of the disk afterwards and hope nothing else had moved.
+// One line at the moment of the decision is the difference between reading the
+// answer and re-deriving it.
+//
+// Best effort and last in the function, like everything else the hooks do: this
+// must never be the reason a session is slow to start.
+export const logChoice = (id, species, why) => {
+  try {
+    if (!(process.env.PIXEL_RUNNER_LOG_HOOK || loadConfig().logHooks)) return
+
+    mkdirSync(STATE_DIR, { recursive: true })
+    appendFileSync(
+      join(STATE_DIR, 'hooks.jsonl'),
+      `${JSON.stringify({ at: Date.now(), event: 'choose', session: id, species: species ?? null, why: why ?? null })}\n`,
+    )
+  } catch {}
 }
 
 export const openWindow = (id, source = null) => {
@@ -321,13 +391,20 @@ export const openWindow = (id, source = null) => {
         mkdirSync(STATE_DIR, { recursive: true })
         writeFileSync(speciesFileFor(id), asked)
       } catch {}
+
+      // Remembered as well as claimed. `claude --resume --gengar` against a
+      // pane that is already up changes what you are looking at, so it is the
+      // answer this session should come back to next time, not the one it had
+      // before the resume.
+      rememberSpecies(id, asked, 'asked')
     }
 
     return false
   }
 
   const rows = config.windowRows ?? 3
-  const species = chooseSpecies(id, config)
+  const reason = {}
+  const species = chooseSpecies(id, config, process.env, reason)
 
   // Claimed before the terminal is launched, so a second session starting in
   // the same moment sees this one taken rather than an empty room.
@@ -336,7 +413,14 @@ export const openWindow = (id, source = null) => {
       mkdirSync(STATE_DIR, { recursive: true })
       writeFileSync(speciesFileFor(id), species)
     } catch {}
+
+    // The durable half. Writing it here rather than inside chooseSpecies keeps
+    // that function what it was — a decision with no side effects, which is the
+    // only reason it can be tested without launching a terminal.
+    rememberSpecies(id, species, reason.why)
   }
+
+  logChoice(id, species, reason.why)
 
   if (config.windowMode === 'split') return openSplit(rows, config.splitShrink ?? 120, config.splitGrow ?? 0, id, species)
 
