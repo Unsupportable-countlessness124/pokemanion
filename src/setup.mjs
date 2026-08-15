@@ -73,7 +73,7 @@ if (!existsSync('/Applications/Ghostty.app')) {
 if (!/(zsh|bash)$/.test(process.env.SHELL ?? '')) {
   warnings.push([
     `your shell is ${process.env.SHELL ?? 'unknown'}, not zsh or bash`,
-    'the claude() wrapper will be written to ~/.zshrc, so launch flags may not load — everything typed inside Claude still works',
+    'the shell wrapper will be written to ~/.zshrc, so launch flags may not load — everything typed inside a session still works',
   ])
 }
 
@@ -164,9 +164,13 @@ for (const [label, args, why] of steps) {
 say()
 say(`  ${GREEN}installed.${RESET} three things left, and none of them is optional:`)
 say()
-say(`    ${BOLD}1.${RESET} restart ${agents.map((agent) => agent.label).join(" and ")}${" ".repeat(Math.max(1, 14 - agents.map((a) => a.label).join(" and ").length))}${DIM}it reads the hooks at startup${RESET}`)
-say(`    ${BOLD}2.${RESET} restart Ghostty        ${DIM}it reads its config at startup${RESET}`)
-say(`    ${BOLD}3.${RESET} open a new terminal    ${DIM}or: source ~/.zshrc${RESET}`)
+const restart = `restart ${agents.map((agent) => agent.label).join(" and ")}`
+const column = Math.max(restart.length, 'restart Ghostty'.length, 'open a new terminal'.length) + 4
+const pad = (text) => text + " ".repeat(Math.max(1, column - text.length))
+
+say(`    ${BOLD}1.${RESET} ${pad(restart)}${DIM}hooks are read at startup${RESET}`)
+say(`    ${BOLD}2.${RESET} ${pad("restart Ghostty")}${DIM}it reads its config at startup${RESET}`)
+say(`    ${BOLD}3.${RESET} ${pad("open a new terminal")}${DIM}or: source ~/.zshrc${RESET}`)
 say()
 say(`  ${DIM}and once, by hand: System Settings > Privacy & Security > Accessibility${RESET}`)
 say(`  ${DIM}> enable Ghostty. Opening a split means pressing keys, and macOS will${RESET}`)
