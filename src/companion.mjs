@@ -237,8 +237,12 @@ const openSplit = (rows, shrink, grow, id, species) => {
   // The wait is generous rather than tight. It costs nothing when the shell
   // turns up quickly, because this returns the moment it sees one; the only
   // thing a longer limit buys is a machine under load still getting its pane.
-  // Two seconds was a guess, and a split that opens and stays empty is the
-  // symptom of having guessed low.
+  //
+  // It was raised from two seconds on the theory that an empty split meant the
+  // wait had timed out. That theory was wrong: every pane since has found its
+  // shell in 25-85ms, against a limit twenty-three times that. The real cause
+  // was counting shells rather than identifying them — see shellPids above. The
+  // larger ceiling is kept because it is free, not because it fixed anything.
   const waited = Date.now()
 
   if (!waitForNewShell(before, 6000)) {

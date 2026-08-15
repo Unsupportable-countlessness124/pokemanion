@@ -35,6 +35,12 @@ If it fails, `npm run doctor` checks every piece individually and says which one
 is unhappy. `npm run uninstall-statusline` and `npm run shell -- --remove` undo
 the two things that touch files outside this repo.
 
+## A difference between the two agents
+
+On Claude Code the pane appears when the session starts. On Codex it appears on
+the **first message** — Codex does not consider a session to exist until then
+and has no earlier hook, so this is not something to fix.
+
 ## Using it
 
 Typed at Claude, mid-session — a hook answers these and blocks the prompt, so

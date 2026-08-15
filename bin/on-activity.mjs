@@ -272,29 +272,21 @@ try {
       tool: event === 'PreToolUse' ? (payload.tool_name ?? null) : null,
     })
 
-    // A first prompt with no pane behind it means SessionStart never opened one.
+    // Opening a pane here as well was tried, and removed.
     //
-    // The two agents disagree about when a session starts. Claude Code fires
-    // SessionStart when it launches; Codex fires it when you send your first
-    // prompt, because opening the TUI does not create a session yet — a Codex
-    // run that is quit without typing anything produces a SessionEnd and no
-    // SessionStart at all. So on Codex the pane arrived a beat late or, if the
-    // prompt hook ran first, not until the next launch.
+    // The idea was to paper over the two agents disagreeing about when a session
+    // starts — Claude Code fires SessionStart at launch, Codex when you send
+    // your first prompt. It does not help: on Codex those two events arrive in
+    // the same second, because that second is when Codex decides a session
+    // exists at all. There is no earlier hook to use.
     //
-    // Opening here as well makes "the pane appears" independent of that
-    // disagreement, and quietly recovers any other way SessionStart can be
-    // missed — a hook awaiting review, a crash during startup.
+    // And it broke something. With randomPokemon off, chooseSpecies returns null
+    // and nothing is recorded, so "has this session been given a Pokemon yet"
+    // was false forever and every prompt attempted another split.
     //
-    // Guarded on never having opened one for this session, not on whether one
-    // is running now. Those differ in the case that matters: closing the pane by
-    // hand to reclaim the screen. Reopening it on the next prompt would make it
-    // impossible to get rid of, so a session that has already been given a
-    // Pokemon is left alone.
-    if (event === 'UserPromptSubmit' && loadConfig().autoWindow) {
-      const { rememberedSpecies } = await import('../src/assigned.mjs')
-
-      if (!rememberedSpecies(session)) openWindow(session, 'prompt')
-    }
+    // The honest position is that the pane appears at launch on Claude and at
+    // the first message on Codex, and that this is a difference between the
+    // agents rather than something to work around.
   } else if (event === 'SessionEnd') {
     // The sprite belongs to this session, so it goes when the session does.
     closeWindow(session)

@@ -160,6 +160,11 @@ updating this project, run **`/hooks`** inside Codex and trust them again.
 Until you do it runs them not at all, silently, and the sprite stops reacting. Re-running `npm run setup` does not disturb this: it leaves the file
 alone when nothing has actually changed.
 
+**When the pane appears differs by agent.** Claude Code opens it the moment you
+start a session. Codex opens it when you send your **first message** — it does
+not consider a session to exist until then, and offers no earlier hook, so
+there is nothing to open one from. Not a bug either side of it.
+
 A pane should appear beside your next session.
 
 ```sh
