@@ -11,9 +11,9 @@
 //
 // Usage: npm test
 
-import { readdirSync, existsSync, readFileSync } from 'node:fs'
+import { readdirSync, existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { ROOT } from './config.mjs'
+import { ROOT, STATE_DIR } from './config.mjs'
 
 const MODULES = [
   'config',
@@ -571,6 +571,19 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       env: { ...process.env, ...env },
     })
 
+  // Mark the plugin hello spent before any of this runs.
+  //
+  // It arms itself when there is no record of a setup having run, and on a fresh
+  // checkout that is true — so on CI it armed, ate the first prompt of two later
+  // tests and failed both, while passing here, where a node-path left by a real
+  // install happens to sit. The hello has its own test below, which clears this
+  // deliberately and puts it back.
+  // Not wrapped in a catch. The first version of this was, mkdirSync was not in
+  // scope here, the ReferenceError was swallowed, and the guard did nothing at
+  // all while looking exactly like it worked.
+  mkdirSync(STATE_DIR, { recursive: true })
+  writeFileSync(join(STATE_DIR, 'greeted'), 'smoke')
+
   // 1. The hook handler. Its whole body sits in `try { } catch {}` and then
   //    exits 0, so a ReferenceError in it is not a crash — every hook silently
   //    becomes a no-op that reports success, and the sprite just stops
@@ -731,8 +744,12 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
         `first exit ${first.status}, second exit ${second.status}`,
       )
 
+      // Left spent rather than cleared. Anything after this that drives a prompt
+      // through the real handler would otherwise have it eaten — which is what
+      // happened on CI, where a fresh checkout has no node-path and the hello
+      // armed itself for tests that were not expecting it.
       rmSync(owed, { force: true })
-      rmSync(spent, { force: true })
+      writeFileSync(spent, 'smoke')
       rmSync(sessionStateFile(greetSession), { force: true })
       if (hadNodePath !== null) writeFileSync(nodePath, hadNodePath)
     }
