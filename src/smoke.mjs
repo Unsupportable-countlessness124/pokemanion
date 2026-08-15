@@ -11,7 +11,7 @@
 //
 // Usage: npm test
 
-import { readdirSync, existsSync } from 'node:fs'
+import { readdirSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { ROOT } from './config.mjs'
 
@@ -125,14 +125,12 @@ check(
   const guests = summonable - everyone.length
   const wrong = []
 
+  // Not wrapped in a try that continues on failure. It was, and that swallowed a
+  // ReferenceError for the whole life of this test: every file read threw, every
+  // file came back empty, no number was ever examined, and it passed. A test that
+  // cannot fail is worse than no test, because it is counted.
   for (const file of ['README.md', 'CLAUDE.md', '.claude-plugin/marketplace.json', '.codex-plugin/plugin.json']) {
-    let text = ''
-
-    try {
-      text = read(join(ROOT, file), 'utf8')
-    } catch {
-      continue
-    }
+    const text = readFileSync(join(ROOT, file), 'utf8')
 
     // Any four-digit number in this range is one of these two claims.
     for (const [found] of text.matchAll(/\b1[0-9]{3}\b/g)) {
@@ -141,6 +139,40 @@ check(
   }
 
   check('the counts in the docs are the real ones', wrong.length === 0, `${guests} guests, ${summonable} total; found ${wrong.join(', ')}`)
+}
+
+// Both marketplace manifests point at the plugin in a way each agent accepts.
+//
+// Codex's said `git-subdir`, which it parses without complaint and then cannot
+// resolve: `codex plugin marketplace add` succeeded, and `codex plugin add`
+// answered "plugin `pokemanion` was not found in marketplace `pokemanion`".
+// Nothing short of installing it on a machine with Codex would have shown that,
+// so this at least pins the shape that was proven to work.
+{
+  const claudeShop = JSON.parse(readFileSync(join(ROOT, '.claude-plugin', 'marketplace.json'), 'utf8'))
+  const codexShop = JSON.parse(readFileSync(join(ROOT, '.agents', 'plugins', 'marketplace.json'), 'utf8'))
+
+  check(
+    'Claude finds the plugin at the repository root',
+    claudeShop.plugins?.[0]?.source === './',
+    JSON.stringify(claudeShop.plugins?.[0]?.source),
+  )
+
+  check(
+    'Codex finds it as a local source, not a git-subdir',
+    codexShop.plugins?.[0]?.source?.source === 'local' && codexShop.plugins?.[0]?.source?.path === './',
+    JSON.stringify(codexShop.plugins?.[0]?.source),
+  )
+
+  // Both manifests name the plugin the same thing, because the install command
+  // people are given is `<plugin>@<marketplace>` with both halves spelled out.
+  check(
+    'both call it pokemanion@pokemanion',
+    claudeShop.name === 'pokemanion' &&
+      claudeShop.plugins[0].name === 'pokemanion' &&
+      codexShop.name === 'pokemanion' &&
+      codexShop.plugins[0].name === 'pokemanion',
+  )
 }
 
 // Adding a character should be one entry in one file.
