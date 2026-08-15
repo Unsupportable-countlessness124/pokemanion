@@ -185,3 +185,124 @@ at 25ms.
 The bundled GIFs come from the PokeAPI sprite collection. Pokémon sprites are
 Nintendo/Game Freak property, fine for a local toy, not for redistribution.
 Swap in your own artwork if this becomes anything more than that.
+
+## Choosing a working sprite
+
+The resting sprite was never in question: the Gen-5 Black/White front sprite,
+as drawn. The working one took four attempts, and the numbers are why.
+
+Everything measured at the size the pane actually draws — roughly 68 pixels
+tall — after `recoverNative` has divided out any whole-number upscale and the
+frame has been cropped to its artwork:
+
+| source | artwork | shown at | frames | verdict |
+| --- | --- | --- | --- | --- |
+| Gen-5 front | 37-74px | 0.9-1.8x | 24-86 | the bar |
+| Gen-5 back | 32-98px | 0.8-1.8x | 28-86 | same bar, but facing away |
+| Showdown `ani` (XY) | 45-133px | 0.5-1.5x | 25-106 | more pixels, 3D renders — pale and soft |
+| PMDCollab | 18-31px | 2.5-3.6x | 3-12 | a third of the resolution magnified twice as far |
+
+PMDCollab is what shipped first and it read as cheap for a reason the table
+makes obvious: three frames where the idle has fifty. Showdown's XY set fails
+the opposite way — it is *higher* resolution and still looks worse, because it
+is 3D renders rather than drawn pixel art.
+
+What won is the **shiny palette**: the same file recoloured, so it cannot be
+lower resolution, cannot clash in style, faces you, and stays the same Pokemon.
+Its honest cost is that the motion is identical. That is what the white flash is
+for — without an event at the switch, a recolour is not noticeable enough to
+work as a status signal.
+
+How far each shiny moves the colour, over the lit pixels of frame one:
+
+```
+psyduck 27%   bulbasaur 21%   eevee 20%   jigglypuff 17%   charmander 13%
+munchlax 12%  squirtle 10%    haunter 8%  meowth 6%
+```
+
+Treat those as a hint. The number averages over the whole sprite, so it
+understates anything that recolours only its accents: Meowth scores 6% and is
+obvious in the pane, because its paws, ears and tail go brown to pink while the
+cream body stays put. Haunter is the genuinely weak one.
+
+The **evolved form** also works, and looked good — Charmander rests, Charizard
+beats its wings. It is deliberately unused, saved for a different idea: a
+session that has run long enough evolves the Pokemon beside it. Spending the
+moment on "Claude is busy" would waste it.
+
+## How to judge a sprite
+
+Never from the name, the source's reputation, or the file size. In order:
+
+1. **Measure it at pane size.** Native resolution after `recoverNative`,
+   artwork size after cropping, the resulting scale, the frame count. The bar
+   is **scale ≤ 1.8x and ≥ 24 frames**.
+2. **Render a filmstrip and look at it**, cropped and scaled the way the pane
+   will draw it.
+3. **If two candidates look alike, measure frame-to-frame change.** This has
+   overruled the eye twice. Gengar's supplied animation looked identical to its
+   idle and moves 45% more per frame (55% against 38%).
+
+File size lies in both directions. A 500x500 GIF that is really 40x39 blown up
+twelve times is pixel art and scales beautifully; a 407x295 smooth render with
+no recoverable pixel grid shrinks to mush. Two other things worth checking that
+have each caught a candidate:
+
+- **Two characters in one frame.** One supplied Psyduck animation had Pikachu
+  running alongside it, which is charming and also puts Pikachu in someone
+  else's pane.
+- **Palette drift between a supplied pair.** Cubone's two GIFs were drawn by
+  different hands and their average lit-pixel colour differs by 20% — about as
+  much as a shiny — so it reads as a recolour as well as a pose change.
+
+## What the hooks actually do
+
+Claude Code documents its hook events but not what happens at the edges, and the
+sprite is wrong exactly when an assumption about that is wrong. Everything here
+was established by logging real sessions to `.state/hooks.jsonl`, not by
+reading the documentation.
+
+- **There is no hook for pressing escape.** This is the whole reason the pane
+  reads the transcript.
+- **An interrupted tool still reports its `PostToolUse`**, on the same
+  millisecond the interruption marker is written — and a hook is a whole node
+  start-up behind a file write, so it lands *after* the interruption is noticed.
+  Comparing against the last hook made a freshly interrupted session look like
+  the busiest one there is.
+- **`UserPromptSubmit` carries the prompt text**, and **exit code 2 blocks the
+  prompt and erases it**, showing stderr as the reason. That pair is what makes
+  `--pikachu` cost no turn and no tokens.
+- **Messages typed while Claude is already working never fire
+  `UserPromptSubmit`.** They are injected into the running turn, so a
+  mid-turn `--random` reaches the model as an ordinary prompt and nothing
+  intercepts it.
+- **`SessionStart` fires for background agents too**, which is why opening the
+  agents list used to split whichever Ghostty window had focus. They are
+  recognised by a file in `~/.claude/jobs`.
+
+## Traps that bit more than once
+
+Written down because each of these cost real time and none of them announced
+itself.
+
+**A running process does not have your new code.** The pane is a long-lived
+node process. Editing `roster.mjs` changes nothing about the pane already
+drawing, and the symptom is a feature that "does not work" while every test
+passes. Compare the pid's start time against the source file's mtime before
+believing anything else.
+
+**A cache keyed by its inputs never notices it is stale.** Bumping
+`CACHE_VERSION` changes every key, so old entries become unreachable — but they
+are not *deleted*, because nothing can tell they are orphaned. That happened
+three times and left 42MB, then 36MB, then 72MB. Entries now record the version
+that wrote them, and `npm run prune` sweeps mismatches.
+
+**A check that looks in one place reports confidently about everywhere.** The
+cache-coverage check passed on a single stray sprite left at the right height
+while ten Pokemon still stalled for two seconds each. The attribution generator
+reported both Pokeballs as unused because it only read the roster. Count what
+you expect, do not test for presence.
+
+**`node --check` does not catch a missing import.** Extracting the renderer into
+`sprite.mjs` left `MIN_DELAY` behind in `window.mjs`; the syntax check passed
+and the pane died on launch. Only running the thing found it.
