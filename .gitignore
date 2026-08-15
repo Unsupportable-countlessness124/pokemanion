@@ -30,6 +30,9 @@ assets/pokemon/*
 # Built from config.json by `npm run build`.
 build/
 
+# Notes to ourselves about what to build next. Kept on disk, out of the repo.
+docs/roadmap.md
+
 # The hand-picked sprites in assets/ are NOT ignored, and must not be. They were
 # found by hand, cannot be re-downloaded, and several are the whole reason a
 # given entry looks right — Pikachu's pair, Ash, Charizard firing, Psyduck,

@@ -308,6 +308,8 @@ anyone, and nothing here is sold.
   terminal can actually draw.
 - [docs/known-issues.md](docs/known-issues.md) — where the working/waiting
   detection frays, and the features that are built but deliberately dormant.
+- [docs/roadmap.md](docs/roadmap.md) — what is next, and what already exists for
+  each of it. Evolution earned by session length is the big one.
 
 ## Contributing
 
