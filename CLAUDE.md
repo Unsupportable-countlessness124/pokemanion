@@ -4,7 +4,7 @@ A Pokémon lives in a terminal pane beside every Claude Code or Codex session. I
 rests while the agent is waiting on you and animates while it is working, so you
 can tell what a session is doing from across the room without reading the screen.
 
-13 ship with it, 1239 more can be summoned by name, and there is a Pokédex.
+14 ship with it, 1242 more can be summoned by name, and there is a Pokédex.
 
 **macOS + Ghostty only.** It draws sprites using the kitty graphics protocol and
 opens the split by driving Ghostty through AppleScript. It needs `chafa`
@@ -58,7 +58,7 @@ and has no earlier hook, so this is not something to fix.
 Typed at Claude, mid-session — a hook answers these and blocks the prompt, so
 they reach no model and cost no tokens:
 
-- `--squirtle` — switch the pane to any of the 1252, live
+- `--squirtle` — switch the pane to any of the 1256, live
 - `--random`, `--pokemon` — roll one, or list the residents
 - `--dex dragonite`, `--dex ghost`, `--dex random` — look things up, answered in chat
 - `--dex current` — the one on screen, answered **in the pane** rather than in chat.

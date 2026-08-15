@@ -197,6 +197,19 @@ export const ROSTER = [
     busy: 'assets/25-gengar-attack.gif',
     busySpeed: 1,
   },
+  // Both halves supplied. Swings its bone while Claude works.
+  //
+  // The two were drawn by different hands and it shows: the average colour of
+  // the lit pixels differs by 20%, about as much as a shiny does, so this reads
+  // as a change of palette as well as a change of pose. Deliberate — it was
+  // asked for by name — but it is why there is no `transition`. Flashing white
+  // on top of a recolour that is already happening would be saying it twice.
+  {
+    name: 'cubone',
+    idle: 'assets/21-cubone.gif',
+    busy: 'assets/22-cubone-swinging.gif',
+    busySpeed: 1,
+  },
 ]
 
 // Showdown's Gen-5 animated set rather than PokeAPI's, which is the same

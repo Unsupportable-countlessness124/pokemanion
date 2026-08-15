@@ -76,8 +76,8 @@ unlisted rather than silently going unnamed.
 | `17-pokeball.gif` | the pane (window.mjs) |
 | `18-meowth-jumping.gif` | meowth working |
 | `20-pokeball-floating.gif` | the pane (dex.mjs) |
-| `21-cubone.gif` | kept, not currently used |
-| `22-cubone-swinging.gif` | kept, not currently used |
+| `21-cubone.gif` | cubone resting |
+| `22-cubone-swinging.gif` | cubone working |
 | `23-gengar.gif` | gengar resting |
 | `25-gengar-attack.gif` | gengar working |
 | `27-ash-standing.gif` | ash resting |

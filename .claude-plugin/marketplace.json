@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "pokemanion",
-      "description": "A Pokemon in a terminal pane beside every session, resting while the agent waits and animating while it works. 14 built in, 1238 summonable by name, with a Pokedex.",
+      "description": "A Pokemon in a terminal pane beside every session, resting while the agent waits and animating while it works. 14 built in, 1242 summonable by name, with a Pokedex.",
       "version": "1.1.0",
       "author": { "name": "khatriadbhut" },
       "source": "./",

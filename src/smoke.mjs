@@ -113,6 +113,36 @@ check(
   `${cardWidth} cols available, longest line ${Math.max(...paneCard(entry('ash')).map((l) => l.length))}`,
 )
 
+// The counts written in prose, against the counts that are true.
+//
+// README, CLAUDE.md and both plugin manifests each state how many ship and how
+// many can be summoned. Nothing generated them and nothing checked them, so
+// they drifted four behind the sprite folder and stayed there — and the plugin
+// manifests are what someone reads before installing.
+{
+  const { knownCount, ROSTER: everyone } = await import('./roster.mjs')
+  const summonable = knownCount() + everyone.filter((row) => row.card).length
+  const guests = summonable - everyone.length
+  const wrong = []
+
+  for (const file of ['README.md', 'CLAUDE.md', '.claude-plugin/marketplace.json', '.codex-plugin/plugin.json']) {
+    let text = ''
+
+    try {
+      text = read(join(ROOT, file), 'utf8')
+    } catch {
+      continue
+    }
+
+    // Any four-digit number in this range is one of these two claims.
+    for (const [found] of text.matchAll(/\b1[0-9]{3}\b/g)) {
+      if (Number(found) !== summonable && Number(found) !== guests) wrong.push(`${file}: ${found}`)
+    }
+  }
+
+  check('the counts in the docs are the real ones', wrong.length === 0, `${guests} guests, ${summonable} total; found ${wrong.join(', ')}`)
+}
+
 // Adding a character should be one entry in one file.
 //
 // Ash was not. He went into the roster, and then the launch flag, "did you
