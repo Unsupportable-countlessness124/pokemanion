@@ -99,8 +99,8 @@ at the switch; four were given animations of their own.
 
 ## What it needs
 
-**Node ≥ 20** (no dependencies), **chafa** (`brew install chafa`), and a
-terminal that speaks the [kitty graphics
+**Node ≥ 20** (no dependencies), **chafa** (`brew install chafa`, or
+`sudo port install chafa`), and a terminal that speaks the [kitty graphics
 protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) — the sprite is a
 real image, not text.
 
@@ -129,9 +129,14 @@ through a hook and works on any shell.
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
 cd pokemanion
-npm run deps      # chafa and Ghostty, via Homebrew — skip if you have them
+npm run deps      # chafa and Ghostty — skip if you have them
 npm run setup
 ```
+
+`deps` uses Homebrew or MacPorts, whichever you have. It will not install a
+package manager for you — if you have neither, it prints the route for each:
+Ghostty ships a [`.dmg`](https://ghostty.org/download), and chafa builds
+[from source](https://hpjansson.org/chafa/download/).
 
 `setup` downloads the sprites, renders them, registers the hooks in
 `~/.claude/settings.json`, adds the `claude()` wrapper to `~/.zshrc`, and sets
@@ -238,7 +243,7 @@ Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 | `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
 | `npm run roster` | download any missing resident sprites (`-- --refresh` to redo them) |
 | `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
-| `npm run deps` | install chafa and Ghostty via Homebrew (`-- --dry` to preview) |
+| `npm run deps` | install chafa and Ghostty via Homebrew or MacPorts (`-- --dry` to preview) |
 | `npm run ghostty -- --install` | the resize keybind the pane needs (`--remove` to undo) |
 | `npm run prune` | evict guests now (`-- --dry` to see what would go, `-- --keep-days=0`) |
 | `npm run assigned` | which Pokemon each session was given, and why (`-- --forget` to reset) |

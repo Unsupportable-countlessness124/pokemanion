@@ -41,7 +41,9 @@ if (process.platform !== 'darwin') {
 }
 
 if (spawnSync('chafa', ['--version'], { encoding: 'utf8' }).status !== 0) {
-  blockers.push(['chafa is not installed', 'brew install chafa'])
+  // npm run deps knows the routes that do not involve Homebrew, so point at it
+  // rather than repeating them here and having two places to keep right.
+  blockers.push(['chafa is not installed', 'brew install chafa — or: npm run deps, which knows the other ways'])
 }
 
 // Not a blocker: everything installs fine without it, and the pane can be run
