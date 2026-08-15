@@ -32,6 +32,7 @@
     "shell": "node src/shell.mjs",
     "choose": "node src/choose.mjs",
     "prune": "node src/prune.mjs",
-    "dex": "node src/dex.mjs"
+    "dex": "node src/dex.mjs",
+    "attribution": "node src/attribution.mjs"
   }
 }

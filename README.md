@@ -16,8 +16,10 @@ lives in this one folder.
 
 The code is MIT. The artwork is not mine and is not covered by it — Gen-5
 sprites are Game Freak's, and the hand-picked GIFs are fan art found online.
-See [LICENSE](LICENSE) for the split and [ATTRIBUTION.md](ATTRIBUTION.md) for
-what came from where.
+They ship with the project anyway, because several roster entries are only
+worth having because of them. See [LICENSE](LICENSE) for the split and
+[ATTRIBUTION.md](ATTRIBUTION.md) for what came from where; `npm run
+attribution` regenerates that list when a sprite is added.
 
 ## Why it isn't inside the spinner line
 
