@@ -91,7 +91,7 @@ try {
       // `--dex` answers and changes nothing. It is still blocked, because the
       // point is to look something up without spending a turn on it.
       if (asked.kind === 'dex') {
-        const { render, search, detail, entry, exactMatch, all } = await import('../src/dex.mjs')
+        const { render, search, detail, entry, exactMatch, paneCard, all } = await import('../src/dex.mjs')
         const { fetchedGuests } = await import('../src/roster.mjs')
 
         if (!asked.query) {
@@ -114,6 +114,19 @@ try {
           if (asking === 'current' && !mine) {
             process.stderr.write('no Pokemon claimed for this session yet\n')
             process.exit(2)
+          }
+
+          // Put it in the pane as well, beside the Pokemon it describes. That
+          // is where you are already looking, and it costs the conversation
+          // nothing — the lines time out on their own.
+          if (mine) {
+            const { mkdirSync, writeFileSync } = await import('node:fs')
+            const { STATE_DIR } = await import('../src/config.mjs')
+
+            try {
+              mkdirSync(STATE_DIR, { recursive: true })
+              writeFileSync(`${STATE_DIR}/window-${String(session).replace(/[^\w.-]/g, '')}.card`, paneCard(entry(mine)).join('\n'))
+            } catch {}
           }
 
           const found = mine ? [entry(mine)] : search(asked.query)

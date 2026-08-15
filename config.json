@@ -37,5 +37,6 @@
   "transitions": true,
   "guestBudgetMb": 200,
   "guestKeepDays": 14,
-  "pokeball": true
+  "pokeball": true,
+  "cardMs": 8000
 }

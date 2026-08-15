@@ -209,6 +209,29 @@ thing that knows: a pane may have been switched, handed a guest, or rolled at
 random since it opened. Inside Claude it answers for *that* session; in a
 terminal it lists every pane that is up.
 
+### Stats in the pane
+
+The pane is four rows and the width of the window, and the sprite uses about
+eight columns of it. The rest is where the stats go:
+
+```
+        Terapagos-Stellar  #1024
+ (:o)   Normal  Blue
+ /|\    1.7m  77kg
+ / \    Teraform Zero
+```
+
+They appear **whenever the pane's Pokemon changes** — rolled with `--random`,
+switched with `--squirtle`, or just opened — and time out after `cardMs`
+(8000). `--dex current` shows them again.
+
+One rule decides this, and it is worth keeping: **the pane's caption always
+describes the Pokemon under it.** So a lookup of something else — `--dex
+dragonite`, `--dex random` — stays in the conversation and never touches the
+pane, because captioning the wrong animal is worse than not captioning at all.
+
+`"cardMs": 0` turns it off.
+
 and the same from inside Claude, which costs no turn:
 
 ```

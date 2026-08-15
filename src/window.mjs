@@ -21,6 +21,7 @@ import { scanLines } from './interrupt.mjs'
 import { STATE_DIR, loadConfig, readState } from './config.mjs'
 import { MIN_DELAY, loadSprite } from './sprite.mjs'
 import { alignFor, busyFile, busySpeedFor, flipBusyFor, idleFile, touch, transitionFor } from './roster.mjs'
+import { entry as dexEntry, paneCard } from './dex.mjs'
 
 const HIDE_CURSOR = '\x1b[?25l'
 const SHOW_CURSOR = '\x1b[?25h'
@@ -515,6 +516,8 @@ const checkSpecies = () => {
 
   speciesCheckedAt = Date.now()
 
+  checkCard()
+
   const stamp = stampOf(SPECIES_FILE)
 
   if (stamp === 0 || stamp === speciesAt) return
@@ -547,6 +550,76 @@ const checkSpecies = () => {
   // here: the frame loop is what owns the screen, and fighting it for the
   // cursor is how placements end up stacked on top of each other.
   evolving = ballFrames()
+  showCard(name)
+}
+
+// Stats shown beside the sprite for a few seconds, then gone.
+//
+// The pane is four rows and the whole width of the window; the sprite uses
+// about eight columns of it. The rest has always been empty, and this is what
+// it is for — `--dex current` writes the lines here and the pane shows them
+// where you are already looking, rather than in the conversation.
+//
+// Timed out rather than dismissed: it is a glance, not a panel, and anything
+// that needs closing is worse than the empty space it replaced.
+const CARD_FILE = join(STATE_DIR, `window-${sessionArg ?? 'default'}.card`)
+const CARD_GAP = 3
+
+let cardAt = stampOf(CARD_FILE)
+let cardLines = []
+let cardUntil = 0
+let cardDrawnAt = 0
+
+// The pane describing itself, whenever what it is showing changes: rolled with
+// --random, switched with --squirtle, or just opened. The card always matches
+// the Pokemon under it, which is the rule that makes this coherent — a lookup
+// of something *else* (`--dex dragonite`, `--dex random`) stays in the
+// conversation, because putting those here would caption the wrong animal.
+const showCard = (name) => {
+  if (!name || config.cardMs === 0) return
+
+  try {
+    cardLines = paneCard(dexEntry(name), paneRows)
+    cardUntil = Date.now() + (config.cardMs ?? 8000)
+  } catch {}
+}
+
+const checkCard = () => {
+  const stamp = stampOf(CARD_FILE)
+
+  if (stamp === 0 || stamp === cardAt) return
+
+  cardAt = stamp
+
+  try {
+    cardLines = readFileSync(CARD_FILE, 'utf8').split('\n').filter(Boolean).slice(0, paneRows)
+  } catch {
+    return
+  }
+
+  cardUntil = Date.now() + (config.cardMs ?? 8000)
+  process.stdout.write(CLEAR)
+}
+
+// Redrawn every frame rather than once, because the sprite underneath is
+// redrawn every frame and the two share the pane. Erased by overwriting with
+// spaces: the text sits in cells, the sprite is an image placement, and
+// clearing lines wholesale would take one without the other.
+const drawCard = (sprite) => {
+  const showing = Date.now() < cardUntil
+
+  if (!showing && cardDrawnAt === 0) return
+
+  const col = sprite.cols + CARD_GAP
+  const width = Math.max(...cardLines.map((line) => line.length), 1)
+
+  for (let i = 0; i < Math.max(cardLines.length, cardDrawnAt); i++) {
+    const text = showing ? (cardLines[i] ?? '').padEnd(width) : ' '.repeat(width)
+
+    process.stdout.write(`\x1b[${i + 1};${col}H${text}`)
+  }
+
+  cardDrawnAt = showing ? cardLines.length : 0
 }
 
 let index = 0
@@ -598,6 +671,8 @@ const tick = () => {
 
   process.stdout.write(DELETE_PLACEMENTS + originFor(sprite) + sprite.frames[frame])
 
+  drawCard(sprite)
+
   index++
 
   setTimeout(tick, delayFor(sprite, frame))
@@ -610,8 +685,9 @@ if (sessionArg === 'warm') {
 }
 
 // The pane opening is an arrival too — the first thing it does is let the
-// Pokemon out.
+// Pokemon out, and say what it is.
 evolving = ballFrames()
+showCard(species)
 
 tick()
 

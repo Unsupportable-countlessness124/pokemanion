@@ -202,6 +202,22 @@ export const detail = (row, colour = true) => {
   )
 }
 
+// The card as it goes in the sprite pane: four lines, because that is how many
+// rows the pane has, and no colour codes because they are written straight into
+// a cell grid alongside an image.
+//
+// Everything the long card says, minus the labels — at a glance beside the
+// Pokemon itself, the labels are the part you can infer.
+export const paneCard = (row, rows = 4) =>
+  [
+    `${row.title}  #${row.num || '?'}`,
+    [row.types, row.colour].filter(Boolean).join('  '),
+    row.height ? `${row.height}m  ${row.weight}kg` : '',
+    row.abilities,
+  ]
+    .filter(Boolean)
+    .slice(0, rows)
+
 // A Pokeball bobbing next to the card.
 //
 // Only in a real terminal. Inside Claude the same text arrives as a hook's
