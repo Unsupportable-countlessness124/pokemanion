@@ -17,9 +17,9 @@ The quickest route is the plugin, which registers the hooks and needs no clone:
     /plugin marketplace add khatriadbhut/pokemanion
     /plugin install pokemanion@pokemanion
 
-It cannot install chafa or Ghostty, and it does not add the shell wrapper — so
-`claude --pikachu` at launch will not work, though everything typed inside a
-session will. For the full thing, clone it:
+It cannot install Ghostty — a GUI app that asks for a password — but it does
+everything else the clone does, including chafa and the `claude --pikachu`
+shell wrapper. Clone it only to work on the code:
 
     git clone https://github.com/khatriadbhut/pokemanion.git
     cd pokemanion

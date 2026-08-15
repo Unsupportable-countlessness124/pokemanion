@@ -98,18 +98,15 @@ Then, at your agent:
 </table>
 
 Nothing to clone or build; the agent fetches the project itself and the sprites
-ship with it. Two things are left:
+ship with it. Three things are left:
 
 - **Allow Ghostty in Accessibility** — System Settings → Privacy & Security →
   Accessibility. Opening the pane means pressing keys, and macOS blocks that
   until you say so. Skip it and everything installs perfectly and no pane ever
   appears.
 - **Restart your agent and Ghostty.** Both read their configuration at startup.
-
-The plugin gives you the commands you type at your agent, like `--pikachu` to
-change the pane. [Installing from source](#install-from-source) also adds
-`claude --pikachu`, which you run in the terminal to start a session with that
-Pokémon already chosen.
+- **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
+  --pikachu`.
 
 ---
 
@@ -195,7 +192,7 @@ does --pikachu do?` is a real question and passes through untouched.
 Punctuation is forgiven and form names work as written: `--ho-oh`,
 `--rotom-wash`, `--charizard-megax`.
 
-At launch, if you installed [from source](#install-from-source):
+At launch, from your terminal:
 
 ```sh
 claude --pikachu             # a particular one
@@ -206,7 +203,8 @@ claude --resume --charizard  # combines with everything else
 
 ## Install from source
 
-Everything the plugin does, plus the launch flags:
+The same install, done by hand — useful if you want the project somewhere you
+can edit it:
 
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git

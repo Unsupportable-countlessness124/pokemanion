@@ -16,7 +16,7 @@
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { join, sep } from 'node:path'
 import { ROOT } from './config.mjs'
 import { SPECIES_ENV, names } from './roster.mjs'
 import { chosen } from './agents.mjs'
@@ -33,6 +33,25 @@ import { chosen } from './agents.mjs'
 const BEGIN = '# >>> pixel-runner >>>'
 const END = '# <<< pixel-runner <<<'
 
+// Installed as a plugin, the project sits in a directory named after its
+// version — ~/.claude/plugins/cache/pokemanion/pokemanion/1.1.0. Writing that
+// path into someone's shell file would work exactly until the next release
+// moved it, leaving a function pointing at a directory that no longer exists
+// and nothing around to notice.
+export const isPluginRoot = (root = ROOT) => root.includes(`${sep}plugins${sep}cache${sep}pokemanion${sep}`)
+
+// So a plugin install writes a wrapper that finds the project each time instead.
+//
+// `find` rather than a glob: an unmatched glob is an error in zsh, not an empty
+// list, and this has to behave the same in both shells. Newest version wins, and
+// an uninstalled plugin resolves to nothing, which the wrapper treats as "not
+// installed" and passes every argument straight through.
+const RESOLVER = `pokemanion_root() {
+  find "$HOME/.claude/plugins/cache/pokemanion" "$HOME/.codex/plugins/cache/pokemanion" \\
+       -maxdepth 4 -type f -name run.sh -path "*/bin/run.sh" 2>/dev/null |
+    sort -V | tail -1 | sed "s:/bin/run.sh$::"
+}`
+
 // One function per agent you have, both inside the same markers.
 //
 // Not one block each. The markers are the handle on what is already in your
@@ -40,7 +59,7 @@ const END = '# <<< pixel-runner <<<'
 // finds it to take it out — so a second pair would orphan every existing
 // install. That is the bug install.mjs had from matching the project's old
 // name, and it is not worth repeating for the sake of tidiness.
-export const snippet = (agents = null) => {
+export const snippet = (agents = null, portable = isPluginRoot()) => {
   const wrappers = (agents ?? chosen()).map((agent) => agent.name)
 
   return `${BEGIN}
@@ -48,16 +67,21 @@ ${wrappers.map((name) => `# Summon a specific one: ${name} --pikachu, ${name} --
 # Or any of the others:  --flygon      (fetched the first time)
 # Pick from a list:      --pokemon
 # Roll the dice:         --random
-# Remove with: node ${join(ROOT, 'src', 'shell.mjs')} --remove
-${wrappers.map((name) => wrapper(name)).join('\n\n')}
+# Remove with: node ${portable ? '"$(pokemanion_root)/src/shell.mjs"' : join(ROOT, 'src', 'shell.mjs')} --remove
+${portable ? `${RESOLVER}\n` : ''}
+${wrappers.map((name) => wrapper(name, portable)).join('\n\n')}
 ${END}`
 }
 
-const wrapper = (agent) => {
+const wrapper = (agent, portable = isPluginRoot()) => {
   const residents = names().map((name) => `--${name}`).join('|')
 
+  // Resolved once per launch rather than per lookup: the find costs about 4ms
+  // and there are three places that would otherwise each pay it.
+  const at = (...parts) => (portable ? `$pixel_runner_root/${parts.join('/')}` : join(ROOT, ...parts))
+
   return `${agent}() {
-  local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try pixel_runner_hint
+  local pixel_runner_species="" pixel_runner_menu="" pixel_runner_random="" pixel_runner_args=() pixel_runner_arg pixel_runner_try pixel_runner_hint${portable ? '\n  local pixel_runner_root="$(pokemanion_root)"' : ''}
   for pixel_runner_arg in "$@"; do
     case "$pixel_runner_arg" in
       --pokemon|--pokemons)
@@ -75,7 +99,7 @@ const wrapper = (agent) => {
         # it is somebody else's flag and is passed straight through — which is
         # what keeps --resume, --continue and the rest working.
         pixel_runner_try="\${pixel_runner_arg#--}"
-        if grep -qi "\\"\${pixel_runner_try}\\"" "${join(ROOT, 'assets', 'gen5-names.json')}" 2>/dev/null; then
+        if grep -qi "\\"\${pixel_runner_try}\\"" "${at('assets', 'gen5-names.json')}" 2>/dev/null; then
           pixel_runner_species="$pixel_runner_try"
         else
           pixel_runner_args+=("$pixel_runner_arg")
@@ -84,7 +108,7 @@ const wrapper = (agent) => {
           # which is enough for --charizrd and silent for every flag Claude
           # actually has. --version is two edits from Persian, which is exactly
           # the kind of thing that must not be shouted at you on launch.
-          pixel_runner_hint=\$("${join(ROOT, 'bin', 'run.sh')}" src/hint.mjs "\${pixel_runner_try}" 2>/dev/null)
+          pixel_runner_hint=\$("${at('bin', 'run.sh')}" src/hint.mjs "\${pixel_runner_try}" 2>/dev/null)
           if [ -n "\$pixel_runner_hint" ]; then
             printf '  pokemanion: no such Pokemon "%s" — did you mean --%s?\\n' "\$pixel_runner_try" "\$pixel_runner_hint" >&2
           fi
@@ -99,14 +123,14 @@ const wrapper = (agent) => {
   # --random beats the menu: asking for a surprise and then being shown a list
   # to choose from would be answering a question nobody asked.
   if [ -n "$pixel_runner_random" ] && [ -z "$pixel_runner_species" ]; then
-    pixel_runner_species="$("${join(ROOT, 'bin', 'run.sh')}" src/choose.mjs --random)" || return $?
+    pixel_runner_species="$("${at('bin', 'run.sh')}" src/choose.mjs --random)" || return $?
   fi
 
   # The picker writes the chosen name to stdout and the list to the terminal,
   # so this captures the answer without swallowing what you are reading. A
   # non-zero exit means you backed out, and then Claude should not start either.
   if [ -n "$pixel_runner_menu" ] && [ -z "$pixel_runner_species" ]; then
-    pixel_runner_species="$("${join(ROOT, 'bin', 'run.sh')}" src/choose.mjs)" || return $?
+    pixel_runner_species="$("${at('bin', 'run.sh')}" src/choose.mjs)" || return $?
   fi
 
   if [ -n "$pixel_runner_species" ]; then
@@ -164,6 +188,29 @@ const write = (body) => {
   if (existsSync(RC)) copyFileSync(RC, `${RC}.pixel-runner-backup`)
 
   writeFileSync(RC, body)
+}
+
+// The same install the command line performs, callable from the hook.
+//
+// A plugin has no setup step to run, so the wrapper is written on its first
+// hook instead. Idempotent by construction: the block is found by its markers
+// and replaced, so this can run on every session start and only ever produce
+// one copy. Returns the file it wrote to, or null if it did nothing.
+export const install = (agents = chosen(), rc = RC) => {
+  if (agents.length === 0) return null
+
+  const existing = existsSync(rc) ? readFileSync(rc, 'utf8') : ''
+  const body = `${withoutBlock(existing).replace(/\s*$/, '')}\n\n${snippet(agents)}\n`
+
+  // Unchanged files are left alone. Rewriting one costs a backup that overwrites
+  // the previous backup, and on a plugin this runs at every install and upgrade.
+  if (body === existing) return null
+
+  if (existsSync(rc)) copyFileSync(rc, `${rc}.pixel-runner-backup`)
+
+  writeFileSync(rc, body)
+
+  return rc
 }
 
 if (process.argv[1] && process.argv[1].endsWith('shell.mjs')) {

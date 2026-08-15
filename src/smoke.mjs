@@ -329,6 +329,86 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   check('every path in the shell wrapper is quoted', bare.length === 0, `${bare.length} bare: ${[...new Set(bare)].join(', ')}`)
   check('and the wrapper still references the launcher', text.includes(`"${join(ROOT, 'bin', 'run.sh')}"`))
 
+  // Installed as a plugin, the project lives at a path carrying its version
+  // number. A wrapper with that written into it works until the next release
+  // moves the directory, and then goes on sitting in the shell file pointing at
+  // nothing. The plugin wrapper resolves the path on each call instead.
+  {
+    const { isPluginRoot } = await import('./shell.mjs')
+    const portable = snippet(allAgents, true)
+
+    check(
+      'a plugin wrapper hard-codes no path of its own',
+      !portable.includes(ROOT) && portable.includes('pokemanion_root'),
+      portable.includes(ROOT) ? 'the repo path is baked in' : '',
+    )
+
+    check('and a clone wrapper still does, its path being fixed', snippet(allAgents, false).includes(join(ROOT, 'bin', 'run.sh')))
+
+    // Which of the two you get is decided by where the project is, and nothing
+    // was checking that. Both cases above pass `portable` by hand, so pinning
+    // the default to a constant broke real plugin installs and no test moved.
+    check('and which one is written is decided by where the project is', snippet(allAgents) === snippet(allAgents, isPluginRoot()))
+
+    check(
+      'a versioned plugin directory is recognised as one',
+      isPluginRoot('/Users/x/.claude/plugins/cache/pokemanion/pokemanion/1.1.0') &&
+        isPluginRoot('/Users/x/.codex/plugins/cache/pokemanion/pokemanion/9.9.9') &&
+        !isPluginRoot('/Users/x/pokemanion'),
+    )
+ 
+    // And it has to actually resolve, in a real shell, against a real directory
+    // tree. Everything above checks the text of the wrapper; this checks that
+    // the text works — sourcing it, running it, and reading what it chose.
+    //
+    // Two versions are planted because the interesting case is an upgrade: 1.10.0
+    // must win over 1.9.0, which a plain sort gets backwards.
+    {
+      // Imported here rather than relied on from an outer scope. Three checks in
+      // this file have already been silently dead from referring to a name that
+      // was destructured further down.
+      const { mkdtempSync, mkdirSync: makeDir, writeFileSync: put, chmodSync: chmod, rmSync: drop } = await import('node:fs')
+      const { spawnSync: runShell } = await import('node:child_process')
+      const { tmpdir: tempRoot } = await import('node:os')
+      const home = mkdtempSync(join(tempRoot(), 'pokemanion-plugin-'))
+      const cache = join(home, '.claude', 'plugins', 'cache', 'pokemanion', 'pokemanion')
+
+      for (const version of ['1.9.0', '1.10.0']) {
+        makeDir(join(cache, version, 'bin'), { recursive: true })
+        put(join(cache, version, 'bin', 'run.sh'), `#!/bin/sh\necho ${version}\n`)
+        chmod(join(cache, version, 'bin', 'run.sh'), 0o755)
+      }
+
+      const bin = join(home, 'bin')
+
+      makeDir(bin, { recursive: true })
+      put(join(bin, 'claude'), '#!/bin/sh\nprintf "%s" "${PIXEL_RUNNER_SPECIES:-none}"\n')
+      chmod(join(bin, 'claude'), 0o755)
+
+      const rc = join(home, '.zshrc')
+
+      put(rc, `${snippet([{ name: 'claude' }], true)}\n`)
+
+      const ask = (line, env = {}) =>
+        runShell('zsh', ['-c', `source ${JSON.stringify(rc)} >/dev/null 2>&1; ${line}`], {
+          encoding: 'utf8',
+          env: { ...process.env, HOME: home, PATH: `${bin}:${process.env.PATH}`, PIXEL_RUNNER_SPECIES: '', ...env },
+        }).stdout ?? ''
+
+      // A resident needs no plugin at all to resolve; --random has to run the
+      // launcher, which is the part that has to find the right directory.
+      check('a plugin wrapper resolves a resident', ask('claude --pikachu').includes('pikachu'))
+      check('and reaches the newest version of the plugin', ask('claude --random').includes('1.10.0'), ask('claude --random'))
+
+      // The plugin uninstalled. The wrapper must not become a broken `claude`.
+      drop(join(home, '.claude'), { recursive: true, force: true })
+
+      check('and passes everything through once the plugin is gone', ask('claude --resume').trim() === 'none', ask('claude --resume'))
+
+      drop(home, { recursive: true, force: true })
+    }
+  }
+
   // The function itself runs under bash 3.2 — the version macOS ships — as well
   // as zsh; only the file it was written to was ever zsh-specific, which is why
   // this used to be documented as zsh-only.

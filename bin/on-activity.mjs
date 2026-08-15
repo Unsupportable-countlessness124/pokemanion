@@ -123,15 +123,19 @@ try {
       } catch {}
 
       const { hasGhostty } = await import('../src/bootstrap.mjs')
+      const { rcFile } = await import('../src/shell.mjs')
 
       process.stderr.write(
         'pokemanion is installed.\n\n' +
-          'Three things it cannot do for you:\n\n' +
+          'Four things it cannot do for you:\n\n' +
           '  1. Restart this agent — it reads its hooks at startup\n' +
           '  2. Restart Ghostty — it reads its config at startup\n' +
           '  3. System Settings > Privacy & Security > Accessibility > enable Ghostty\n' +
           '     Opening the pane means pressing keys, and macOS blocks that until you\n' +
-          '     allow it. Without this no pane appears at all.\n\n' +
+          '     allow it. Without this no pane appears at all.\n' +
+          `  4. Open a new terminal, or run: source ${rcFile()}\n` +
+          '     A launcher was added there, so you can start a session with a\n' +
+          '     chosen Pokemon: claude --pikachu, codex --random\n\n' +
           (hasGhostty() ? '' : 'Ghostty is missing — the pane is a Ghostty split: https://ghostty.org\n\n') +
           'Then send that message again and a Pokemon should be sitting beside it.\n' +
           'Type --pokemon to see who ships, or --random to roll one.\n\n' +
@@ -415,6 +419,17 @@ try {
           // application someone does not have is litter, and it would sit in
           // ~/.config waiting to confuse them later.
           if (hasGhostty()) install()
+
+          // The shell wrapper, so a plugin install is the same install as a
+          // clone. It is the one thing the plugin used to leave out, which made
+          // `claude --pikachu` a reason to clone rather than a feature.
+          //
+          // Only from a plugin. A clone gets this from `npm run setup`, and
+          // doing it here as well would write to a shell file that someone
+          // running the pane by hand never asked us to touch.
+          const { install: installShell, isPluginRoot } = await import('../src/shell.mjs')
+
+          if (isPluginRoot()) installShell()
 
           bootstrapChafa()
           mkdirSync(STATE_DIR, { recursive: true })
