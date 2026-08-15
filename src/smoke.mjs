@@ -95,7 +95,23 @@ const { detail, paneCard } = await import('./dex.mjs')
 check('a resident who is not a Pokemon is still a lookup', exactMatch('ash') === 'ash')
 check('and has a description rather than an empty fact table', detail(entry('ash'), false).includes('Pallet Town'))
 check('and never rolls on the dice', !Array.from({ length: 50 }, pickRandom).includes('ash'))
-check('his pane card fits the pane', paneCard(entry('ash')).every((line) => line.length <= 24))
+// Measured against the pane it is drawn in rather than a number typed here:
+// the card sits beside the sprite, so what it gets is the pane minus the widest
+// resident sprite and the gap. This is the check that would have caught Ash's
+// Goal line wrapping onto the sprite.
+// The card starts at `sprite.cols + CARD_GAP` and runs to the edge. Ash renders
+// 5 columns wide at pane height, measured rather than guessed — and his card is
+// only ever drawn beside his own sprite, so that is the width that matters.
+const { DEFAULTS: paneDefaults } = await import('./config.mjs')
+const CARD_GAP = 2
+const ASH_COLS = 5
+const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
+
+check(
+  'his pane card fits the pane it is drawn in',
+  paneCard(entry('ash')).every((line) => line.length <= cardWidth),
+  `${cardWidth} cols available, longest line ${Math.max(...paneCard(entry('ash')).map((l) => l.length))}`,
+)
 
 // "N other forms" points at a prefix search, so anything without the prefix is
 // not a form and the follow-up cannot find it. --dex mew counted Mewtwo.

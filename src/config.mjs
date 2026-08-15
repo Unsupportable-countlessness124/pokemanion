@@ -160,7 +160,17 @@ export const DEFAULTS = {
   // Turn it on only if you want the pane forced to an exact row count.
   autoFit: false,
   windowRows: 3,
-  windowCols: 34,
+
+  // 38 rather than 34 because of one line of text. The dex card draws beside the
+  // sprite, and Ash's ends with `Goal : Become a "Pokemon Master"` — 32 columns,
+  // against the 28 left once a 5-column sprite and its gap had taken theirs.
+  // Four columns short wraps onto the next row and lands on the sprite, and the
+  // card is erased by overwriting its own width, so the wrapped remainder would
+  // not be cleaned up either.
+  //
+  // Widening is the fix that keeps the wording. It applies to every pane rather
+  // than only Ash's, which is the cost.
+  windowCols: 38,
 
   // Whether the status line draws the sprite at all. Off leaves it as plain
   // text, for when the sprite is running in a pane of its own — a pane is not

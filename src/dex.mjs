@@ -52,8 +52,11 @@ const OFF_DEX = {
     facts: [
       ['from', 'Pallet Town'],
       ['partner', 'Pikachu'],
+      ['goal', 'Become a "Pokémon Master"'],
     ],
-    pane: ['Pallet Town', 'partner Pikachu', '25 seasons, champion'],
+    // The whole card, not lines appended to the title — a person's card is
+    // written, not assembled from fields the way a Pokemon's is.
+    pane: ['Ash Ketchum (Satoshi)', 'Pallet Town', 'Partner : Pikachu', 'Goal : Become a "Pokémon Master"'],
   },
 }
 
@@ -282,7 +285,7 @@ export const detail = (row, colour = true) => {
 // Pokemon itself, the labels are the part you can infer.
 export const paneCard = (row, rows = 4) =>
   (row.pane
-    ? [row.title, ...row.pane]
+    ? row.pane
     : [
         `${row.title}  #${row.num || '?'}`,
         [row.types, row.colour].filter(Boolean).join('  '),
