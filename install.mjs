@@ -8,13 +8,12 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { FRAMES_FILE, ROOT } from './src/config.mjs'
+import { ROOT } from './src/config.mjs'
 
 const SETTINGS = join(homedir(), '.claude', 'settings.json')
 const BACKUP = `${SETTINGS}.pixel-runner-backup`
 
 const RUNNER = `"${join(ROOT, 'bin', 'run.sh')}"`
-const STATUS_COMMAND = `${RUNNER} statusline.mjs`
 const ACTIVITY_COMMAND = `${RUNNER} on-activity.mjs`
 
 // Notification is here for the turns that end by Claude asking you something
@@ -131,10 +130,17 @@ if (uninstalling) {
   process.exit(0)
 }
 
-if (!existsSync(FRAMES_FILE)) {
-  console.error('  no frames built yet — run `npm run build` first')
-  process.exit(1)
-}
+// There used to be a guard here refusing to install until `npm run build` had
+// written build/frames.json. Those frames are read by exactly one file,
+// bin/statusline.mjs, and the status line is no longer installed — the block
+// below removes it if it finds one. So the guard was demanding a build for a
+// feature this script switches off four lines later.
+//
+// It made a fresh clone impossible to install. `npm run setup` reported the
+// first two steps done and stopped at the third with "run npm run build first",
+// and the four commands the README listed before that had the same hole. It
+// only ever worked on a machine that had run the build back when the status
+// line was the whole project.
 
 // No status line. The sprite lives in its own pane now, and interruptions are
 // caught from the transcript rather than from a status line heartbeat — so
@@ -157,8 +163,7 @@ if (!skipVerbs) settings.spinnerVerbs = SPINNER_VERBS
 
 write(settings)
 
-console.log(`  status line  -> ${STATUS_COMMAND}`)
 console.log(`  hooks        -> ${HOOK_EVENTS.join(', ')}`)
 console.log(`  spinner verbs-> ${skipVerbs ? 'left alone' : `${SPINNER_VERBS.verbs.length} themed verbs`}`)
-console.log('\n  Done. Restart Claude Code to load the hooks and the status line.')
+console.log('\n  Done. Restart Claude Code to load the hooks.')
 console.log(`  Undo with: node ${join(ROOT, 'install.mjs')} --uninstall\n`)
