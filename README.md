@@ -106,9 +106,10 @@ ship with it. Two things are left:
   appears.
 - **Restart your agent and Ghostty.** Both read their configuration at startup.
 
-This covers everything you type *inside* a session. To also choose a Pokémon as
-the session opens — `claude --pikachu` — [install from source](#install-from-source)
-instead.
+The plugin gives you the commands you type at your agent, like `--pikachu` to
+change the pane. [Installing from source](#install-from-source) also adds
+`claude --pikachu`, which you run in the terminal to start a session with that
+Pokémon already chosen.
 
 ---
 
