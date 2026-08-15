@@ -33,7 +33,7 @@ whether anything is happening.
   <td>Pikachu runs. It is the one everything else was tuned against.</td>
 </tr>
 <tr>
-  <td><img src="assets/pokemon/psyduck/idle.gif" height="76" alt="Psyduck standing"></td>
+  <td><img src="assets/pokemon/psyduck/idle.gif" height="96" alt="Psyduck standing"></td>
   <td><img src="assets/12-psyduck-running.gif" height="118" alt="Psyduck working"></td>
   <td>Psyduck throws its arms about, headache and all.</td>
 </tr>
@@ -43,7 +43,7 @@ whether anything is happening.
   <td>Gengar fires a shadow beam across the pane.</td>
 </tr>
 <tr>
-  <td><img src="assets/21-cubone.gif" height="84" alt="Cubone standing"></td>
+  <td><img src="assets/21-cubone.gif" height="104" alt="Cubone standing"></td>
   <td><img src="assets/22-cubone-swinging.gif" height="88" alt="Cubone working"></td>
   <td>Cubone swings its bone.</td>
 </tr>

@@ -14,12 +14,33 @@
 // local tables would need each one patched, and this refuses rather than
 // half-doing it.
 //
-// Usage: npm run recolour -- <source.gif> <match-this.gif> <out.gif>
+// Colours are matched by role — body to body, shadow to shadow — ranked by how
+// much of the sprite each covers. That works when both sprites are built the
+// same way and fails when they are not: Cubone's working animation is four flat
+// colours where its resting sprite has eight, so ranking put the skull's olive
+// onto the body's brown. When that happens, say what maps to what.
+//
+// Usage: npm run recolour -- <source.gif> <match.gif> <out.gif>
+//        npm run recolour -- a.gif b.gif out.gif --map 805020=946b5a --map a09860=e7e7ef
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { decodeGif } from './gif.mjs'
 
-const [, , sourcePath, matchPath, outPath] = process.argv
+const args = process.argv.slice(2)
+const explicit = []
+
+for (let i = 0; i < args.length; i++) {
+  if (args[i] !== '--map') continue
+
+  const [from, to] = args[i + 1].split('=')
+
+  explicit.push({
+    from: [0, 2, 4].map((k) => parseInt(from.replace('#', '').slice(k, k + 2), 16)),
+    to: [0, 2, 4].map((k) => parseInt(to.replace('#', '').slice(k, k + 2), 16)),
+  })
+}
+
+const [sourcePath, matchPath, outPath] = args.filter((a) => !a.startsWith('--') && !a.includes('='))
 
 if (!sourcePath || !matchPath || !outPath) {
   console.log('\n  npm run recolour -- <source.gif> <match-this.gif> <out.gif>\n')
@@ -111,7 +132,11 @@ const TABLE_AT = 13
 const source = rankedColours(sourcePath, 0.45).filter((c) => isBody(c.rgb))
 const target = rankedColours(matchPath).filter((c) => isBody(c.rgb))
 
-const pairs = source.slice(0, 3).map((from, i) => ({ from: from.rgb, to: target[i]?.rgb ?? from.rgb }))
+const pairs = explicit.length
+  ? explicit
+  : source.slice(0, 3).map((from, i) => ({ from: from.rgb, to: target[i]?.rgb ?? from.rgb }))
+
+if (explicit.length) console.log(`  ${explicit.length} mappings given explicitly`)
 
 const patched = Buffer.from(buffer)
 let changed = 0
