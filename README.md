@@ -74,7 +74,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 
 | | resting | working |
 | --- | --- | --- |
-| **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" height="72" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" height="66" alt="pikachu working"> |
+| **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" height="67" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" height="65" alt="pikachu working"> |
 | **ash**<br><sub>own animation</sub> | <img src="assets/10-ash-standing.gif" height="78" alt="ash resting"> | <img src="assets/11-ash-running.gif" height="87" alt="ash working"> |
 | **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" height="67" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" height="67" alt="charmander working"> |
 | **squirtle**<br><sub>its shiny</sub> | <img src="assets/pokemon/squirtle/idle.gif" height="69" alt="squirtle resting"> | <img src="assets/pokemon/squirtle/busy-shiny.gif" height="69" alt="squirtle working"> |
@@ -82,12 +82,12 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **eevee**<br><sub>its shiny</sub> | <img src="assets/pokemon/eevee/idle.gif" height="65" alt="eevee resting"> | <img src="assets/pokemon/eevee/busy-shiny.gif" height="65" alt="eevee working"> |
 | **munchlax**<br><sub>its shiny</sub> | <img src="assets/pokemon/munchlax/idle.gif" height="67" alt="munchlax resting"> | <img src="assets/pokemon/munchlax/busy-shiny.gif" height="67" alt="munchlax working"> |
 | **haunter**<br><sub>its shiny</sub> | <img src="assets/pokemon/haunter/idle.gif" height="87" alt="haunter resting"> | <img src="assets/pokemon/haunter/busy-shiny.gif" height="87" alt="haunter working"> |
-| **psyduck**<br><sub>own animation</sub> | <img src="assets/pokemon/psyduck/idle.gif" height="76" alt="psyduck resting"> | <img src="assets/12-psyduck-running.gif" height="118" alt="psyduck working"> |
+| **psyduck**<br><sub>own animation</sub> | <img src="assets/pokemon/psyduck/idle.gif" height="64" alt="psyduck resting"> | <img src="assets/12-psyduck-running.gif" height="125" alt="psyduck working"> |
 | **jigglypuff**<br><sub>its shiny</sub> | <img src="assets/pokemon/jigglypuff/idle.gif" height="84" alt="jigglypuff resting"> | <img src="assets/pokemon/jigglypuff/busy-shiny.gif" height="84" alt="jigglypuff working"> |
-| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" height="70" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" height="84" alt="charizard working"> |
+| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" height="66" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" height="87" alt="charizard working"> |
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" height="85" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" height="88" alt="meowth working"> |
-| **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" height="76" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" height="82" alt="gengar working"> |
-| **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" height="84" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" height="88" alt="cubone working"> |
+| **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" height="73" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" height="85" alt="gengar working"> |
+| **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" height="72" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" height="94" alt="cubone working"> |
 
 <!-- /gallery -->
 
@@ -195,6 +195,7 @@ Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 | `npm run install-statusline` | register the hooks (`npm run uninstall-statusline` to undo) |
 | `npm run window` | run a pane by hand, for debugging |
 | `npm run build` | rebuild the status-line frames from `config.json` |
+| `npm run recolour` | repaint one sprite's palette to match another: `-- a.gif b.gif out.gif` |
 
 `doctor` and `watch` are the two worth remembering. `doctor` answers "is this
 set up right", and `watch` answers "why is the sprite doing that" — it prints
@@ -221,6 +222,11 @@ Any GIF works. Drop it in `assets/` and point a roster entry at it:
 
 Hand-picked files are never overwritten or re-downloaded, and they override the
 default — which is the Pokémon's own shiny palette, with a white flash between.
+
+If a supplied animation is the right Pokemon in the wrong shade — two artists
+rarely agree on a palette — `npm run recolour` repaints it to match. A GIF
+stores pixels as indices into a colour table, so its colours can be changed
+without touching a single pixel or re-encoding anything.
 
 Judge a candidate at the size the pane actually draws, about 68 pixels tall.
 File size lies in both directions: a 500×500 GIF that is really 40×39 upscaled
