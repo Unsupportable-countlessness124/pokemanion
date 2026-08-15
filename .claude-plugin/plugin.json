@@ -3,10 +3,19 @@
   "displayName": "pokemanion",
   "version": "1.1.0",
   "description": "A Pokemon in a terminal pane beside every session, resting while the agent waits and animating while it works.",
-  "author": { "name": "khatriadbhut", "url": "https://github.com/khatriadbhut" },
+  "author": {
+    "name": "khatriadbhut",
+    "url": "https://github.com/khatriadbhut"
+  },
   "homepage": "https://github.com/khatriadbhut/pokemanion",
   "repository": "https://github.com/khatriadbhut/pokemanion",
   "license": "MIT",
-  "keywords": ["pokemon", "sprite", "status", "terminal", "ghostty", "hooks"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": [
+    "pokemon",
+    "sprite",
+    "status",
+    "terminal",
+    "ghostty",
+    "hooks"
+  ]
 }
