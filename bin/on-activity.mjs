@@ -316,13 +316,15 @@ try {
       //
       // Once per install. `install` is cheap when there is nothing to do, but
       // reading one file is cheaper, and this runs on every session.
-      const done = join(STATE_DIR, 'keybind-checked')
+      const done = join(STATE_DIR, 'bootstrapped')
 
       if (!existsSync(done)) {
         try {
           const { install } = await import('../src/ghostty.mjs')
+          const { bootstrapChafa } = await import('../src/bootstrap.mjs')
 
           install()
+          bootstrapChafa()
           mkdirSync(STATE_DIR, { recursive: true })
           writeFileSync(done, new Date().toISOString())
         } catch {}

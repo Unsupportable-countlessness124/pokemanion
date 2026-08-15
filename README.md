@@ -135,10 +135,15 @@ through a hook and works regardless.
 /plugin install pokemanion@pokemanion
 ```
 
-Works in Claude Code and Codex, and registers the hooks for you. You still need
-[**chafa** and **Ghostty**](#what-it-needs) — a plugin cannot install those —
-and you lose the launch flags, since `claude --pikachu` needs a shell function
-that only the clone route installs. Everything typed *inside* a session works.
+Works in Claude Code and Codex. It registers the hooks, writes the Ghostty
+keybind, and fetches **chafa** through Homebrew in the background if you do not
+have it — so the sprite may take a minute to appear the very first time.
+
+Two things it deliberately does not do. **Ghostty** it leaves alone: it is a GUI
+app that can ask for a password, and the pane is a Ghostty split, so anyone who
+can see a pane already has it. And the **launch flags** need a shell function
+that only the clone route installs — so `claude --pikachu` will not work, though
+everything typed *inside* a session will.
 
 **From a clone**, which is the full version:
 
