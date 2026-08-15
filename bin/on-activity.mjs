@@ -271,6 +271,30 @@ try {
       // whether Claude is still busy.
       tool: event === 'PreToolUse' ? (payload.tool_name ?? null) : null,
     })
+
+    // A first prompt with no pane behind it means SessionStart never opened one.
+    //
+    // The two agents disagree about when a session starts. Claude Code fires
+    // SessionStart when it launches; Codex fires it when you send your first
+    // prompt, because opening the TUI does not create a session yet — a Codex
+    // run that is quit without typing anything produces a SessionEnd and no
+    // SessionStart at all. So on Codex the pane arrived a beat late or, if the
+    // prompt hook ran first, not until the next launch.
+    //
+    // Opening here as well makes "the pane appears" independent of that
+    // disagreement, and quietly recovers any other way SessionStart can be
+    // missed — a hook awaiting review, a crash during startup.
+    //
+    // Guarded on never having opened one for this session, not on whether one
+    // is running now. Those differ in the case that matters: closing the pane by
+    // hand to reclaim the screen. Reopening it on the next prompt would make it
+    // impossible to get rid of, so a session that has already been given a
+    // Pokemon is left alone.
+    if (event === 'UserPromptSubmit' && loadConfig().autoWindow) {
+      const { rememberedSpecies } = await import('../src/assigned.mjs')
+
+      if (!rememberedSpecies(session)) openWindow(session, 'prompt')
+    }
   } else if (event === 'SessionEnd') {
     // The sprite belongs to this session, so it goes when the session does.
     closeWindow(session)

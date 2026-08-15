@@ -448,6 +448,36 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     rmSync(stateFile, { force: true })
   } catch {}
 
+  // 1a2. A prompt does not resurrect a pane you closed on purpose.
+  //
+  //      The two agents disagree about when a session starts — Claude Code at
+  //      launch, Codex at your first prompt — so the prompt hook also opens a
+  //      pane when none was ever opened. The guard is "never had one", not "has
+  //      one right now", because those differ exactly when someone closes the
+  //      sprite by hand to reclaim the screen: reopening it every prompt would
+  //      make it impossible to get rid of.
+  //
+  //      Only this half is tested here. The opening half launches a real Ghostty
+  //      split, which is not a thing to do in a test run.
+  {
+    const { rememberSpecies, forgetSession } = await import('./assigned.mjs')
+    const { pidFileFor } = await import('./companion.mjs')
+    const closed = 'smoke-closed-0001'
+
+    rememberSpecies(closed, 'gengar', 'test')
+    rmSync(pidFileFor(closed), { force: true })
+
+    run('bin/on-activity.mjs', {
+      input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', session_id: closed, prompt: 'hello' }),
+    })
+
+    check('a prompt does not reopen a pane closed by hand', !existsSync(pidFileFor(closed)))
+
+    forgetSession(closed)
+    const { STATE_DIR: sdir } = await import('./config.mjs')
+    rmSync(join(sdir, 'sessions', `${closed}.json`), { force: true })
+  }
+
   // 1b. Where each --dex answer goes. `current` describes the Pokemon already
   //     on screen, so it belongs beside it; everything else, `random` included,
   //     belongs in the conversation. Both used to answer in both places, which
