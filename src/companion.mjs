@@ -119,6 +119,26 @@ const waitForNewShell = (before, timeoutMs) => {
 
 const runScript = (body) => spawnSync('osascript', ['-e', body], { encoding: 'utf8' })
 
+// How far opening the split got.
+//
+// Every way this fails is silent from where you are sitting. It runs from a
+// SessionStart hook, so its stderr goes nowhere you will read; the split either
+// appears with a sprite in it or it does not, and a pane that opens empty looks
+// identical whether the keystroke was refused, the shell never arrived, or the
+// command was typed into the wrong window. Diagnosing one meant reconstructing
+// it afterwards from timestamps and guesswork.
+//
+// Same file and same switch as the rest of the hook logging, so it is already
+// on for anyone who has logHooks set and costs a line per session otherwise.
+const logSplit = (id, detail) => {
+  try {
+    if (!(process.env.PIXEL_RUNNER_LOG_HOOK || loadConfig().logHooks)) return
+
+    mkdirSync(STATE_DIR, { recursive: true })
+    appendFileSync(join(STATE_DIR, 'hooks.jsonl'), `${JSON.stringify({ at: Date.now(), event: 'split', session: id, ...detail })}\n`)
+  } catch {}
+}
+
 const openSplit = (rows, shrink, grow, id, species) => {
   // System Events types a keystroke string one character at a time, so the
   // length of this command is paid for in wall clock — the full node
@@ -168,17 +188,30 @@ const openSplit = (rows, shrink, grow, id, species) => {
         : `pokemanion: could not open the split — ${message}`,
     )
 
+    logSplit(id, { step: 'split keystroke failed', error: message.slice(0, 200) })
+
     return false
   }
 
   // If the shell never appears the split did not happen, and typing a command
   // now would send it to whatever is focused instead — most likely the Claude
   // prompt. Better to do nothing.
-  if (!waitForNewShell(before, 2000)) {
+  //
+  // The wait is generous rather than tight. It costs nothing when the shell
+  // turns up quickly, because this returns the moment it sees one; the only
+  // thing a longer limit buys is a machine under load still getting its pane.
+  // Two seconds was a guess, and a split that opens and stays empty is the
+  // symptom of having guessed low.
+  const waited = Date.now()
+
+  if (!waitForNewShell(before, 6000)) {
     console.error('pokemanion: the split did not open, so nothing was typed into it')
+    logSplit(id, { step: 'no shell appeared', shellsBefore: before, waitedMs: Date.now() - waited })
 
     return false
   }
+
+  const appeared = Date.now() - waited
 
   // Squash the empty pane, then start the sprite in it.
   const result = runScript(`
@@ -188,6 +221,13 @@ ${squeeze}
       key code 36
     end tell
   `)
+
+  logSplit(id, {
+    step: result.status === 0 ? 'typed' : 'typing failed',
+    shellsBefore: before,
+    shellAppearedMs: appeared,
+    error: result.status === 0 ? null : (result.stderr ?? '').trim().slice(0, 200),
+  })
 
   return result.status === 0
 }
