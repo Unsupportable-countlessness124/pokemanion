@@ -389,15 +389,25 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
       put(rc, `${snippet([{ name: 'claude' }], true)}\n`)
 
+      // Whichever shell this machine has. Hard-coding zsh passed here and failed
+      // on CI, which is Ubuntu and ships bash — the third test in this file to
+      // have quietly assumed the machine it was written on. The wrapper is
+      // supported on both, so either proves it; `sh` would not, since the
+      // function uses arrays.
+      const shell = ['zsh', 'bash'].find(
+        (candidate) => runShell(candidate, ['-c', 'true'], { encoding: 'utf8' }).status === 0,
+      )
+
       const ask = (line, env = {}) =>
-        runShell('zsh', ['-c', `source ${JSON.stringify(rc)} >/dev/null 2>&1; ${line}`], {
+        runShell(shell, ['-c', `source ${JSON.stringify(rc)} >/dev/null 2>&1; ${line}`], {
           encoding: 'utf8',
           env: { ...process.env, HOME: home, PATH: `${bin}:${process.env.PATH}`, PIXEL_RUNNER_SPECIES: '', ...env },
         }).stdout ?? ''
 
       // A resident needs no plugin at all to resolve; --random has to run the
       // launcher, which is the part that has to find the right directory.
-      check('a plugin wrapper resolves a resident', ask('claude --pikachu').includes('pikachu'))
+      check('a shell to test the wrapper in', Boolean(shell), shell ?? 'neither zsh nor bash on this machine')
+      check('a plugin wrapper resolves a resident', ask('claude --pikachu').includes('pikachu'), shell)
       check('and reaches the newest version of the plugin', ask('claude --random').includes('1.10.0'), ask('claude --random'))
 
       // The plugin uninstalled. The wrapper must not become a broken `claude`.
