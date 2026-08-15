@@ -65,9 +65,6 @@ export const POKEMON_DIR = join(ROOT, 'assets', 'pokemon')
 // brown to pink while the cream body stays put. Haunter is the genuinely weak
 // one. Look before believing the number.
 export const ROSTER = [
-  // The one everything was built around, using the sprites chosen for it. Not
-  // evolved: Raichu would be a change to Pikachu, and Pikachu does not change.
-  { name: 'pikachu', dex: 25, idle: 'assets/3-standing.gif', busy: 'assets/9-pikachu-run.gif', busySpeed: 1 },
   // Not a Pokemon and not from PokeAPI — supplied by hand, and the only entry
   // whose two halves are of the trainer rather than of a Pokemon. Standing
   // while it waits, running while it works. Its run is already a run cycle at
@@ -80,12 +77,9 @@ export const ROSTER = [
   // number — modal run length 1 across 255 colours — so there is no pixel grid
   // left to recover and it is scaled down as the smooth image it now is.
   { name: 'ash', idle: 'assets/10-ash-standing.gif', busy: 'assets/11-ash-running.gif', busySpeed: 1 },
-  { name: 'charmander' },
-  { name: 'squirtle' },
-  { name: 'bulbasaur' },
-  { name: 'eevee' },
-  { name: 'munchlax' },
-  { name: 'haunter' },
+  // The one everything was built around, using the sprites chosen for it. Not
+  // evolved: Raichu would be a change to Pikachu, and Pikachu does not change.
+  { name: 'pikachu', dex: 25, idle: 'assets/3-standing.gif', busy: 'assets/9-pikachu-run.gif', busySpeed: 1 },
   // The only mixed entry: its Gen-5 sprite while it waits, a supplied GIF while
   // it works — so it stays Psyduck rather than working as its shiny.
   //
@@ -101,6 +95,33 @@ export const ROSTER = [
   //
   // `busySpeed: 1` because the animation is already timed by whoever drew it.
   { name: 'psyduck', busy: 'assets/12-psyduck-running.gif', busySpeed: 1 },
+  // Gengar was never in the roster — Haunter is, left over from when working
+  // meant the evolved form — so this is a new entry rather than a change to
+  // one. Haunter stays; they are different Pokemon and both are worth having.
+  //
+  // Resting sprite downloaded like any other; the working one supplied. The two
+  // look alike at a glance, which is why it was measured: 55% change per frame
+  // against the idle's 38%.
+  { name: 'gengar', busy: 'assets/19-gengar-moving.gif', busySpeed: 1 },
+  // Both halves supplied. Swings its bone while Claude works.
+  //
+  // The two were drawn by different hands and it shows: the average colour of
+  // the lit pixels differs by 20%, about as much as a shiny does, so this reads
+  // as a change of palette as well as a change of pose. Deliberate — it was
+  // asked for by name — but it is why there is no `transition`. Flashing white
+  // on top of a recolour that is already happening would be saying it twice.
+  {
+    name: 'cubone',
+    idle: 'assets/21-cubone.gif',
+    busy: 'assets/22-cubone-swinging.gif',
+    busySpeed: 1,
+  },
+  { name: 'charmander' },
+  { name: 'squirtle' },
+  { name: 'bulbasaur' },
+  { name: 'eevee' },
+  { name: 'munchlax' },
+  { name: 'haunter' },
   { name: 'jigglypuff' },
   // Rests as its Gen-5 sprite, breathes fire while Claude works.
   //
@@ -133,27 +154,6 @@ export const ROSTER = [
   // No `transition`: jumping is Meowth doing something, not Meowth becoming
   // something, and the white flash is reserved for recolours.
   { name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
-  // Gengar was never in the roster — Haunter is, left over from when working
-  // meant the evolved form — so this is a new entry rather than a change to
-  // one. Haunter stays; they are different Pokemon and both are worth having.
-  //
-  // Resting sprite downloaded like any other; the working one supplied. The two
-  // look alike at a glance, which is why it was measured: 55% change per frame
-  // against the idle's 38%.
-  { name: 'gengar', busy: 'assets/19-gengar-moving.gif', busySpeed: 1 },
-  // Both halves supplied. Swings its bone while Claude works.
-  //
-  // The two were drawn by different hands and it shows: the average colour of
-  // the lit pixels differs by 20%, about as much as a shiny does, so this reads
-  // as a change of palette as well as a change of pose. Deliberate — it was
-  // asked for by name — but it is why there is no `transition`. Flashing white
-  // on top of a recolour that is already happening would be saying it twice.
-  {
-    name: 'cubone',
-    idle: 'assets/21-cubone.gif',
-    busy: 'assets/22-cubone-swinging.gif',
-    busySpeed: 1,
-  },
 ]
 
 // Showdown's Gen-5 animated set rather than PokeAPI's, which is the same
