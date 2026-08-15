@@ -88,7 +88,36 @@ export const ROSTER = [
   // halves different scales — Ash is smaller when running, because the pane
   // fits the whole scene rather than the figure — but that is the same trade
   // Charizard makes, where the fire fills the empty half of the pane.
-  { name: 'ash', idle: 'assets/27-ash-standing.gif', busy: 'assets/28-ash-pikachu-running.gif', busySpeed: 1 },
+  //
+  // `card` is what a resident who is not a Pokemon needs, and the only extra
+  // field one of them needs anywhere. Not `dex`, which is taken: Pikachu carries
+  // `dex: 25`, a number, and reusing the name made every lookup of Pikachu
+  // return a row with no title at all. The pokedex is built from Showdown's
+  // data, which has no trainers in it, so without this `--dex ash` has nothing
+  // to answer with. Everything else — summoning, the launch flag, the picker,
+  // "did you mean" — reads the roster and needs nothing added.
+  {
+    name: 'ash',
+    idle: 'assets/27-ash-standing.gif',
+    busy: 'assets/28-ash-pikachu-running.gif',
+    busySpeed: 1,
+    card: {
+      title: 'Ash Ketchum',
+      blurb:
+        'A young Pokémon Trainer from Pallet Town whose lifelong dream is to become a ' +
+        'Pokémon Master. Accompanied by his loyal partner Pikachu, he starred in the ' +
+        'anime for 25 seasons before finally achieving his goal of becoming a world champion.',
+      facts: [
+        ['from', 'Pallet Town'],
+        ['partner', 'Pikachu'],
+        ['goal', 'Become a "Pokémon Master"'],
+      ],
+      // The card as it appears in the pane, written whole rather than wrapped
+      // from the blurb: the pane is a few cells wide and sizes itself to its
+      // longest line, so short lines belong there and sentences do not.
+      pane: ['Ash Ketchum (Satoshi)', 'Pallet Town', 'Partner : Pikachu', 'Goal : Become a "Pokémon Master"'],
+    },
+  },
   { name: 'charmander' },
   { name: 'squirtle' },
   { name: 'bulbasaur' },
@@ -204,7 +233,10 @@ const KNOWN = new Set(JSON.parse(readFileSync(join(ROOT, 'assets', 'gen5-names.j
 
 // Every name the sprite folder has, for anything that needs to search the set
 // rather than ask about one member of it — the "did you mean" matcher, mostly.
-export const allNames = () => [...KNOWN]
+// Residents included, because a resident who is not in the sprite folder was
+// invisible to it: `--ashh` got no "did you mean --ash", the one case where a
+// suggestion is most obviously owed.
+export const allNames = () => [...new Set([...ROSTER.map((row) => row.name), ...KNOWN])]
 
 // What someone types, turned into what the folder calls it.
 //
@@ -216,6 +248,14 @@ export const resolveName = (input) => {
   const text = String(input ?? '').trim().toLowerCase()
 
   if (!text) return null
+
+  // The roster before the sprite folder. A resident whose name is not a
+  // Pokemon's — Ash — is not in the folder and never will be, and every command
+  // that takes a name comes through here. Resolving him here rather than at each
+  // call site is what makes adding another one a matter of one roster entry:
+  // when this returned null for him, the launch flag silently fell back to the
+  // rotation and "did you mean" could not offer him.
+  if (ROSTER.some((row) => row.name === text)) return text
 
   if (KNOWN.has(text)) return text
 
@@ -402,15 +442,6 @@ export const names = () => ROSTER.map((entry) => entry.name)
 // files are missing, and refusing silently is exactly how this would look
 // broken. Returns the resolved name, or null if it could not be had.
 export const ensure = (input) => {
-  // The roster first, the sprite folder second — the same order `switch.mjs`
-  // parses in, and for the same reason. Ash is a resident whose name is not a
-  // Pokemon's, so the folder has never heard of him and `resolveName` returns
-  // null. Asking the roster first is what makes `claude --ash` work; without it
-  // the flag was silently ignored and you got the rotation instead.
-  const resident = String(input ?? '').trim().toLowerCase()
-
-  if (entryFor(resident)) return isFetched(resident) ? resident : null
-
   const name = resolveName(input)
 
   if (!name) return null

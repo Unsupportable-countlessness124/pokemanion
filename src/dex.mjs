@@ -17,7 +17,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ROOT } from './config.mjs'
-import { fetchedGuests, isResident, names, resolveName } from './roster.mjs'
+import { ROSTER, fetchedGuests, isResident, names, resolveName } from './roster.mjs'
 import { speciesInUse } from './companion.mjs'
 import { loadSprite } from './sprite.mjs'
 
@@ -39,32 +39,20 @@ const DEX = JSON.parse(readFileSync(join(ROOT, 'assets', 'gen5-dex.json'), 'utf8
 // actually called Ash was not among them. Something you can summon should be
 // something you can look up.
 //
-// `pane` is written separately rather than wrapped from `blurb` because the
-// pane is a few cells wide and sizes itself to its longest line. Four short
-// lines belong there; four sentences do not.
-const OFF_DEX = {
-  ash: {
-    title: 'Ash Ketchum',
-    blurb:
-      'A young Pokémon Trainer from Pallet Town whose lifelong dream is to become a ' +
-      'Pokémon Master. Accompanied by his loyal partner Pikachu, he starred in the ' +
-      'anime for 25 seasons before finally achieving his goal of becoming a world champion.',
-    facts: [
-      ['from', 'Pallet Town'],
-      ['partner', 'Pikachu'],
-      ['goal', 'Become a "Pokémon Master"'],
-    ],
-    // The whole card, not lines appended to the title — a person's card is
-    // written, not assembled from fields the way a Pokemon's is.
-    pane: ['Ash Ketchum (Satoshi)', 'Pallet Town', 'Partner : Pikachu', 'Goal : Become a "Pokémon Master"'],
-  },
-}
+// Read off the roster rather than kept here, so that adding a character is one
+// entry in one file. Written twice, the two halves drift: the roster knew about
+// Ash while every "did you mean" and the launch flag did not.
+// Looked up on each call rather than snapshotted into a table at import time.
+// A snapshot works only because the roster happens to be static by the time
+// this module loads, which is a load-order dependency between two files that
+// nothing states and nothing checks.
+const cardFor = (name) => ROSTER.find((row) => row.name === name)?.card ?? null
 
 const BLANK = { num: 0, types: '', height: 0, weight: 0, colour: '', abilities: '' }
 
 export const entry = (name) => {
   const key = resolveName(name) ?? String(name ?? '').trim().toLowerCase()
-  const off = OFF_DEX[key]
+  const off = cardFor(key)
 
   if (off) return { name: key, ...BLANK, ...off }
 
@@ -173,7 +161,7 @@ export const exactMatch = (query) => {
 
   // Before name resolution, which only knows the sprite folder and so has never
   // heard of a trainer.
-  if (OFF_DEX[text]) return text
+  if (cardFor(text)) return text
 
   const name = resolveName(text)
 

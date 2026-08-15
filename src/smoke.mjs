@@ -113,6 +113,50 @@ check(
   `${cardWidth} cols available, longest line ${Math.max(...paneCard(entry('ash')).map((l) => l.length))}`,
 )
 
+// Adding a character should be one entry in one file.
+//
+// Ash was not. He went into the roster, and then the launch flag, "did you
+// mean" and the pokedex each had to be taught about him separately — two of
+// them never were, and nothing said so. This adds a character the way someone
+// would, then asks every command that takes a name whether it can see him. It
+// is the only test here that would catch the *next* one being half-wired.
+{
+  const { ROSTER: roster } = await import('./roster.mjs')
+  const { ensure, resolveName, names: rosterNames } = await import('./roster.mjs')
+  const { parse, suggest } = await import('./switch.mjs')
+  const { snippet } = await import('./shell.mjs')
+
+  // Real files, because half of this is "are its sprites on disk" — borrowed
+  // from Pikachu rather than invented, so nothing has to be written.
+  roster.push({
+    name: 'testchar',
+    idle: 'assets/3-standing.gif',
+    busy: 'assets/9-pikachu-run.gif',
+    busySpeed: 1,
+    card: { title: 'Test Character', blurb: 'Exists only for this test.', pane: ['Test Character', 'not real'] },
+  })
+
+  try {
+    const surfaces = [
+      ['resolves as a name', () => resolveName('testchar') === 'testchar'],
+      ['can be summoned', () => ensure('testchar') === 'testchar'],
+      ['appears in the picker', () => rosterNames().includes('testchar')],
+      ['is switched to when typed', () => parse('--testchar', rosterNames())?.kind === 'switch'],
+      ['is offered by did-you-mean', () => String(suggest('testchr', rosterNames()) ?? '').includes('testchar')],
+      ['is a dex lookup', () => exactMatch('testchar') === 'testchar'],
+      ['has a dex card', () => detail(entry('testchar'), false).includes('Exists only for this test')],
+      ['has a pane card', () => paneCard(entry('testchar'))[0] === 'Test Character'],
+      ['gets a launch flag in the shell wrapper', () => snippet(['claude']).includes('--testchar')],
+    ]
+
+    const missed = surfaces.filter(([, works]) => !works()).map(([what]) => what)
+
+    check('a new character needs only its roster entry', missed.length === 0, missed.join('; '))
+  } finally {
+    roster.pop()
+  }
+}
+
 // "N other forms" points at a prefix search, so anything without the prefix is
 // not a form and the follow-up cannot find it. --dex mew counted Mewtwo.
 const forms = (name) => search(name).filter((row) => row.name.startsWith(`${name}-`)).length
