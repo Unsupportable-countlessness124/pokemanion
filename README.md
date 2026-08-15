@@ -115,6 +115,16 @@ Only the pane-opening is macOS-specific: it splits Ghostty through AppleScript.
 Everything else is portable Node. Where it says *no*, run the pane yourself in a
 second terminal — `npm run window 4 --session=<id>` — and the rest still works.
 
+**One permission, granted by hand.** Splitting Ghostty means pressing keys, and
+macOS will not let anything press keys until you allow it: **System Settings →
+Privacy & Security → Accessibility → enable Ghostty**, then restart Ghostty.
+Nothing can script this. Without it no pane opens, and `npm run doctor` is what
+tells you that is why.
+
+`setup` also adds one keybind to `~/.config/ghostty/config` — a large resize
+step used to collapse the new split into a strip. Ghostty's built-in step is ten
+pixels, so without it the pane arrives at half your window height.
+
 The `claude --pikachu` wrapper is written to `~/.zshrc`, so it is zsh-only.
 Without it you lose the launch flags; everything typed *inside* Claude goes
 through a hook and works on any shell.
@@ -178,10 +188,20 @@ arrives in a pane taking half your window.
 
 </details>
 
-Undo it all with `npm run uninstall-statusline`, `npm run shell -- --remove`
-and `npm run ghostty -- --remove`.
-Your previous settings are copied to `~/.claude/settings.json.pixel-runner-backup`
-the first time anything is written.
+### What it touches outside this folder
+
+Three files, each backed up the first time it is written, each removable:
+
+| file | what goes in | undo |
+| --- | --- | --- |
+| `~/.claude/settings.json` | seven hooks | `npm run uninstall-statusline` |
+| `~/.zshrc` | the `claude()` wrapper, in a marked block | `npm run shell -- --remove` |
+| `~/.config/ghostty/config` | one resize keybind, in a marked block | `npm run ghostty -- --remove` |
+
+Nothing else leaves the repo — sprites, frame cache and state all live in
+`assets/` and `.state/`, so deleting the folder after undoing the three above
+leaves no trace. The backups are kept, at `<file>.pixel-runner-backup` and
+`<file>.pokemanion-backup`.
 
 ## Commands
 
