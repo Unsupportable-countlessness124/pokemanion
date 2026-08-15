@@ -444,6 +444,39 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     wrote ? `state=${wrote.state}` : 'wrote no state — it exits 0 even when it does nothing',
   )
 
+  // Every lifecycle event, under both agents' names for them. The one that
+  // differs is the waiting state: Claude calls it Notification, Codex calls it
+  // PermissionRequest, and getting it wrong means the sprite runs while the
+  // agent sits on an unanswered question.
+  {
+    const states = [
+      ['SessionStart', 'idle'],
+      ['UserPromptSubmit', 'working'],
+      ['PreToolUse', 'working'],
+      ['PostToolUse', 'working'],
+      ['Stop', 'idle'],
+      ['Notification', 'waiting'],
+      ['PermissionRequest', 'waiting'],
+    ]
+    const lifecycle = 'smoke-lifecycle-0001'
+    const wrong = []
+
+    for (const [event, want] of states) {
+      run('bin/on-activity.mjs', { input: JSON.stringify({ hook_event_name: event, session_id: lifecycle }) })
+
+      let got = null
+
+      try {
+        got = JSON.parse(read(sessionStateFile(lifecycle), 'utf8')).state
+      } catch {}
+
+      if (got !== want) wrong.push(`${event}: ${got} not ${want}`)
+    }
+
+    check(`every lifecycle event maps to a state (${states.length} checked)`, wrong.length === 0, wrong.join(', '))
+    rmSync(sessionStateFile(lifecycle), { force: true })
+  }
+
   try {
     rmSync(stateFile, { force: true })
   } catch {}
@@ -658,6 +691,47 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
         })
 
         check('and come back out again', gone.status === 0 && !JSON.parse(read(file, 'utf8')).hooks)
+
+        // Codex's hooks file may already be somebody else's. Ours go in beside
+        // theirs, survive being installed twice, and leave theirs behind when
+        // removed — the same contract as Claude's settings.json, which holds far
+        // more than hooks and has always been treated carefully.
+        const { writeFileSync: put } = await import('node:fs')
+
+        put(
+          file,
+          JSON.stringify({
+            description: 'theirs',
+            hooks: { Stop: [{ hooks: [{ type: 'command', command: '/opt/theirs/notify.sh' }] }] },
+          }),
+        )
+
+        const theirs = () => {
+          const doc = JSON.parse(read(file, 'utf8'))
+
+          return {
+            them: Object.values(doc.hooks ?? {}).flat().filter((g) => JSON.stringify(g).includes('/opt/theirs')).length,
+            us: Object.values(doc.hooks ?? {}).flat().filter((g) => JSON.stringify(g).includes('on-activity.mjs')).length,
+            note: doc.description,
+          }
+        }
+
+        spawnSync(process.execPath, ['install.mjs', '--codex'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, HOME: codexHome } })
+        spawnSync(process.execPath, ['install.mjs', '--codex'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, HOME: codexHome } })
+
+        const after = theirs()
+
+        check("another tool's codex hooks survive ours", after.them === 1 && after.us === 7 && after.note === 'theirs', JSON.stringify(after))
+
+        spawnSync(process.execPath, ['install.mjs', '--codex', '--uninstall'], {
+          cwd: ROOT,
+          encoding: 'utf8',
+          env: { ...process.env, HOME: codexHome },
+        })
+
+        const left = theirs()
+
+        check('and are still there after ours are removed', left.them === 1 && left.us === 0, JSON.stringify(left))
       } catch (error) {
         check('codex install', false, error.message.split('\n')[0])
       } finally {
