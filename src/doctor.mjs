@@ -103,7 +103,10 @@ check('Claude settings wiring', () => {
   const statusLine = String(settings.statusLine?.command ?? '')
   const events = Object.entries(settings.hooks ?? {})
     .filter(([, groups]) =>
-      groups.some((group) => (group.hooks ?? []).some((hook) => String(hook.command).includes('pixel-runner'))),
+      // Matched on where this project actually is, not on what it is called.
+      // Checking for the literal name meant renaming the folder would report
+      // every hook as missing while they all worked perfectly.
+      groups.some((group) => (group.hooks ?? []).some((hook) => String(hook.command).includes(ROOT))),
     )
     .map(([event]) => event)
 
@@ -114,7 +117,7 @@ check('Claude settings wiring', () => {
     ok: missing.length === 0,
     detail: missing.length
       ? `hooks missing: ${missing.join(', ')} — run npm run install-statusline`
-      : `${events.length} hooks registered${statusLine.includes('pixel-runner') ? ', status line wired' : ''}`,
+      : `${events.length} hooks registered${statusLine.includes(ROOT) ? ', status line wired' : ''}`,
   }
 })
 
