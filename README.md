@@ -8,7 +8,7 @@ One lives in a pane beside every session: it rests while Claude waits, and does
 something else while Claude works — so you can tell from the corner of your eye
 whether anything is happening.
 
-[![CI](https://github.com/<you>/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/<you>/pokemanion/actions/workflows/ci.yml)
+[![CI](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](package.json)
@@ -112,7 +112,7 @@ through a hook and works on any shell.
 ## Install
 
 ```sh
-git clone https://github.com/<you>/pokemanion.git
+git clone https://github.com/khatriadbhut/pokemanion.git
 cd pokemanion
 
 npm run roster                # fetch the sprites
