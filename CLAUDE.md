@@ -27,8 +27,9 @@ Then tell them the things the script cannot do for them:
 4. **System Settings → Privacy & Security → Accessibility → enable Ghostty.**
    Opening a split means pressing keys, and macOS blocks that until allowed.
    Without it no pane appears at all.
-5. **Trust the hooks when Codex asks.** It hashes each one, so it asks again
-   after any update to this project — and runs none of them until you answer.
+5. **Trust the hooks when Codex asks**, and run `/hooks` inside Codex after any
+   update to this project. It hashes each hook and skips the ones it has not
+   reviewed, silently, so the sprite just stops reacting.
 
 If it fails, `npm run doctor` checks every piece individually and says which one
 is unhappy. `npm run uninstall-statusline` and `npm run shell -- --remove` undo

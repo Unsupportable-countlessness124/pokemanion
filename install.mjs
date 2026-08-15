@@ -109,13 +109,31 @@ const read = (file) => {
   }
 }
 
+// Written only when the contents would actually differ.
+//
+// Codex records trust against a hash of each hook and skips any it does not
+// recognise — so rewriting the file with identical contents is not free, it
+// silently revokes trust and the sprite stops reacting with nothing said
+// anywhere. `npm run setup` is meant to be safe to run twice; unconditionally
+// rewriting made running it twice a way to break your own install.
+//
+// This is not a micro-optimisation. It is the difference between re-running
+// setup being harmless and re-running setup being the thing that broke it.
 const write = (file, document) => {
+  const body = `${JSON.stringify(document, null, 2)}\n`
+
+  try {
+    if (readFileSync(file, 'utf8') === body) return false
+  } catch {}
+
   // The directory may not exist yet. Writing straight into it threw ENOENT with
   // a node stack trace and — because this runs at the top level of a script that
   // ends `process.exit(0)` — still exited 0, so `npm run setup` reported the
   // step as done having written nothing at all.
   mkdirSync(dirname(file), { recursive: true })
-  writeFileSync(file, `${JSON.stringify(document, null, 2)}\n`)
+  writeFileSync(file, body)
+
+  return true
 }
 
 const targets = chosen()
@@ -189,8 +207,15 @@ for (const agent of targets) {
   // rude at best.
   if (!skipVerbs && agent.shape === 'settings') document.spinnerVerbs = SPINNER_VERBS
 
-  write(file, document)
-  console.log(`  ${agent.name}: ${events.length} hooks -> ${file}`)
+  const changed = write(file, document)
+
+  console.log(`  ${agent.name}: ${events.length} hooks -> ${file}${changed ? '' : ' (unchanged)'}`)
+
+  // Only when something actually moved. Saying it every time trains people to
+  // ignore it, and the whole point is that they act on it the once.
+  if (changed && agent.name === 'codex') {
+    console.log('  codex: run /hooks inside Codex to trust them — it skips hooks it has not reviewed')
+  }
 }
 
 console.log(

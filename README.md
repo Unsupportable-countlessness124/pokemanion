@@ -155,9 +155,10 @@ Then four things it cannot do for you:
 
 **Codex will ask you to trust the hooks**, and should — they are commands it is
 about to run for you, and they sit in `~/.codex/hooks.json` where you can read
-them first. It stores a hash per hook, so it asks again whenever one changes:
-after updating this project, expect one more prompt. Until you answer it, Codex
-runs no hooks and the sprite simply will not react.
+them first. It stores a hash per hook and **skips any it has not reviewed**, so after
+updating this project, run **`/hooks`** inside Codex and trust them again.
+Until you do it runs them not at all, silently, and the sprite stops reacting. Re-running `npm run setup` does not disturb this: it leaves the file
+alone when nothing has actually changed.
 
 A pane should appear beside your next session.
 
