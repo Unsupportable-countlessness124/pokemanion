@@ -271,6 +271,17 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       )
     }
 
+    // Every resident by name, not just whichever one a pane happens to hold.
+    // The version of this test that sampled the live panes only caught Ash
+    // being unresolvable at launch on the day a pane happened to be showing
+    // him — a resident whose name is not a Pokemon's takes a different route
+    // through `ensure` than the other twelve, and nothing was walking it.
+    const unreachable = names().filter(
+      (name) => chooseSpecies(`ask-${name}`, on, { PIXEL_RUNNER_SPECIES: name }) !== name,
+    )
+
+    check('every resident can be asked for by name at launch', unreachable.length === 0, unreachable.join(' '))
+
     // A guest is the case most worth remembering — you went and named it — and
     // the one that breaks if "is this still on disk" is asked of the resident
     // list, which is what `available()` is. That mistake restored every

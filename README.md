@@ -44,13 +44,13 @@ whether anything is happening.
   <td>Gengar fires a shadow beam across the pane.</td>
 </tr>
 <tr>
-  <td align="center"><img src="assets/21-cubone.gif" width="85" alt="Cubone standing"></td>
-  <td align="center"><img src="assets/22-cubone-swinging.gif" width="97" alt="Cubone working"></td>
-  <td>Cubone swings its bone.</td>
+  <td align="center"><img src="assets/27-ash-standing.gif" width="52" alt="Ash standing"></td>
+  <td align="center"><img src="assets/28-ash-pikachu-running.gif" width="200" alt="Ash and Pikachu running"></td>
+  <td>Ash waits, then runs off with Pikachu.</td>
 </tr>
 </table>
 
-Fourteen hand-tuned residents ship with it. **1238 more** can be summoned by
+Thirteen hand-tuned residents ship with it. **1239 more** can be summoned by
 name and are fetched on the spot.
 
 <img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
@@ -67,7 +67,7 @@ sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
 [Settings](#settings) · [Design notes](docs/design.md)**
 
 <details>
-<summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
+<summary><b>All thirteen residents</b> — resting on the left, working on the right</summary>
 
 <br>
 
@@ -88,13 +88,12 @@ sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
 | **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" width="67" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" width="204" alt="charizard working"> |
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" width="65" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" width="70" alt="meowth working"> |
 | **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" width="89" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" width="166" alt="gengar working"> |
-| **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" width="85" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" width="97" alt="cubone working"> |
 
 <!-- /gallery -->
 
 These animate — they are the sprite files themselves, not pictures of them.
 Seven work as their own shiny, the same animation recoloured with a white
-flash at the switch; seven were given animations of their own.
+flash at the switch; six were given animations of their own.
 
 </details>
 
@@ -366,11 +365,11 @@ mush. `npm run attribution` regenerates the credits list when you add one.
 
 ## Residents and guests
 
-**Residents** are the 14 in `src/roster.mjs`: hand-tuned, always on disk,
+**Residents** are the 13 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out. Pikachu goes to whoever is free to have it.
 
-**Guests** are the other 1238. They arrive when you name them — about two
+**Guests** are the other 1239. They arrive when you name them — about two
 seconds, measured: roughly 1.3s to fetch and 0.6s to render — then stay while
 you use them and load in 2 ms thereafter. They are evicted least-recently-shown
 first, and one a pane is currently showing is never evicted, however long it has

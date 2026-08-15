@@ -170,19 +170,6 @@ export const ROSTER = [
     busy: 'assets/25-gengar-attack.gif',
     busySpeed: 1,
   },
-  // Both halves supplied. Swings its bone while Claude works.
-  //
-  // The two were drawn by different hands and it shows: the average colour of
-  // the lit pixels differs by 20%, about as much as a shiny does, so this reads
-  // as a change of palette as well as a change of pose. Deliberate — it was
-  // asked for by name — but it is why there is no `transition`. Flashing white
-  // on top of a recolour that is already happening would be saying it twice.
-  {
-    name: 'cubone',
-    idle: 'assets/21-cubone.gif',
-    busy: 'assets/22-cubone-swinging.gif',
-    busySpeed: 1,
-  },
 ]
 
 // Showdown's Gen-5 animated set rather than PokeAPI's, which is the same
@@ -415,6 +402,15 @@ export const names = () => ROSTER.map((entry) => entry.name)
 // files are missing, and refusing silently is exactly how this would look
 // broken. Returns the resolved name, or null if it could not be had.
 export const ensure = (input) => {
+  // The roster first, the sprite folder second — the same order `switch.mjs`
+  // parses in, and for the same reason. Ash is a resident whose name is not a
+  // Pokemon's, so the folder has never heard of him and `resolveName` returns
+  // null. Asking the roster first is what makes `claude --ash` work; without it
+  // the flag was silently ignored and you got the rotation instead.
+  const resident = String(input ?? '').trim().toLowerCase()
+
+  if (entryFor(resident)) return isFetched(resident) ? resident : null
+
   const name = resolveName(input)
 
   if (!name) return null
