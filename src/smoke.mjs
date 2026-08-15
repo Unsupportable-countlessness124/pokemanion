@@ -449,8 +449,18 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   // PermissionRequest, and getting it wrong means the sprite runs while the
   // agent sits on an unanswered question.
   {
+    // SessionStart is deliberately not in this list.
+    //
+    // It is the one event that opens a pane, and the handler under test is the
+    // real one — so including it made `npm test` split a live terminal and
+    // leave a sprite running. Two of them were sitting on screen before anyone
+    // noticed, alongside the real sessions. A test suite that spawns windows on
+    // the machine running it is worse than a slightly smaller test suite.
+    //
+    // Nothing is lost: SessionStart shares the idle branch with Stop, which is
+    // covered, and the pane-opening path is exercised by the real agents rather
+    // than by pretending to be one.
     const states = [
-      ['SessionStart', 'idle'],
       ['UserPromptSubmit', 'working'],
       ['PreToolUse', 'working'],
       ['PostToolUse', 'working'],
