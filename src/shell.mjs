@@ -117,7 +117,34 @@ const withoutBlock = (text) => {
   return `${text.slice(0, from)}${text.slice(to + END.length)}`.replace(/\n{3,}/g, '\n\n')
 }
 
-const RC = join(homedir(), '.zshrc')
+// Where the function goes, which is a question about the shell you use rather
+// than about the function.
+//
+// This was hard-coded to ~/.zshrc, and the docs said the wrapper was zsh-only
+// on the strength of it. It is not: the same function sources and runs
+// identically under bash 3.2, the version macOS ships — arrays, `local`, the
+// case patterns, all of it. The only thing that was zsh-only was the filename
+// it got written to, so a bash user had it installed into a file their shell
+// never reads and concluded the feature did not work.
+//
+// macOS terminals start login shells, which is why .bash_profile comes before
+// .bashrc for bash. An existing file wins over convention either way, since
+// that is the one they already put things in.
+export const rcFile = (shell = process.env.SHELL ?? '', home = homedir()) => {
+  const override = process.argv.find((arg) => arg.startsWith('--rc='))
+
+  if (override) return override.slice('--rc='.length)
+
+  if (/bash/.test(shell)) {
+    const profile = join(home, '.bash_profile')
+
+    return existsSync(profile) || !existsSync(join(home, '.bashrc')) ? profile : join(home, '.bashrc')
+  }
+
+  return join(home, '.zshrc')
+}
+
+const RC = rcFile()
 
 const write = (body) => {
   if (existsSync(RC)) copyFileSync(RC, `${RC}.pixel-runner-backup`)

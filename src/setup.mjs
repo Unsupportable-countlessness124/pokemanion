@@ -52,10 +52,13 @@ if (!existsSync('/Applications/Ghostty.app')) {
   warnings.push(['Ghostty is not in /Applications', 'the sprite needs it — https://ghostty.org'])
 }
 
-if (!/^zsh/.test(process.env.SHELL ?? '') && !process.env.SHELL?.endsWith('zsh')) {
+// zsh and bash both work — the function is plain POSIX-ish shell and runs the
+// same under bash 3.2, which is what macOS ships. Anything else gets the
+// warning, because the file it would be written to is a guess.
+if (!/(zsh|bash)$/.test(process.env.SHELL ?? '')) {
   warnings.push([
-    `your shell is ${process.env.SHELL ?? 'unknown'}, not zsh`,
-    'the claude() wrapper is written for zsh, so launch flags will not work — everything typed inside Claude still will',
+    `your shell is ${process.env.SHELL ?? 'unknown'}, not zsh or bash`,
+    'the claude() wrapper will be written to ~/.zshrc, so launch flags may not load — everything typed inside Claude still works',
   ])
 }
 

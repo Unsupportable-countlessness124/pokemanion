@@ -179,6 +179,24 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
   check('every path in the shell wrapper is quoted', bare.length === 0, `${bare.length} bare: ${[...new Set(bare)].join(', ')}`)
   check('and the wrapper still references the launcher', text.includes(`"${join(ROOT, 'bin', 'run.sh')}"`))
+
+  // The function itself runs under bash 3.2 — the version macOS ships — as well
+  // as zsh; only the file it was written to was ever zsh-specific, which is why
+  // this used to be documented as zsh-only.
+  const { rcFile } = await import('./shell.mjs')
+  const { mkdtempSync: rcTemp, writeFileSync: put, rmSync: drop } = await import('node:fs')
+  const { tmpdir: temp } = await import('node:os')
+  const bare2 = rcTemp(join(temp(), 'pokemanion-rc-'))
+  const withBashrc = rcTemp(join(temp(), 'pokemanion-rc-'))
+
+  put(join(withBashrc, '.bashrc'), '')
+
+  check('zsh installs into .zshrc', rcFile('/bin/zsh', bare2).endsWith('.zshrc'))
+  check('bash installs into a bash file', rcFile('/bin/bash', bare2).endsWith('.bash_profile'))
+  check('and prefers one that already exists', rcFile('/bin/bash', withBashrc).endsWith('.bashrc'))
+
+  drop(bare2, { recursive: true, force: true })
+  drop(withBashrc, { recursive: true, force: true })
 }
 
 // What a session was given, and getting it back.

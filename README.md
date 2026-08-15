@@ -108,7 +108,7 @@ real image, not text.
 | --- | :---: | :---: | :---: |
 | **macOS + Ghostty** — the only tested setup | yes | yes | yes |
 | macOS + kitty, iTerm2, WezTerm, Warp | yes | no | yes |
-| Linux + kitty, Konsole | should | no | needs bash porting |
+| Linux + kitty, Konsole | should | no | untested |
 | Alacritty, Terminal.app, Windows | no | no | no |
 
 Only the pane-opening is macOS-specific: it splits Ghostty through AppleScript.
@@ -120,9 +120,10 @@ macOS blocks that until you allow it — **System Settings → Privacy & Securit
 Accessibility → enable Ghostty**. Nothing can script it, and without it no pane
 opens.
 
-The `claude --pikachu` wrapper is written to `~/.zshrc`, so it is zsh-only.
-Without it you lose the launch flags; everything typed *inside* Claude goes
-through a hook and works on any shell.
+The `claude --pikachu` wrapper works in **zsh and bash**, and installs into
+whichever you use — `~/.zshrc`, or `~/.bash_profile`/`~/.bashrc`. On any other
+shell you lose the launch flags only; everything typed *inside* Claude goes
+through a hook and works regardless.
 
 ## Install
 
