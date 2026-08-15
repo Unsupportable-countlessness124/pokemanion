@@ -14,6 +14,11 @@ and stands still when it doesn't.
 No dependencies. Everything — code, sprites, build output, runtime state —
 lives in this one folder.
 
+The sprites are not mine. The Gen-5 animated sprites are Game Freak's, by way of
+Showdown's collection; several of the hand-picked GIFs are fan art found online
+and are kept here because no command can bring them back. Treat this repository
+as personal, not as something to redistribute.
+
 ## Why it isn't inside the spinner line
 
 The obvious place for this is next to `Actioning…`, and that turns out to be
@@ -55,6 +60,29 @@ animation runs at a constant speed no matter how often we happen to be called.
 If that bothers you, drop `refreshInterval` from the `statusLine` block in
 `~/.claude/settings.json`: the sprite then only advances when a message updates,
 which still animates while Claude works but goes still when idle.
+
+## What it needs
+
+```
+macOS       the pane is a Ghostty split driven by AppleScript, and the
+            shell wrapper edits ~/.zshrc. Nothing else is macOS-specific.
+Ghostty     for the kitty graphics protocol — the sprite is a real image,
+            not text. Any kitty-protocol terminal should work.
+chafa       brew install chafa. Converts frames to image escapes.
+Node >= 20  no dependencies, nothing to install.
+```
+
+First run downloads the resident sprites and renders them:
+
+```sh
+npm run roster   # fetch the sprites
+npm run warm     # render them for a 4-row pane
+npm run doctor   # check every piece is in place
+```
+
+`npm run doctor` is the thing to run when something looks wrong — it checks the
+hooks are wired, chafa is present, the cache matches the pane height, and which
+Pokemon are currently held.
 
 ## Use
 
