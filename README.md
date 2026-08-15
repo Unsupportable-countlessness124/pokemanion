@@ -1,619 +1,193 @@
-# pixel-runner
+# pokemanion
 
-A Pokemon lives in a pane beside every Claude Code session. It rests while
-Claude waits and does something else while Claude works — Charizard breathes
-fire, Meowth jumps, Psyduck runs — so you can tell from the corner of your eye
-whether anything is happening.
+**Your Pokémon companion for Claude Code.** One lives in a pane beside every
+session: it rests while Claude waits, and does something else while Claude
+works — so you can tell from the corner of your eye whether anything is
+happening.
 
-```
-                      Charizard  #6
-  (\/)                Fire/Flying  Red
-  (oo)  ~~~~~~~>      1.7m  90.5kg
-  /||\                Blaze/Solar Power
-```
+<table>
+<tr>
+  <th align="left" width="16%">waiting</th>
+  <th align="left" width="20%">working</th>
+  <th align="left">&nbsp;</th>
+</tr>
+<tr>
+  <td><img src="assets/14-charizard.gif" width="90" alt="Charizard standing"></td>
+  <td><img src="assets/16-charizard-firing.gif" width="150" alt="Charizard breathing fire"></td>
+  <td>Charizard breathes fire across the empty half of the pane.</td>
+</tr>
+<tr>
+  <td><img src="assets/21-cubone.gif" width="70" alt="Cubone standing"></td>
+  <td><img src="assets/22-cubone-swinging.gif" width="70" alt="Cubone swinging its bone"></td>
+  <td>Cubone swings its bone.</td>
+</tr>
+<tr>
+  <td><img src="assets/3-standing.gif" width="70" alt="Pikachu standing"></td>
+  <td><img src="assets/9-pikachu-run.gif" width="110" alt="Pikachu running"></td>
+  <td>Pikachu runs. It is the one everything else was tuned against.</td>
+</tr>
+</table>
 
-Fourteen hand-tuned residents. Any of **1252 more** can be summoned by name and
-are fetched on the spot:
+Fourteen hand-tuned residents ship with it. **1252 more** can be summoned by
+name and are fetched on the spot.
 
-```sh
-claude --pikachu           # start a session with a particular one
-claude --resume --random   # or be handed one
-claude --pokemon           # pick from a list
-```
+<img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
 
-and from inside Claude, costing no turn and no tokens:
+A Pokéball opens whenever one arrives, and its stats appear beside it for a few
+seconds. Everything is local: no account, no backend, nothing about you leaving
+the machine.
 
-```
---squirtle        switch this pane
---random          roll one
---dex ghost       look one up
---dex current     what is this one
-```
-
-No dependencies. Everything — code, sprites, build output, runtime state —
-lives in this one folder.
-
-The code is MIT. The artwork is not mine and is not covered by it — Gen-5
-sprites are Game Freak's, and the hand-picked GIFs are fan art found online.
-They ship with the project anyway, because several roster entries are only
-worth having because of them. See [LICENSE](LICENSE) for the split and
-[ATTRIBUTION.md](ATTRIBUTION.md) for what came from where; `npm run
-attribution` regenerates that list when a sprite is added.
-
-## How it knows Claude is working
-
-It is inference, not a signal, and that is the most interesting part of this.
-Claude Code rings a hook when you submit a prompt and around each tool, but
-there is **no hook for pressing escape** — so an interrupted turn looks
-identical to a running one.
-
-So the pane also reads the session transcript, where an interruption leaves an
-`interruptedMessageId`, and watches whether the transcript is still growing at
-all. Where that frays, and why the thresholds are what they are, is written
-down in [docs/known-issues.md](docs/known-issues.md).
-
-## Why it isn't inside the spinner line (background)
-
-The obvious place for this is next to `Actioning…`, and that turns out to be
-closed off. Claude Code 2.1.221 exposes exactly three spinner settings —
-`spinnerVerbs`, `spinnerTipsEnabled`, `spinnerTipsOverride`. There is no setting
-for the animated glyph, and the verb is chosen once per turn:
-
-```js
-let [K] = SK.useState(() => O$(GWt()))   // GWt() reads your spinnerVerbs
-```
-
-`useState` with an initialiser — picked at mount, never re-rolled. So a sprite
-put there through config would freeze for the whole turn. On top of that the
-spinner is a single text row, and a recognisable sprite needs four or more rows
-of half blocks.
-
-The status line sits directly beneath it, takes as many rows as we want, and
-does re-run. So the sprite goes there, and `install.mjs` also swaps the spinner
-verbs for themed ones so the two rows read as a single unit.
-
-## How fast it can animate
-
-Two things re-run the status line: a `refreshInterval` timer, clamped in the
-binary to a one second floor —
-
-```js
-refreshInterval: E.number().min(1)
-```
-
-— and event-driven updates, debounced at 300ms, which fire as token usage
-changes while Claude streams. So it holds at 1fps when idle and picks up to
-roughly 3fps while Claude is actually working, which is when you're looking at
-it. The frame is derived from the wall clock rather than a counter, so the
-animation runs at a constant speed no matter how often we happen to be called.
-
-## Cost
-
-25ms per tick, once a second. About 2.5% of one core while a session is open.
-If that bothers you, drop `refreshInterval` from the `statusLine` block in
-`~/.claude/settings.json`: the sprite then only advances when a message updates,
-which still animates while Claude works but goes still when idle.
+<br clear="left">
 
 ## What it needs
 
-```
-macOS       the pane is a Ghostty split driven by AppleScript, and the
-            shell wrapper edits ~/.zshrc. Nothing else is macOS-specific.
-Ghostty     for the kitty graphics protocol — the sprite is a real image,
-            not text. Any kitty-protocol terminal should work.
-chafa       brew install chafa. Converts frames to image escapes.
-Node >= 20  no dependencies, nothing to install.
-```
+| | |
+| --- | --- |
+| **macOS** | the pane is a Ghostty split driven by AppleScript, and the shell wrapper edits `~/.zshrc` |
+| **Ghostty** | for the kitty graphics protocol — the sprite is a real image, not text. Any kitty-protocol terminal should do |
+| **chafa** | `brew install chafa` |
+| **Node ≥ 20** | no dependencies, nothing to install |
 
-First run downloads the resident sprites and renders them:
+## Install
 
 ```sh
-npm run roster   # fetch the sprites
-npm run warm     # render them for a 4-row pane
-npm run doctor   # check every piece is in place
+git clone https://github.com/<you>/pokemanion.git
+cd pokemanion
+
+npm run roster                # fetch the sprites
+npm run warm                  # render them for a 4-row pane
+npm run install-statusline    # wire the hooks into ~/.claude/settings.json
+npm run shell -- --install    # add the claude() wrapper to ~/.zshrc
 ```
 
-`npm run doctor` is the thing to run when something looks wrong — it checks the
-hooks are wired, chafa is present, the cache matches the pane height, and which
-Pokemon are currently held.
-
-## Use
+Then **restart Claude Code** and open a new terminal. A pane should appear
+beside your next session.
 
 ```sh
-npm run build              # decode the sprite into build/frames.json
-npm run install-statusline # wire it into ~/.claude/settings.json
-# restart Claude Code
+npm run doctor                # if it doesn't
 ```
 
-Ask for a particular one:
+`doctor` is the thing to run whenever something looks wrong. It checks the hooks
+are registered, chafa is present, the frame cache matches your pane height, and
+which Pokémon are currently held.
 
-```sh
-npm run shell -- --install   # adds a claude() function to ~/.zshrc
-# then
-claude --pikachu
-claude --resume --ash
-claude --model opus --gengar
-claude --pokemon             # pick from a numbered list
-```
-
-`--pokemon` lists everything available and waits for a number. A name works
-too. Blank carries on under the usual rules; backing out starts nothing at all.
-
-```
-   1  pikachu
-   2  ash
-   3  charmander
-   ...
-  number, or blank for the usual:
-```
-
-Claude Code owns the `claude` command and rejects flags it does not know, so
-these must never reach it. The function gets there first: it lifts out any
-argument naming a Pokemon, passes everything else through untouched, and puts
-the choice in `PIXEL_RUNNER_SPECIES`, which Claude Code inherits and passes on
-to its hooks. Order does not matter and other flags are unaffected. Undo with
-`npm run shell -- --remove`.
-
-Without a flag, the pane gets Pikachu whenever Pikachu is free — close the
-window it is in and the next terminal you open has it again — and otherwise a
-Pokemon nobody else currently has. `npm run doctor` shows who holds what.
-
-When the sprite is running at the wrong moment — still going after you pressed
-escape, or still while Claude waits on an answer — `npm run watch` prints the
-same decision the pane is making and what it rested on:
-
-```sh
-npm run watch          # every session
-npm run watch 3ff282   # one, by the start of its id
-```
-
-Set `logHooks` to also record which hooks fired, to `.state/hooks.jsonl`. The
-two together say whether Claude reported the end of a turn at all, and whether
-the pane believed it.
-
-Undo everything:
-
-```sh
-npm run uninstall-statusline
-```
-
+Undo it all with `npm run uninstall-statusline` and `npm run shell -- --remove`.
 Your previous settings are copied to `~/.claude/settings.json.pixel-runner-backup`
 the first time anything is written.
 
-## Using a different sprite
+## Commands
 
-Any GIF works. Drop it in `assets/`, point `config.json` at it, rebuild:
-
-```json
-{ "sprite": "assets/charizard.gif", "cols": 14, "rows": 5 }
-```
+Starting a session:
 
 ```sh
-npm run build
+claude --pikachu             # a particular one
+claude --flygon              # any of the 1252, fetched on first use
+claude --random              # be handed one
+claude --pokemon             # pick from a list
+claude --resume --charizard  # combines with everything else
 ```
 
-Preview any sprite at any size without installing:
-
-```sh
-node src/preview.mjs assets/pikachu-bw.gif 18 6
-```
-
-Each Pokemon waits as its Gen-5 Black/White front sprite and works as the same
-sprite in its shiny palette. Meowth's paws, ears and tail go from brown to pink;
-Psyduck would go from yellow to teal.
-
-Both halves come from one place, which is the point:
+Typed at Claude, inside a session. These never reach the model — a hook answers
+them and blocks the prompt, so they cost no turn and no tokens:
 
 ```
-https://play.pokemonshowdown.com/sprites/gen5ani/<name>.gif
-https://play.pokemonshowdown.com/sprites/gen5ani-shiny/<name>.gif
+--squirtle          switch this pane, live, no restart
+--random            roll one
+--pokemon           list the residents
+
+--dex               what you have, and how many exist
+--dex ghost         every Ghost type
+--dex 149           by number
+--dex dragonite     by name
+--dex current       the stats of the one you're looking at
+--dex random        be shown something
 ```
 
-Shiny is the same file recoloured, so it cannot be lower resolution than the
-resting sprite, cannot clash with it in style, faces you, and stays the same
-Pokemon. The cost is that the *motion* is identical — only the colour changes.
-At this size that is the signal that reads fastest, but where it is not enough,
-give the entry its own `busy` file and it overrides everything.
+A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
+question and reaches Claude untouched.
 
-How far each shiny actually moves the colour, over the lit pixels of frame one:
+## Your own sprites
 
-```
-psyduck 27%   bulbasaur 21%   eevee 20%   jigglypuff 17%   charmander 13%
-munchlax 12%  squirtle 10%    haunter 8%  meowth 6%
-```
+Any GIF works. Drop it in `assets/` and point a roster entry at it:
 
-Treat that as a hint, not a verdict. It averages over the whole sprite, so it
-understates anything that recolours only its accents — Meowth scores 6% and is
-obvious in the pane. Haunter is the genuinely weak one. Look before believing it.
-
-Gen 5 holds exactly two animations per Pokemon — the front sprite and the back
-one — so a genuinely *different* animation of the same Pokemon has to come from
-somewhere else, and everywhere else loses on quality. Measured at the size the
-pane draws:
-
-| source | artwork | shown at | frames | |
-| --- | --- | --- | --- | --- |
-| Gen-5 front | 37-74px | 0.9-1.8x | 24-86 | the bar |
-| Gen-5 back | 32-98px | 0.8-1.8x | 28-86 | same bar, facing away |
-| Showdown `ani` (XY) | 45-133px | 0.5-1.5x | 25-106 | pale, smooth, 3D renders |
-| PMDCollab | 18-31px | 2.5-3.6x | 3-12 | blobby, thick outline |
-
-Shiny keeps both halves inside the top row for free: it *is* the top row, in a
-different palette.
-
-The evolved form also works and was tried here, but evolving is being kept back
-for something else — a session that has run long enough evolves what is sitting
-beside it. The silhouette flicker is already built for that; see
-`docs/known-issues.md`.
-
-The folder carries **895 species**, not the 649 that existed in Gen 5, because
-Smogon's sprite project kept drawing in the Black/White style: Sylveon,
-Toxtricity and Dragapult are all there and all measure 0.8-1.1x with 60-76
-frames. Gen 7 onward is patchy — no Decidueye, Cinderace or Meowscarada — so
-fetch a new entry before believing in it.
-
-## The Pokedex
-
-Twelve hundred names is not a list anyone reads, so there is a way to search it:
-
-```sh
-npm run dex                  # summary, and what is on disk
-npm run dex -- charizard     # by name
-npm run dex -- dragon        # by type
-npm run dex -- 25            # by dex number
-npm run dex -- current       # what the panes are showing now
-npm run dex -- random        # be shown something
+```js
+// src/roster.mjs
+{ name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
 ```
 
-`current` reads the claim files rather than the roster, because that is the only
-thing that knows: a pane may have been switched, handed a guest, or rolled at
-random since it opened. Inside Claude it answers for *that* session; in a
-terminal it lists every pane that is up.
+Hand-picked files are never overwritten or re-downloaded, and they override the
+default — which is the Pokémon's own shiny palette, with a white flash between.
 
-### Stats in the pane
-
-The pane is four rows and the width of the window, and the sprite uses about
-eight columns of it. The rest is where the stats go:
-
-```
-        Terapagos-Stellar  #1024
- (:o)   Normal  Blue
- /|\    1.7m  77kg
- / \    Teraform Zero
-```
-
-They appear **whenever the pane's Pokemon changes** — rolled with `--random`,
-switched with `--squirtle`, or just opened — and time out after `cardMs`
-(8000). `--dex current` shows them again.
-
-One rule decides this, and it is worth keeping: **the pane's caption always
-describes the Pokemon under it.** So a lookup of something else — `--dex
-dragonite`, `--dex random` — stays in the conversation and never touches the
-pane, because captioning the wrong animal is worse than not captioning at all.
-
-`"cardMs": 0` turns it off.
-
-and the same from inside Claude, which costs no turn:
-
-```
---dex          --dex ghost          --dex 149          --dex random
---dex current  # the stats of whatever this pane is showing right now
-```
-
-A search with exactly one answer — or `random` — gets the long form instead of
-a table row:
-
-```
-  Gurdurr
-
-    no.     #533
-    type    Fighting
-    size    1.2m, 40kg
-    colour  Gray
-    ability Guts/Sheer Force/Iron Fist
-    sprite  fetched when you summon it
-
-  --gurdurr to summon it
-```
-
-To be handed one rather than choosing:
-
-```sh
-claude --random           # roll at launch
-claude --resume --random  # works with the rest
-```
-```
---random                  # roll mid-session
-```
-
-The dice only ever land on a real Pokemon. The sprite folder also holds Pokestar
-Studios movie props from Black 2, Smogon's invented CAP Pokemon and Alcremie's
-decorative variants — 65 things with no real dex number — and rolling
-"Pokestar UFO #-5001" is a bad surprise. They stay summonable by name.
-
-```
-  *   25 Pikachu              Electric      --pikachu
-  .  330 Flygon               Ground/Dragon --flygon
-     149 Dragonite            Dragon/Flying --dragonite
-```
-
-`*` is a resident, `.` a guest currently on disk, blank means it would be
-fetched when you name it. The last column is the command that summons it.
-
-A single result gets a card, with a Pokeball bobbing beside the stats. The ball
-only appears in a real terminal — inside Claude the same text arrives as a
-hook's blocking reason and is rendered as plain text, where an image escape
-sequence would be printed literally instead of drawn.
-
-Number, name and types for all 1252 are bundled in `assets/gen5-dex.json`
-(51KB, built from Showdown's pokedex), so searching never touches the network.
+Judge a candidate at the size the pane actually draws, about 68 pixels tall.
+File size lies in both directions: a 500×500 GIF that is really 40×39 upscaled
+is pixel art and scales beautifully, while a 407×295 smooth render shrinks to
+mush. `npm run attribution` regenerates the credits list when you add one.
 
 ## Residents and guests
 
-All 1255 names the sprite folder has are available. They are not all on disk.
-
-**Residents** are `ROSTER` in `src/roster.mjs` — hand-tuned, always present,
+**Residents** are the 14 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
-out. **Guests** are everything else: fetched the first time you name them, kept
-while you use them, and evicted when the space is wanted.
+out. Pikachu goes to whoever is free to have it.
+
+**Guests** are the other 1252. They arrive when you name them — about a second —
+stay while you use them, and are evicted least-recently-shown first.
 
 ```sh
-claude --flygon      # fetched on the spot, about a second the first time
---flygon             # same thing from inside Claude
-npm run prune        # evict now; happens on its own as sessions open
+npm run prune            # evict now; happens on its own as sessions open
 npm run prune -- --dry
 ```
 
-The split exists because the whole set pre-rendered is roughly **2.7GB** of
-frame cache and twenty-five minutes of work. Guests cost 1-5MB each.
-
-Eviction is least-recently-shown first, bounded by two settings:
-
-| key | default | meaning |
-| --- | --- | --- |
-| `guestBudgetMb` | `200` | total disk guests may hold |
-| `guestKeepDays` | `14` | a guest unused this long goes regardless |
-
-Residents are never evicted. Names are matched the way the folder spells them,
-with punctuation forgiven — `--ho-oh` finds `hooh`, `--porygon-z` finds
-`porygonz` — and form names work as written: `--rotom-wash`, `--charizard-mega-x`.
-
-To promote a guest to a resident, add its name:
-
-```js
-{ name: 'totodile' },
-```
-
-To use your own files instead — a GIF you found anywhere — point the entry
-straight at them, which is how Pikachu and Ash work:
-
-```js
-{ name: 'ash', idle: 'assets/10-ash-standing.gif', busy: 'assets/11-ash-running.gif', busySpeed: 1 },
-```
-
-Hand-picked files are never re-downloaded or overwritten. Big smooth GIFs are
-fine — `recoverNative` in `prepare.mjs` divides out whole-number upscales, so a
-500x488 sprite that is really 40x39 is treated as 40x39.
-
-`npm run roster` downloads everything in `src/roster.mjs`; add `--refresh` to
-re-download ones already here. `npm run warm` renders them all into the frame
-cache so a session's pane draws immediately.
+The whole set pre-rendered would be about **2.7 GB** of frame cache and
+twenty-five minutes of work, which is the entire reason for the split. Guests
+cost 1–5 MB each, bounded by `guestBudgetMb` (200) and `guestKeepDays` (14).
 
 ## Settings
 
-`config.json`, all optional:
+`config.json`, all optional. The ones worth knowing:
 
 | key | default | meaning |
 | --- | --- | --- |
-| `sprite` | `assets/pikachu-showdown.gif` | GIF to animate |
-| `rows` | `10` | height in terminal cells (snapped — see below) |
-| `cols` | `null` | width; `null` derives it from the sprite's proportions |
-| `sampler` | `mode` | how a pixel is chosen when scaling down — see below |
-| `style` | `sextant` | how many pixels fit in one cell — see below |
-| `snap` | `true` | force a whole-number reduction. Leave this on |
-| `palette` | `6` | flatten to this many colours before shrinking; `0` disables |
-| `frameMs` | `200` | how long one frame is held |
-| `maxFrames` | `12` | source frames are sampled down to this many |
-| `animateWhenIdle` | `false` | keep moving when Claude isn't working |
+| `windowRows` | `4` | how tall the pane is |
+| `idleAfterMs` | `20000` | transcript silence that counts as finished |
 | `workingTimeoutMs` | `120000` | how long after the last hook we still count as working |
-| `idleAfterMs` | `20000` | transcript silence that counts as finished — see `docs/known-issues.md` |
-| `transitions` | `true` | play an animation when the sprite changes over |
-| `logHooks` | `false` | append every hook to `.state/hooks.jsonl` for diagnosis |
+| `transitions` | `true` | animate the change between the two sprites |
+| `pokeball` | `true` | open a Pokéball when one arrives |
+| `cardMs` | `8000` | how long the stats stay beside the sprite; `0` disables |
+| `guestBudgetMb` | `200` | disk the guests may hold |
+| `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
-A Pokeball opens when a Pokemon **arrives** — the pane starting up, or a species
-being switched to. Not when Claude starts or stops working.
+## How it knows Claude is working
 
-That split is deliberate. Waiting-to-working happens constantly and has to stay
-readable at a glance, so it gets a quick flash. Arriving happens when you ask for
-it, so it can afford a second and a half of ceremony. Playing the ball on every
-work switch would bury the signal under the celebration.
+This is inference rather than a signal, and it is the part most likely to
+surprise you. Claude Code rings a hook when you submit a prompt and around each
+tool — but there is **no hook for pressing escape**, so an interrupted turn
+looks identical to a running one.
 
-Turn it off with `"pokeball": false`.
+So the pane also reads the session transcript, where an interruption leaves an
+`interruptedMessageId`, and watches whether the transcript is growing at all.
+Where that frays, and why the thresholds are what they are, is in
+[docs/known-issues.md](docs/known-issues.md).
 
-The rest are transitions between the two sprites, and an entry gets whichever
-fits what is actually changing:
+When the sprite is wrong at the wrong moment, `npm run watch` prints the same
+decision the pane is making and what it rested on.
 
-| kind | when | what it does |
-| --- | --- | --- |
-| `flash` | the same Pokemon recoloured | white, colour, white, colour, white — 326ms, accelerating 90ms to 40ms |
-| `evolve` | two different Pokemon | their two silhouettes traded back and forth — 680ms, 130ms to 40ms |
+## Licence and artwork
 
-Every shiny pair flashes. It matters more than decoration: a shiny works as the
-resting sprite recoloured and *moves identically*, so without the flash there is
-no moment where anything visibly happens.
+The **code** is MIT — see [LICENSE](LICENSE).
 
-`evolve` is set by `becomes`, which nothing uses today — see
-`docs/known-issues.md`.
+The **artwork is not mine and is not covered by it.** The Gen-5 sprites are
+Game Freak's; the hand-picked GIFs are fan art found online. They ship with the
+project because several entries are only worth having because of them.
+[ATTRIBUTION.md](ATTRIBUTION.md) names what came from where, and anything will
+be removed on request — sprites are read by path, so it is a one-line change.
 
-Pikachu, Ash and Psyduck get neither. Standing and running is not a
-transformation, and announcing one would be a lie. A hand-picked pair that *is*
-a recolour has to say so, since nothing can infer it from the files:
+Pokémon is a trademark of Nintendo. This is a personal tool, unaffiliated with
+anyone, and nothing here is sold.
 
-```js
-{ name: 'charizard', idle: '...', busy: '...', transition: 'flash' },
-```
+## More
 
-## Changing Pokemon mid-session
-
-Type the flag at Claude, as a prompt on its own:
-
-```
---squirtle      switch this session's pane to Squirtle
---pokemon       list them, marking the current one
-```
-
-The sprite changes in place — no new window, no restart, and the pane keeps its
-position. The switch also updates the claim, so other terminals still see what
-is taken.
-
-The prompt never reaches Claude. A `UserPromptSubmit` hook recognises it, writes
-the name to the claim file the pane already watches, and exits 2, which blocks
-the prompt and erases it — so it costs no turn and no tokens. The reply you see
-is the hook's stderr.
-
-Only a prompt that is **entirely** the flag counts. `what does --pikachu do?` is
-a real question and goes to Claude untouched.
-
-Leave `cols` at `null`. Fixing both dimensions by hand is how the sprite ends up
-squashed sideways: a half block cell is two pixels tall and one wide, and
-terminal cells are about twice as tall as they are wide, so a sprite pixel is
-square and the source aspect ratio carries through on its own.
-
-## Don't average when scaling down
-
-The first version of this box-filtered the sprite down and it came out as yellow
-mush. A sprite's outline is one pixel wide, so it is a minority of every block it
-falls in and the mean slides towards the body colour. Measured on the bundled
-Pikachu, whose source is 16.7% outline pixels:
-
-| sampler | outline surviving |
-| --- | --- |
-| average | 3.8% |
-| `nearest` | 16.2% |
-| `mode` | 19.2% |
-| `outline` | 26.9% |
-
-`mode` — the most frequent colour in the block — tracks the source most closely
-and keeps flat regions flat, so it is the default. `outline` biases towards dark
-pixels and is worth trying below about six rows. Averaging isn't offered.
-
-## Scale by a whole number
-
-This matters more than the sampler. Reducing a 60px sprite to 16px is a factor
-of 3.75, so some output pixels average a 3x3 block of the source and their
-neighbours average 4x4. Edges that are straight in the sprite come out ragged
-and the whole thing reads as mush no matter how good the sampler is.
-
-`snap: true` rounds `rows` to the nearest size that divides the source evenly.
-The height has to divide cleanly *and* stay even, because two pixel rows share a
-cell — for the bundled 60px Pikachu that permits 3, 5, 6, 10 or 15 rows, but not
-8. Ask for 8 and you get 10, at exactly 3x. `npm run build` prints what it chose:
-
-```
-size     20x10 cells, style half, sampler mode
-scaling  3x exactly — snapped rows 8 -> 10
-```
-
-## Flatten the palette
-
-A sprite carries more shades than survive being shrunk. Pikachu's body is one
-yellow plus two shading yellows, and at 3x neighbouring blocks land on different
-shades, so a flat belly breaks into speckle. `palette: 6` collapses the sprite to
-its six most-used colours first — outline, body, shade, cheek, eye, highlight —
-which puts the flat areas back. Rendered frame goes from 13 colours to 6.
-
-The palette is counted across every frame, so a region never flickers between two
-shades as the animation runs. Nothing is really lost: the source is drawn in flat
-colour to begin with.
-
-## The limit is the terminal
-
-Once averaging, aspect, scaling and palette are all right, what's left is
-resolution, and that is fixed by how many rows you are willing to spend. At
-`rows: 10` the sprite is 20x20 pixels. That is the whole budget.
-
-For the bundled 60px Pikachu:
-
-| rows | reduction | pixels | reads as |
-| --- | --- | --- | --- |
-| 5 | 6x | 10x10 | a yellow blob |
-| 6 | 5x | 12x12 | ears and tail visible |
-| 10 | 3x | 20x20 | clearly Pikachu — the default |
-| 15 | 2x | 30x30 | sharp, but half your terminal |
-| 30 | 1x | 60x60 | the sprite exactly as drawn |
-
-There is no setting that beats this trade. If you want it sharper, spend rows.
-
-## More detail without more rows
-
-The number of rows is not the real limit — how finely a cell is divided is.
-Unicode has glyphs that cut a character cell into halves, quarters, sixths or
-eighths, so the same eight rows can carry four times the pixels.
-
-The price is colour. A cell is one glyph with one foreground and one background,
-so however many pixels it holds, only two colours can appear in it. Each cell
-picks the two that fit its own pixels best. Sprites are drawn in flat colour, so
-most cells sit inside one region and lose nothing.
-
-| style | pixels per cell | the 50x46 Gen-5 sprite at 8 rows |
-| --- | --- | --- |
-| `blocks` | 1 (1x1) | 4x reduction, always solid |
-| `half` | 2 (1x2) | 3x reduction |
-| `quad` | 4 (2x2) | 3x, twice the horizontal detail |
-| `sextant` | 6 (2x3) | **2x reduction** |
-| `braille` | 8 (2x4) | 2x — and 1:1 by 12 rows |
-
-Braille packs the most in and is in every font, but the dots do not fill the
-cell, so it reads as dot matrix rather than solid, and it only carries one colour
-per cell. Sextants are the best looking if your font has them.
-
-Check what your font supports before choosing:
-
-```sh
-npm run fontcheck
-```
-
-Any family that renders as a row of identical empty rectangles is missing.
-
-## Seams: `half` vs `blocks`
-
-`half` uses the ▀ glyph to fit two pixels in one cell. It has twice the vertical
-detail, but it is a *glyph*, and a terminal configured with any line spacing
-draws a gap underneath every row — the sprite comes out visibly striped, and no
-amount of resampling will fix it.
-
-`blocks` paints one pixel per cell as a background colour behind two spaces.
-Backgrounds fill the whole cell whatever the line spacing is, so it is always
-solid. The cost is half the vertical detail and double the width.
-
-Apple Terminal is the common case where `half` looks striped. iTerm2, Kitty,
-WezTerm and Ghostty all let you set line height to 1.0, which makes `half`
-seamless and strictly better.
-
-See both, with every sampler, in your own terminal:
-
-```sh
-npm run compare
-```
-
-## Layout
-
-```
-src/gif.mjs       GIF87a/89a decoder — LZW, interlacing, frame disposal
-src/render.mjs    RGBA frames -> half-block ANSI rows
-src/build.mjs     pre-renders everything into build/frames.json
-src/preview.mjs   print every frame to look at it
-bin/statusline.mjs  what Claude Code runs each tick
-bin/on-activity.mjs hook handler; records working/idle into .state/
-bin/run.sh        finds node under a hook's trimmed PATH
-install.mjs       settings.json wiring, with --uninstall
-```
-
-The decode happens at build time, not per tick, which is what keeps the runtime
-at 25ms.
-
-## Sprites
-
-The bundled GIFs come from the PokeAPI sprite collection. Pokémon sprites are
-Nintendo/Game Freak property, fine for a local toy, not for redistribution.
-Swap in your own artwork if this becomes anything more than that.
+- [docs/design.md](docs/design.md) — why it is built this way: why it is not in
+  the spinner line, how a sprite is scaled down without ruining it, and what a
+  terminal can actually draw.
+- [docs/known-issues.md](docs/known-issues.md) — where the working/waiting
+  detection frays, and the features that are built but deliberately dormant.
