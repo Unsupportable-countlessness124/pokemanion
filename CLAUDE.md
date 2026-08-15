@@ -12,15 +12,20 @@ opens the split by driving Ghostty through AppleScript. It needs `chafa`
 
 ## If the user wants to install it
 
-Run **`npm run setup`**. That is the whole install — it checks the
-prerequisites, downloads the sprites, renders them, registers the hooks in
-`~/.claude/settings.json`, and adds a `claude()` wrapper to `~/.zshrc`. It is
-safe to run more than once.
+If `chafa` or Ghostty are missing, run **`npm run deps`** first — it installs
+both via Homebrew. Then run **`npm run setup`**, which is the whole install: it
+checks the prerequisites, downloads the sprites, renders them, registers the
+hooks in `~/.claude/settings.json`, adds a `claude()` wrapper to `~/.zshrc`, and
+sets the Ghostty resize keybind the pane needs. Safe to run more than once.
 
-Then tell them the two things the script cannot do for them:
+Then tell them the things the script cannot do for them:
 
 1. **Restart Claude Code** — it reads the hooks at startup.
-2. **Open a new terminal**, or `source ~/.zshrc`.
+2. **Restart Ghostty** — it reads its config at startup.
+3. **Open a new terminal**, or `source ~/.zshrc`.
+4. **System Settings → Privacy & Security → Accessibility → enable Ghostty.**
+   Opening a split means pressing keys, and macOS blocks that until allowed.
+   Without it no pane appears at all.
 
 If it fails, `npm run doctor` checks every piece individually and says which one
 is unhappy. `npm run uninstall-statusline` and `npm run shell -- --remove` undo

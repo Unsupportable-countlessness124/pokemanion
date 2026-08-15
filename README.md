@@ -124,23 +124,26 @@ through a hook and works on any shell.
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
 cd pokemanion
+npm run deps      # chafa and Ghostty, via Homebrew — skip if you have them
 npm run setup
 ```
 
-That checks what it needs, downloads the sprites, renders them, registers the
-hooks in `~/.claude/settings.json`, and adds the `claude()` wrapper to
-`~/.zshrc`. Safe to run again. If you would rather do it a piece at a time, or
-something failed and you only need to redo that part:
+`setup` downloads the sprites, renders them, registers the hooks in
+`~/.claude/settings.json`, adds the `claude()` wrapper to `~/.zshrc`, and sets
+the one Ghostty keybind the pane needs. It checks its prerequisites first and
+stops without touching anything if one is missing. Safe to run again.
 
-```sh
-npm run roster                # fetch the sprites
-npm run warm                  # render them for a 4-row pane
-npm run install-statusline    # wire the hooks into ~/.claude/settings.json
-npm run shell -- --install    # add the claude() wrapper to ~/.zshrc
-```
+Then three restarts, none of them optional:
 
-Then **restart Claude Code** and open a new terminal. A pane should appear
-beside your next session.
+1. **Restart Claude Code** — it reads the hooks at startup.
+2. **Restart Ghostty** — it reads its config at startup.
+3. **Open a new terminal**, or `source ~/.zshrc`.
+
+And once, by hand: **System Settings → Privacy & Security → Accessibility →
+enable Ghostty**. Opening a split means pressing keys, and macOS will not let
+anything press keys until you allow it. Nothing can script this for you.
+
+A pane should appear beside your next session.
 
 ```sh
 npm run doctor                # if it doesn't
@@ -150,7 +153,33 @@ npm run doctor                # if it doesn't
 are registered, chafa is present, the frame cache matches your pane height, and
 which Pokémon are currently held.
 
-Undo it all with `npm run uninstall-statusline` and `npm run shell -- --remove`.
+<details>
+<summary>Doing it a piece at a time</summary>
+
+<br>
+
+Each step `setup` runs is still its own command, for when only one needs
+redoing:
+
+```sh
+npm run roster                  # fetch the sprites
+npm run warm                    # render them for a 4-row pane
+npm run install-statusline      # wire the hooks into ~/.claude/settings.json
+npm run shell -- --install      # add the claude() wrapper to ~/.zshrc
+npm run ghostty -- --install    # the resize keybind, so the pane is a strip
+```
+
+**The keybind is not optional.** The pane is opened by splitting the window and
+then collapsing that split to a strip, and the collapse is one press of a
+2000px resize step. Ghostty's built-in step is ten pixels — a hundred presses
+you would watch crawl down the screen — so the binding has to be in your own
+Ghostty config. Without it the split opens and never collapses, and the sprite
+arrives in a pane taking half your window.
+
+</details>
+
+Undo it all with `npm run uninstall-statusline`, `npm run shell -- --remove`
+and `npm run ghostty -- --remove`.
 Your previous settings are copied to `~/.claude/settings.json.pixel-runner-backup`
 the first time anything is written.
 
@@ -202,6 +231,8 @@ Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 | `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
 | `npm run roster` | download any missing resident sprites (`-- --refresh` to redo them) |
 | `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
+| `npm run deps` | install chafa and Ghostty via Homebrew (`-- --dry` to preview) |
+| `npm run ghostty -- --install` | the resize keybind the pane needs (`--remove` to undo) |
 | `npm run prune` | evict guests now (`-- --dry` to see what would go, `-- --keep-days=0`) |
 | `npm run assigned` | which Pokemon each session was given, and why (`-- --forget` to reset) |
 | `npm run dex` | the Pokedex, from a terminal: `-- fire`, `-- 25`, `-- current`, `-- random` |
