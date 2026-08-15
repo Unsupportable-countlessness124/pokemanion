@@ -61,8 +61,8 @@ unlisted rather than silently going unnamed.
 | `3-standing.gif` | pikachu resting |
 | `8-pikachu-ow.png` | config.json |
 | `9-pikachu-run.gif` | pikachu working |
-| `10-ash-standing.gif` | ash resting |
-| `11-ash-running.gif` | ash working |
+| `10-ash-standing.gif` | kept, not currently used |
+| `11-ash-running.gif` | kept, not currently used |
 | `12-psyduck-running.gif` | psyduck working |
 | `14-charizard.gif` | charizard resting |
 | `15-charizard-shiny.gif` | kept, not currently used |
@@ -74,8 +74,10 @@ unlisted rather than silently going unnamed.
 | `22-cubone-swinging.gif` | cubone working |
 | `23-gengar.gif` | gengar resting |
 | `25-gengar-attack.gif` | gengar working |
+| `27-ash-standing.gif` | ash resting |
+| `28-ash-pikachu-running.gif` | ash working |
 
-16 files.
+18 files.
 
 <!-- /files -->
 

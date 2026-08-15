@@ -73,13 +73,22 @@ export const ROSTER = [
   // while it waits, running while it works. Its run is already a run cycle at
   // 100ms a frame, so like Pikachu it plays as drawn.
   //
-  // The standing sprite arrived with an opaque near-white background, which
-  // would have drawn as a solid slab; `keyOutBackground` in prepare.mjs knocks
-  // it out, all four corners agreeing on the colour being what makes that safe.
-  // It had also been resized with interpolation rather than blown up by a whole
-  // number — modal run length 1 across 255 colours — so there is no pixel grid
-  // left to recover and it is scaled down as the smooth image it now is.
-  { name: 'ash', idle: 'assets/10-ash-standing.gif', busy: 'assets/11-ash-running.gif', busySpeed: 1 },
+  // The standing half was cut out of a sheet of five trainers with `npm run
+  // crop -- <in> <out> --find=3` — Ash is the middle one. Cropping is the one
+  // operation here that cannot be a byte patch: `recolour` and `key` relabel a
+  // palette, but this moves every pixel to a new address, so the frames are
+  // decoded and re-encoded the way `flip` does.
+  //
+  // At 66x85 it draws at 0.8x, which is the Gen-5 range rather than the 0.14x
+  // the previous standing sprite needed — that one was 329x498 of smooth
+  // artwork with no pixel grid to recover, and it read as soft beside sprites
+  // that snap to the terminal's cells.
+  //
+  // The running half deliberately keeps Pikachu in frame. It makes the two
+  // halves different scales — Ash is smaller when running, because the pane
+  // fits the whole scene rather than the figure — but that is the same trade
+  // Charizard makes, where the fire fills the empty half of the pane.
+  { name: 'ash', idle: 'assets/27-ash-standing.gif', busy: 'assets/28-ash-pikachu-running.gif', busySpeed: 1 },
   { name: 'charmander' },
   { name: 'squirtle' },
   { name: 'bulbasaur' },

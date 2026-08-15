@@ -43,6 +43,7 @@
     "gallery": "node src/gallery.mjs",
     "recolour": "node src/recolour.mjs",
     "flip": "node src/flip.mjs",
-    "key": "node src/key.mjs"
+    "key": "node src/key.mjs",
+    "crop": "node src/crop.mjs"
   }
 }
