@@ -97,9 +97,6 @@ Then, at your agent:
 </tr>
 </table>
 
-> Codex says **add** where Claude Code says **install** — Codex's own spelling,
-> not a typo.
-
 Nothing to clone or build; the agent fetches the project itself and the sprites
 ship with it. Two things are left:
 
@@ -109,14 +106,13 @@ ship with it. Two things are left:
   appears.
 - **Restart your agent and Ghostty.** Both read their configuration at startup.
 
-The plugin says both of these itself on your first message.
-
-Want `claude --pikachu` at launch? That needs [the clone](#from-a-clone).
+This covers everything you type *inside* a session. To also choose a Pokémon as
+the session opens — `claude --pikachu` — [install from source](#install-from-source)
+instead.
 
 ---
 
-**[Requirements](#requirements) · [Commands](#commands) · [From a
-clone](#from-a-clone) · [Troubleshooting](#troubleshooting) · [Residents and
+**[Requirements](#requirements) · [Commands](#commands) · [From source](#install-from-source) · [Troubleshooting](#troubleshooting) · [Residents and
 guests](#residents-and-guests) · [Settings](#settings) · [Your own
 sprites](#your-own-sprites) · [Design notes](docs/design.md)**
 
@@ -198,7 +194,7 @@ does --pikachu do?` is a real question and passes through untouched.
 Punctuation is forgiven and form names work as written: `--ho-oh`,
 `--rotom-wash`, `--charizard-megax`.
 
-At launch, if you installed [from a clone](#from-a-clone):
+At launch, if you installed [from source](#install-from-source):
 
 ```sh
 claude --pikachu             # a particular one
@@ -207,11 +203,9 @@ claude --random              # be handed one
 claude --resume --charizard  # combines with everything else
 ```
 
-<a id="from-a-clone"></a>
+## Install from source
 
-## From a clone
-
-The full version, and the only one with the launch flags:
+Everything the plugin does, plus the launch flags:
 
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
