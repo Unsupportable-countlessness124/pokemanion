@@ -14,10 +14,10 @@ and stands still when it doesn't.
 No dependencies. Everything — code, sprites, build output, runtime state —
 lives in this one folder.
 
-The sprites are not mine. The Gen-5 animated sprites are Game Freak's, by way of
-Showdown's collection; several of the hand-picked GIFs are fan art found online
-and are kept here because no command can bring them back. Treat this repository
-as personal, not as something to redistribute.
+The code is MIT. The artwork is not mine and is not covered by it — Gen-5
+sprites are Game Freak's, and the hand-picked GIFs are fan art found online.
+See [LICENSE](LICENSE) for the split and [ATTRIBUTION.md](ATTRIBUTION.md) for
+what came from where.
 
 ## Why it isn't inside the spinner line
 

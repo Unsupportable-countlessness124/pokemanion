@@ -1,5 +1,6 @@
 {
   "name": "pixel-runner",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "description": "A sprite that runs in the Claude Code status line while Claude works.",
