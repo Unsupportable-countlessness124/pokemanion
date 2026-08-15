@@ -117,7 +117,14 @@ try {
           // session asking already knows which Pokemon it is holding, so it
           // answers with that one's card rather than a list of every window.
           const asking = asked.query.trim().toLowerCase()
-          const mine = asking === 'current' ? current : null
+          // Naming the one you are looking at counts as asking about it.
+          // `current` was the only word that reached the pane, so `--dex ash`
+          // with Ash sitting right there answered in the conversation instead —
+          // the same question routed away from the thing it was about, purely
+          // because it was asked by name. The rule this branch is built on is
+          // "the answer belongs beside it", and a name satisfies that as well as
+          // the word "current" does.
+          const mine = asking === 'current' || (current && exactMatch(asking) === current) ? current : null
 
           // Without a claim of its own, "current" has no answer. Falling back
           // to a search would list what *other* windows are holding, under a

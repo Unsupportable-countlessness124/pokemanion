@@ -18,8 +18,11 @@ The quickest route is the plugin, which registers the hooks and needs no clone:
     /plugin install pokemanion@pokemanion
 
 It cannot install chafa or Ghostty, and it does not add the shell wrapper — so
- at launch will not work, though everything typed inside a
+`claude --pikachu` at launch will not work, though everything typed inside a
 session will. For the full thing, clone it:
+
+    git clone https://github.com/khatriadbhut/pokemanion.git
+    cd pokemanion
 
 If `chafa` or Ghostty are missing, run **`npm run deps`** first — it installs
 both via Homebrew. Then run **`npm run setup`**, which is the whole install: it
@@ -57,8 +60,10 @@ they reach no model and cost no tokens:
 
 - `--squirtle` — switch the pane to any of the 1252, live
 - `--random`, `--pokemon` — roll one, or list the residents
-- `--dex pikachu`, `--dex ghost`, `--dex random` — look things up, answered in chat
-- `--dex current` — the one on screen, answered **in the pane** rather than in chat
+- `--dex dragonite`, `--dex ghost`, `--dex random` — look things up, answered in chat
+- `--dex current` — the one on screen, answered **in the pane** rather than in chat.
+  Naming that same one (`--dex ash` with Ash in the pane) is the same question and
+  answers in the same place. Naming a different one stays in chat.
 
 Send them while Claude is **idle**. Text typed while a turn is already running
 never fires the hook — Claude Code folds it into the running turn — so it

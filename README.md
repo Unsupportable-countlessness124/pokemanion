@@ -279,14 +279,19 @@ them and blocks the prompt, so they cost no turn and no tokens:
 --dex 149           by number
 --dex dragonite     by name
 --dex current       the one you're looking at — answers in the pane
+--dex ash           naming the one on screen answers there too
 --dex random        be shown something
 ```
 
 `--dex current` puts its card **beside the sprite**, not in the conversation:
 you asked about the Pokémon already on your screen, so that is where the answer
-goes. It fades after a few seconds. Everything else answers in the conversation,
-including `--dex random`, which describes one you have not summoned and would
-otherwise label the wrong Pokémon.
+goes. It fades after a few seconds. Naming that same one does the same thing —
+with Pikachu in the pane, `--dex pikachu` and `--dex current` are the same
+question and get the same answer in the same place.
+
+Everything else answers in the conversation, including `--dex random`, which
+describes one you have not summoned and would otherwise caption the wrong
+Pokémon.
 
 A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
 question and reaches Claude untouched.

@@ -585,6 +585,44 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       afterRandom === before ? 'pane untouched' : 'pane was overwritten',
     )
 
+    // Naming the one on screen is the same question as `--dex current`, and used
+    // to be answered somewhere else entirely just because it was asked by name.
+    // Naming a different one still belongs in the conversation — a card in the
+    // pane captions the sprite under it, or it is a lie.
+    rmSync(card, { force: true })
+
+    const byName = ask('--dex pikachu')
+    const namedPane = (() => {
+      try {
+        return read(card, 'utf8')
+      } catch {
+        return ''
+      }
+    })()
+
+    check(
+      'naming the one on screen answers in the pane too',
+      /pikachu/i.test(namedPane) && byName.stderr.trim().split('\n').length === 1,
+      byName.stderr.trim().slice(0, 60),
+    )
+
+    rmSync(card, { force: true })
+
+    const other = ask('--dex dragonite')
+    const otherPane = (() => {
+      try {
+        return read(card, 'utf8')
+      } catch {
+        return ''
+      }
+    })()
+
+    check(
+      'naming a different one still answers in the conversation',
+      /no\./.test(other.stderr) && otherPane === '',
+      otherPane === '' ? 'pane untouched' : 'captioned the wrong Pokemon',
+    )
+
     rmSync(card, { force: true })
     rmSync(join(STATE_DIR, `window-${dexSession}.species`), { force: true })
   }
