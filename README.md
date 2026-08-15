@@ -61,6 +61,48 @@ the machine.
 
 <br clear="left">
 
+---
+
+## Install it in two lines
+
+<table>
+<tr>
+<td valign="top" width="50%">
+
+**Claude Code**
+
+```
+/plugin marketplace add khatriadbhut/pokemanion
+/plugin install pokemanion@pokemanion
+```
+
+</td>
+<td valign="top" width="50%">
+
+**Codex**
+
+```
+/plugin marketplace add khatriadbhut/pokemanion
+/plugin add pokemanion@pokemanion
+```
+
+</td>
+</tr>
+</table>
+
+> Codex says **add** where Claude Code says **install** — that is Codex's own
+> spelling, not a typo.
+
+Type them at your agent. Nothing to clone, nothing to build: the sprites ship
+with it. Then **[three things no plugin can do](#install)** — restart your agent
+and Ghostty, and allow Ghostty in **Accessibility**, without which macOS blocks
+the keystroke that opens the pane. It tells you this itself the first time you
+send a message.
+
+Want `claude --pikachu` at launch too? That needs [the clone](#from-a-clone).
+
+---
+
 **[What it needs](#what-it-needs) · [Install](#install) · [Commands](#commands)
 · [Troubleshooting](#if-something-looks-wrong) · [Your own
 sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
@@ -128,14 +170,21 @@ through a hook and works regardless.
 
 ## Install
 
-**As a plugin**, if you would rather not clone anything:
+**As a plugin**, if you would rather not clone anything. In **Claude Code**:
 
 ```
 /plugin marketplace add khatriadbhut/pokemanion
 /plugin install pokemanion@pokemanion
 ```
 
-Works in Claude Code and Codex. It registers the hooks, writes the Ghostty
+In **Codex**, where the second command is `add` rather than `install`:
+
+```
+/plugin marketplace add khatriadbhut/pokemanion
+/plugin add pokemanion@pokemanion
+```
+
+Both were installed and run end to end before this was written. It registers the hooks, writes the Ghostty
 keybind, and fetches **chafa** through Homebrew in the background if you do not
 have it — so the sprite may take a minute to appear the very first time. With
 no Homebrew it cannot, and says so the next time you type a command rather than
@@ -159,6 +208,8 @@ prompt through has no way to say anything to you. Send it again afterwards.
 On Codex, also read [the two things specific to it](#two-things-specific-to-codex)
 — you will be asked to trust the hooks, and the pane arrives at your first
 message rather than at launch.
+
+<a id="from-a-clone"></a>
 
 **From a clone**, which is the full version:
 
