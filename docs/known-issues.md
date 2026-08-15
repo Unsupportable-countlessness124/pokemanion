@@ -59,6 +59,32 @@ The case that prompted all of this — press escape, sprite stands still in abou
 a second, and stays still until you send something new — is covered by the
 marker, verified end to end, and has a seven-case regression suite behind it.
 
+## Commands typed mid-turn go to Claude instead
+
+`--squirtle` and the rest are caught by the `UserPromptSubmit` hook, which fires
+when a prompt is submitted. Text typed while Claude is **already working** never
+fires it — Claude Code folds that text into the turn already in flight rather
+than treating it as a new prompt.
+
+So the same keystrokes mean two different things depending on timing:
+
+| when | what happens |
+| --- | --- |
+| Claude is idle | the hook answers, the prompt is blocked, the pane switches, no tokens spent |
+| Claude is working | the text reaches the model as an ordinary message and it replies about Squirtle |
+
+Nothing breaks and nothing is lost — the pane simply does not change, and you get
+an answer where you wanted an action.
+
+**There is no fix from this side.** The hook cannot run for an event that is
+never emitted, and there is no other event carrying mid-turn text. Anything that
+looked like a fix would mean reading the transcript and racing the model for a
+message it is already answering.
+
+The one thing that would close it is Claude Code firing `UserPromptSubmit` for
+mid-turn input, or emitting any event at all that carries it. Same shape as the
+missing interrupt hook above: the information exists, nothing hands it over.
+
 ## The working animation is the same motion in a different palette
 
 The working sprite is the resting sprite's **shiny** form. That fixes quality —

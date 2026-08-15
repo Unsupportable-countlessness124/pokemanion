@@ -177,6 +177,13 @@ them and blocks the prompt, so they cost no turn and no tokens:
 A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
 question and reaches Claude untouched.
 
+**Send them while Claude is idle.** The hook that catches these runs when you
+submit a prompt, and a message typed while Claude is already working never fires
+it — Claude Code folds that text into the turn already running instead. So
+`--squirtle` sent mid-answer reaches the model as an ordinary message, and you
+get a reply about Squirtle rather than a Squirtle. Nothing breaks; the pane just
+does not change. Wait for it to finish and send it again.
+
 Punctuation is forgiven, and form names work as written: `--ho-oh` finds
 `hooh`, `--rotom-wash` and `--charizard-megax` are exactly themselves.
 
