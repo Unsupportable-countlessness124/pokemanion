@@ -22,8 +22,14 @@ without naming them is the part that is actually rude.
 Everything in `assets/pokemon/`, and the resting halves of most roster entries.
 
 - **Downloaded at runtime** from `play.pokemonshowdown.com/sprites/gen5ani/`
-  by `npm run roster`. Not committed — `assets/pokemon/` is gitignored — so a
-  clone fetches its own copies.
+  by `npm run roster`. `assets/pokemon/` is gitignored, so a clone fetches its
+  own copies of the 1252.
+- **Nine are committed anyway** — bulbasaur, charmander, eevee, haunter,
+  jigglypuff, meowth, munchlax, psyduck and squirtle, named one by one as
+  exceptions in `.gitignore`. The gallery in the README is animated, and GitHub
+  will only show a GIF that is actually in the repository. So those nine are
+  shipped Game Freak sprites, on the same fan-use footing as everything in the
+  next section, rather than files a clone goes and fetches.
 - **Generation 5 sprites** (the Black/White animated set) are the work of
   Game Freak, and are the property of Nintendo / Game Freak / The Pokemon
   Company.
