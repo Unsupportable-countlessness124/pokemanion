@@ -186,7 +186,13 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   const { prune } = await import('./prune.mjs')
   const { fetchedGuests } = await import('./roster.mjs')
   const { speciesFileFor } = await import('./companion.mjs')
-  const [guest] = fetchedGuests()
+
+  // Not simply the first guest on disk. A pane running right now may be holding
+  // it, and then the "is a stale guest still evicted?" half fails — correctly,
+  // because the protection being tested is doing its job. Which made this pass
+  // on CI, where nothing is running, and fail on the machine that has a pane
+  // open. A test that depends on what is on screen is worse than no test.
+  const [guest] = fetchedGuests().filter((name) => !held.has(name))
 
   if (guest) {
     const { writeFileSync, unlinkSync, mkdirSync } = await import('node:fs')
