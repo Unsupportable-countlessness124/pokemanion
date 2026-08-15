@@ -116,9 +116,16 @@ try {
             process.exit(2)
           }
 
-          // Put it in the pane as well, beside the Pokemon it describes. That
-          // is where you are already looking, and it costs the conversation
-          // nothing — the lines time out on their own.
+          // `--dex current` answers in the pane and nowhere else.
+          //
+          // It used to do both, and the pane was the smaller half of what you
+          // got: the same stats arrived in the conversation at the same moment,
+          // which is the thing this command exists to avoid. You asked about the
+          // Pokemon you are already looking at, so the answer belongs beside it.
+          //
+          // `--dex random` still answers in the conversation, because there is
+          // nothing to look at — it is one you have not summoned, and putting
+          // its card in the pane would label the wrong Pokemon.
           if (mine) {
             const { mkdirSync, writeFileSync } = await import('node:fs')
             const { STATE_DIR } = await import('../src/config.mjs')
@@ -127,10 +134,16 @@ try {
               mkdirSync(STATE_DIR, { recursive: true })
               writeFileSync(`${STATE_DIR}/window-${String(session).replace(/[^\w.-]/g, '')}.card`, paneCard(entry(mine)).join('\n'))
             } catch {}
+
+            // One line rather than none. The prompt is erased either way, and a
+            // prompt that vanishes in silence reads as a command that failed —
+            // so this says where the answer went without being the answer.
+            process.stderr.write(`${entry(mine).title} — beside the pane\n`)
+            process.exit(2)
           }
 
-          const found = mine ? [entry(mine)] : search(asked.query)
-          const hit = mine ?? exactMatch(asked.query)
+          const found = search(asked.query)
+          const hit = exactMatch(asked.query)
 
           // An exact name, or a single answer, gets the card; several get the
           // table. The same split the command line makes, because it is about

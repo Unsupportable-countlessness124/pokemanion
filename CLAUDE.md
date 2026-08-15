@@ -38,7 +38,8 @@ they reach no model and cost no tokens:
 
 - `--squirtle` — switch the pane to any of the 1252, live
 - `--random`, `--pokemon` — roll one, or list the residents
-- `--dex pikachu`, `--dex ghost`, `--dex current`, `--dex random` — look things up
+- `--dex pikachu`, `--dex ghost`, `--dex random` — look things up, answered in chat
+- `--dex current` — the one on screen, answered **in the pane** rather than in chat
 
 Send them while Claude is **idle**. Text typed while a turn is already running
 never fires the hook — Claude Code folds it into the running turn — so it

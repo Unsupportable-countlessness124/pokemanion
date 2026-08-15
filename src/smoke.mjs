@@ -321,6 +321,62 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     rmSync(stateFile, { force: true })
   } catch {}
 
+  // 1b. Where each --dex answer goes. `current` describes the Pokemon already
+  //     on screen, so it belongs beside it; everything else, `random` included,
+  //     belongs in the conversation. Both used to answer in both places, which
+  //     made `current` a slower way of getting the same wall of text.
+  {
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+    const { STATE_DIR } = await import('./config.mjs')
+    const dexSession = 'smoke-dex-0001'
+    const card = join(STATE_DIR, `window-${dexSession}.card`)
+
+    mkdirSync(STATE_DIR, { recursive: true })
+    writeFileSync(join(STATE_DIR, `window-${dexSession}.species`), 'pikachu')
+    rmSync(card, { force: true })
+
+    const ask = (prompt) =>
+      run('bin/on-activity.mjs', {
+        input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', session_id: dexSession, prompt }),
+      })
+
+    const current = ask('--dex current')
+    const inPane = (() => {
+      try {
+        return read(card, 'utf8')
+      } catch {
+        return ''
+      }
+    })()
+
+    // One line in the conversation, not the card. "no." is a field of the card
+    // itself, so its absence is what proves the stats did not go to both.
+    check(
+      '--dex current answers in the pane',
+      /pikachu/i.test(inPane) && current.stderr.trim().split('\n').length === 1 && !/no\./.test(current.stderr),
+      current.stderr.trim().slice(0, 60),
+    )
+
+    const before = inPane
+    const random = ask('--dex random')
+    const afterRandom = (() => {
+      try {
+        return read(card, 'utf8')
+      } catch {
+        return ''
+      }
+    })()
+
+    check(
+      '--dex random answers in the conversation and leaves the pane alone',
+      /no\./.test(random.stderr) && afterRandom === before,
+      afterRandom === before ? 'pane untouched' : 'pane was overwritten',
+    )
+
+    rmSync(card, { force: true })
+    rmSync(join(STATE_DIR, `window-${dexSession}.species`), { force: true })
+  }
+
   // 2. The installer, on the one path that is safe to run: a missing
   //    prerequisite. With no PATH there is no chafa, so it must stop at the
   //    preflight having written nothing. This is the promise the file makes in

@@ -219,9 +219,15 @@ them and blocks the prompt, so they cost no turn and no tokens:
 --dex ghost         every Ghost type
 --dex 149           by number
 --dex dragonite     by name
---dex current       the stats of the one you're looking at
+--dex current       the one you're looking at — answers in the pane
 --dex random        be shown something
 ```
+
+`--dex current` puts its card **beside the sprite**, not in the conversation:
+you asked about the Pokémon already on your screen, so that is where the answer
+goes. It fades after a few seconds. Everything else answers in the conversation,
+including `--dex random`, which describes one you have not summoned and would
+otherwise label the wrong Pokémon.
 
 A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
 question and reaches Claude untouched.
