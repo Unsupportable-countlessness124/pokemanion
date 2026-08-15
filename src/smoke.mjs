@@ -12,7 +12,7 @@
 // Usage: npm test
 
 import { readdirSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { ROOT } from './config.mjs'
 
 const MODULES = [
@@ -342,6 +342,22 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   //    a hook firing at a file that no longer exists.
   const home = mkdtempSync(join(tmpdir(), 'pokemanion-smoke-'))
 
+  // install.mjs refuses to run before anything is built, and build/frames.json
+  // is git-ignored — so it is there on a machine that has run the build and
+  // never on CI. Left alone, this test passed locally and failed on CI, which
+  // is the same environment-dependence that already bit the pruner check.
+  // Stubbed when missing so the full install/uninstall cycle runs in both
+  // places; only `existsSync` is ever asked of it.
+  const { FRAMES_FILE } = await import('./config.mjs')
+  const framesWereThere = existsSync(FRAMES_FILE)
+
+  if (!framesWereThere) {
+    const { mkdirSync, writeFileSync } = await import('node:fs')
+
+    mkdirSync(dirname(FRAMES_FILE), { recursive: true })
+    writeFileSync(FRAMES_FILE, '{}\n')
+  }
+
   try {
     const ours = (settings) =>
       Object.values(settings.hooks ?? {})
@@ -377,6 +393,10 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     check('install.mjs runs against a scratch HOME', false, error.message.split('\n')[0])
   } finally {
     rmSync(home, { recursive: true, force: true })
+
+    // Only what this test created. Deleting a real build would turn a test run
+    // into twenty-five minutes of re-rendering.
+    if (!framesWereThere) rmSync(FRAMES_FILE, { force: true })
   }
 }
 
