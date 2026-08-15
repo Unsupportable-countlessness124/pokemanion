@@ -116,14 +116,9 @@ Everything else is portable Node. Where it says *no*, run the pane yourself in a
 second terminal — `npm run window 4 --session=<id>` — and the rest still works.
 
 **One permission, granted by hand.** Splitting Ghostty means pressing keys, and
-macOS will not let anything press keys until you allow it: **System Settings →
-Privacy & Security → Accessibility → enable Ghostty**, then restart Ghostty.
-Nothing can script this. Without it no pane opens, and `npm run doctor` is what
-tells you that is why.
-
-`setup` also adds one keybind to `~/.config/ghostty/config` — a large resize
-step used to collapse the new split into a strip. Ghostty's built-in step is ten
-pixels, so without it the pane arrives at half your window height.
+macOS blocks that until you allow it — **System Settings → Privacy & Security →
+Accessibility → enable Ghostty**. Nothing can script it, and without it no pane
+opens.
 
 The `claude --pikachu` wrapper is written to `~/.zshrc`, so it is zsh-only.
 Without it you lose the launch flags; everything typed *inside* Claude goes
@@ -143,15 +138,12 @@ npm run setup
 the one Ghostty keybind the pane needs. It checks its prerequisites first and
 stops without touching anything if one is missing. Safe to run again.
 
-Then three restarts, none of them optional:
+Then four things it cannot do for you:
 
 1. **Restart Claude Code** — it reads the hooks at startup.
 2. **Restart Ghostty** — it reads its config at startup.
 3. **Open a new terminal**, or `source ~/.zshrc`.
-
-And once, by hand: **System Settings → Privacy & Security → Accessibility →
-enable Ghostty**. Opening a split means pressing keys, and macOS will not let
-anything press keys until you allow it. Nothing can script this for you.
+4. **Allow Ghostty in Accessibility** — [see above](#what-it-needs), once.
 
 A pane should appear beside your next session.
 
@@ -179,29 +171,24 @@ npm run shell -- --install      # add the claude() wrapper to ~/.zshrc
 npm run ghostty -- --install    # the resize keybind, so the pane is a strip
 ```
 
-**The keybind is not optional.** The pane is opened by splitting the window and
-then collapsing that split to a strip, and the collapse is one press of a
-2000px resize step. Ghostty's built-in step is ten pixels — a hundred presses
-you would watch crawl down the screen — so the binding has to be in your own
-Ghostty config. Without it the split opens and never collapses, and the sprite
-arrives in a pane taking half your window.
+The keybind is not optional: collapsing the new split into a strip is one press
+of a large resize step, and Ghostty's built-in step is ten pixels. Without it
+the pane arrives at half your window height.
 
 </details>
 
 ### What it touches outside this folder
 
-Three files, each backed up the first time it is written, each removable:
+Three files. Each is backed up before the first write, and each comes back out:
 
 | file | what goes in | undo |
 | --- | --- | --- |
 | `~/.claude/settings.json` | seven hooks | `npm run uninstall-statusline` |
-| `~/.zshrc` | the `claude()` wrapper, in a marked block | `npm run shell -- --remove` |
-| `~/.config/ghostty/config` | one resize keybind, in a marked block | `npm run ghostty -- --remove` |
+| `~/.zshrc` | the `claude()` wrapper | `npm run shell -- --remove` |
+| `~/.config/ghostty/config` | one resize keybind | `npm run ghostty -- --remove` |
 
-Nothing else leaves the repo — sprites, frame cache and state all live in
-`assets/` and `.state/`, so deleting the folder after undoing the three above
-leaves no trace. The backups are kept, at `<file>.pixel-runner-backup` and
-`<file>.pokemanion-backup`.
+Nothing else leaves the repo. Undo those three, delete the folder, and no trace
+is left.
 
 ## Commands
 
