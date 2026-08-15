@@ -157,7 +157,11 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 // possible spread of symptoms to debug from.
 {
   const { snippet } = await import('./shell.mjs')
-  const text = snippet()
+  const { AGENTS: allAgents } = await import('./agents.mjs')
+  // Explicit, because CI has no coding agent installed and detection would
+  // return an empty list — the third time a test has quietly depended on what
+  // happens to be on the machine running it.
+  const text = snippet(allAgents)
 
   // Every occurrence of the repo path, and whether a quote sits immediately
   // before it. Matching on the path itself rather than on a shape — the first
@@ -398,6 +402,11 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   const { mkdtempSync, rmSync, readFileSync: read } = await import('node:fs')
   const { tmpdir } = await import('node:os')
   const { sessionStateFile } = await import('./config.mjs')
+
+  // Same spawn, but with arguments and a forced HOME — the agent-targeted
+  // installs need both, and detection must never decide what a test exercises.
+  const run2 = (file, args, home) =>
+    spawnSync(process.execPath, [file, ...args], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, HOME: home } })
 
   const run = (file, { input = '', env = {} } = {}) =>
     spawnSync(process.execPath, [file], {
@@ -656,22 +665,22 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       }
     }
 
-    const installed = run('install.mjs', { env: { HOME: home } })
+    const installed = run2('install.mjs', ['--claude'], home)
     const after = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
 
     check('install registers its hooks', installed.status === 0 && ours(after) > 0, `${ours(after)} hooks`)
 
-    const removed = run('install.mjs', { env: { HOME: home } })
+    const removed = run2('install.mjs', ['--claude'], home)
     const cleaned = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
 
     // Re-running must not stack a second copy — that is what `withoutOurs` is
     // for, and a duplicate would fire every hook twice.
     check('and does not add them twice', removed.status === 0 && ours(cleaned) === ours(after), `${ours(cleaned)} hooks`)
 
-    const uninstalled = run('install.mjs', { env: { HOME: home } })
+    const uninstalled = run2('install.mjs', ['--claude'], home)
 
     // `--uninstall` is passed by argv, not env, so it needs its own spawn.
-    const gone = spawnSync(process.execPath, ['install.mjs', '--uninstall'], {
+    const gone = spawnSync(process.execPath, ['install.mjs', '--claude', '--uninstall'], {
       cwd: ROOT,
       encoding: 'utf8',
       env: { ...process.env, HOME: home },
