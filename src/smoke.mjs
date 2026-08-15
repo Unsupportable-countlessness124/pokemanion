@@ -92,6 +92,12 @@ const { parse } = await import('./switch.mjs')
 check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
+// Every other command is `--something`, so `--dex --current` is what fingers
+// type. It used to search for a Pokemon literally named "--current".
+check('--dex tolerates a dashed argument', parse('--dex --current')?.query === 'current')
+// But only leading ones: a trailing dash asks for every form of a Pokemon
+// rather than the Pokemon itself, and dropping it would change the answer.
+check('and keeps a trailing dash', parse('--dex pikachu-')?.query === 'pikachu-')
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
 // What a session was given, and getting it back.

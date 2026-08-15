@@ -29,7 +29,15 @@ export const parse = (prompt, pool = available()) => {
   // single-word forms. `--dex` alone is the summary; `--dex fire` searches.
   const dex = text.match(/^--dex(?:\s+(.+))?$/i)
 
-  if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim() }
+  // Leading dashes on the argument are dropped. Every other command here is
+  // `--something`, so `--dex --current` is the natural thing to type — and it
+  // used to be taken literally, searching for a Pokemon named "--current" and
+  // answering `nothing matches "--current"`, which reads as the command being
+  // broken rather than the argument being spelled a way it did not expect.
+  //
+  // Only leading ones. A trailing dash is meaningful — `--dex pikachu-` is a
+  // search for every Pikachu form rather than a lookup of Pikachu itself.
+  if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim().replace(/^-+/, '') }
 
   const match = text.match(/^--([a-z][a-z0-9.:-]*)$/i)
 
