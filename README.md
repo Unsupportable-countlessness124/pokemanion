@@ -161,6 +161,20 @@ npm run doctor                # if it doesn't
 are registered, chafa is present, the frame cache matches your pane height, and
 which Pokémon are currently held.
 
+**If a sprite stutters or freezes for a second**, that is the frame cache. Frames
+are rendered per pane height, so resizing the pane — or switching to a Pokémon
+nobody has warmed — leaves it rendering on the fly. `doctor` names it exactly:
+
+```
+✘ cache matches the pane   pane is 4 rows but only 20 of 28 sprites are
+                           warmed for it — run: npm run warm -- 4
+```
+
+Run what it tells you. Warm sprites load in about **3 ms**; cold ones take
+**one to two seconds**, which is the stutter. A Pokémon summoned for the first
+time always pays that once — roughly two seconds to fetch and render — and is
+instant every time after.
+
 <details>
 <summary>Doing it a piece at a time</summary>
 
@@ -311,9 +325,11 @@ mush. `npm run attribution` regenerates the credits list when you add one.
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out. Pikachu goes to whoever is free to have it.
 
-**Guests** are the other 1252. They arrive when you name them — about a second —
-stay while you use them, and are evicted least-recently-shown first. One a pane
-is currently showing is never evicted, however long it has been sitting there.
+**Guests** are the other 1252. They arrive when you name them — about two
+seconds, measured: roughly 1.3s to fetch and 0.6s to render — then stay while
+you use them and load in 2 ms thereafter. They are evicted least-recently-shown
+first, and one a pane is currently showing is never evicted, however long it has
+been sitting there.
 
 Whichever you end up with, the session keeps it. The choice is written down and
 read back when a pane reopens, so closing a window and coming back gives you the
