@@ -94,6 +94,18 @@ const isOurs = (group) => (group?.hooks ?? []).some((hook) => isOurCommand(hook?
 
 const withoutOurs = (groups) => (groups ?? []).filter((group) => !isOurs(group))
 
+// Which node this is, so the hooks can find one later.
+//
+// bin/run.sh has to locate an interpreter from inside a hook, where the PATH is
+// trimmed and none of the usual guesses need be true — under nvm, node lives in
+// a version-numbered directory that moves every upgrade. Recording the
+// interpreter that ran this installer is the only path that is certainly right,
+// because it just proved itself by running.
+try {
+  mkdirSync(join(ROOT, '.state'), { recursive: true })
+  writeFileSync(join(ROOT, '.state', 'node-path'), `${process.execPath}\n`)
+} catch {}
+
 const settings = read()
 
 if (existsSync(SETTINGS) && !existsSync(BACKUP)) {

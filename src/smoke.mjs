@@ -431,6 +431,53 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     rmSync(join(STATE_DIR, `window-${dexSession}.species`), { force: true })
   }
 
+  // 1c. A half-finished download has to be able to say so.
+  //
+  //     `npm run roster` printed its per-entry results and exited 0 whatever
+  //     happened, so with a failing network `npm run setup` ticked "downloading
+  //     sprites ✓" and went on to report the whole install finished — leaving a
+  //     pane that opens onto sprites that were never fetched.
+  //
+  //     Tested by taking one resident's files away and putting them back, with
+  //     curl stubbed out so nothing can quietly re-download them mid-test.
+  {
+    const { renameSync, mkdtempSync: tempDir, writeFileSync: write, chmodSync } = await import('node:fs')
+    const { idleFile, busyFile, ROSTER: roster } = await import('./roster.mjs')
+    const victim = roster.find((row) => existsSync(idleFile(row.name)) && !row.idle)?.name
+    const stub = tempDir(join(tmpdir(), 'pokemanion-nocurl-'))
+
+    write(join(stub, 'curl'), '#!/bin/sh\nexit 6\n')
+    chmodSync(join(stub, 'curl'), 0o755)
+
+    if (victim) {
+      const moved = join(stub, 'idle.gif')
+
+      renameSync(idleFile(victim), moved)
+
+      try {
+        const broke = spawnSync(process.execPath, ['src/roster.mjs'], {
+          cwd: ROOT,
+          encoding: 'utf8',
+          env: { ...process.env, PATH: `${stub}:${process.env.PATH}` },
+        })
+
+        check(`a failed download exits non-zero (${victim})`, broke.status === 1, `exit ${broke.status}`)
+      } finally {
+        renameSync(moved, idleFile(victim))
+      }
+    }
+
+    const fine = spawnSync(process.execPath, ['src/roster.mjs'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, PATH: `${stub}:${process.env.PATH}` },
+    })
+
+    check('and exits zero when everything is present', fine.status === 0, `exit ${fine.status}`)
+
+    rmSync(stub, { recursive: true, force: true })
+  }
+
   // 2. The installer, on the one path that is safe to run: a missing
   //    prerequisite. With no PATH there is no chafa, so it must stop at the
   //    preflight having written nothing. This is the promise the file makes in

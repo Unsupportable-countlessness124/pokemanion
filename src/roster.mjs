@@ -554,5 +554,18 @@ if (process.argv[1] && process.argv[1].endsWith('roster.mjs')) {
     console.log(`  ${entry.name.padEnd(12)} ${fetchOne(entry, refresh)}`)
   }
 
-  console.log(`\n  ${available().length} ready\n`)
+  const ready = available().length
+
+  console.log(`\n  ${ready} of ${ROSTER.length} ready\n`)
+
+  // Non-zero when any of them is missing, because the caller cannot tell
+  // otherwise. This printed its per-entry results and exited 0 regardless, so
+  // `npm run setup` ticked "downloading sprites ✓" with a failing network and
+  // carried on to report the whole install finished — leaving a pane that opens
+  // onto sprites that were never fetched. A step that half-worked has to be
+  // able to say so.
+  if (ready < ROSTER.length) {
+    console.error(`  ${ROSTER.length - ready} could not be fetched — check the network and run this again\n`)
+    process.exit(1)
+  }
 }

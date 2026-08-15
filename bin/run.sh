@@ -19,7 +19,27 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 node_bin=
 if [ -n "$PIXEL_RUNNER_NODE" ] && [ -x "$PIXEL_RUNNER_NODE" ]; then
   node_bin=$PIXEL_RUNNER_NODE
-else
+fi
+
+# The node that ran the installer, written down at the time.
+#
+# Guessing at install locations only works for people who installed node the way
+# the guesser expected. Under nvm — which is most people — node lives in a
+# version-numbered directory that changes when you upgrade, and there is no
+# stable path to hard-code: nvm does not create the `current` symlink this used
+# to look for. On a machine with nvm and no system node, every fallback below
+# missed, `command -v node` found nothing because hooks run with a trimmed PATH,
+# and run.sh exited 0 having done nothing at all. Every hook silently became a
+# no-op and the sprite just never moved.
+#
+# So setup records the interpreter it was itself running under. That is the one
+# path guaranteed to be right, because node proved it by executing.
+if [ -z "$node_bin" ] && [ -r "$script_dir/../.state/node-path" ]; then
+  recorded=$(cat "$script_dir/../.state/node-path" 2>/dev/null)
+  [ -n "$recorded" ] && [ -x "$recorded" ] && node_bin=$recorded
+fi
+
+if [ -z "$node_bin" ]; then
   for candidate in \
     /opt/homebrew/bin/node \
     /usr/local/bin/node \
@@ -27,6 +47,18 @@ else
     "$HOME/.local/bin/node" \
     "$HOME/.volta/bin/node" \
     "$HOME/.nvm/versions/node/current/bin/node"
+  do
+    if [ -x "$candidate" ]; then
+      node_bin=$candidate
+      break
+    fi
+  done
+fi
+
+# Last resort before PATH: any nvm or fnm install at all, newest first. Covers
+# the machine where the recorded path has since been uninstalled.
+if [ -z "$node_bin" ]; then
+  for candidate in $(ls -d "$HOME"/.nvm/versions/node/*/bin/node "$HOME"/.local/share/fnm/node-versions/*/installation/bin/node 2>/dev/null | sort -rV)
   do
     if [ -x "$candidate" ]; then
       node_bin=$candidate
