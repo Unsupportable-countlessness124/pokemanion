@@ -47,6 +47,20 @@ const SPINNER_VERBS = {
 const uninstalling = process.argv.includes('--uninstall')
 const skipVerbs = process.argv.includes('--no-verbs')
 
+// Five seconds is generous for a hook that writes one small file, and it is
+// what every event gets — except SessionEnd, which Codex caps.
+//
+// Codex clamps a SessionEnd timeout above three seconds and says so on every
+// single startup: "clamping SessionEnd hook timeout to 3s in ~/.codex/
+// hooks.json". A warning printed each time you launch, for a limit we have no
+// reason to exceed, is a bad first impression of a thing that is otherwise
+// working — and the work it does there is killing a process and unlinking two
+// files, which takes milliseconds.
+//
+// Claude has no such cap, but three is plenty for both, so both get it rather
+// than the two agents drifting apart over a number that does not matter.
+const timeoutFor = (event) => (event === 'SessionEnd' ? 3 : 5)
+
 // Ours are recognised by the shape of the command we write: our launcher, then
 // one of our scripts.
 //
@@ -166,7 +180,7 @@ for (const agent of targets) {
   for (const event of events) {
     document.hooks[event] = [
       ...withoutOurs(document.hooks[event]),
-      { hooks: [{ type: 'command', command: ACTIVITY_COMMAND, timeout: 5 }] },
+      { hooks: [{ type: 'command', command: ACTIVITY_COMMAND, timeout: timeoutFor(event) }] },
     ]
   }
 

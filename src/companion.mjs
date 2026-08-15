@@ -296,6 +296,19 @@ export const speciesInUse = (exceptId = null) => {
   if (!fileExists(STATE_DIR)) return taken
 
   for (const file of readdirSync(STATE_DIR)) {
+    // A note left for a pane that never arrived. closeWindow writes one when it
+    // has no pid to signal, and the pane deletes it on the way in — but if the
+    // pane failed to start at all, nobody ever comes to read it and it sits
+    // there. Harmless, and it would still be sitting there in a year, so it is
+    // swept alongside the claims rather than left to accumulate.
+    if (file.endsWith('.closed')) {
+      try {
+        if (Date.now() - statSync(join(STATE_DIR, file)).mtimeMs > STARTUP_GRACE_MS) unlinkSync(join(STATE_DIR, file))
+      } catch {}
+
+      continue
+    }
+
     if (!file.endsWith('.species')) continue
 
     const id = file.slice('window-'.length, -'.species'.length)
