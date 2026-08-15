@@ -20,6 +20,15 @@ import { join } from 'node:path'
 import { ROOT } from './config.mjs'
 import { SPECIES_ENV, names } from './roster.mjs'
 
+// Do not rename these to match the project. They are not a label, they are the
+// handle on a block already written into people's ~/.zshrc: install finds the
+// old block by these exact strings and replaces it, and `--remove` finds it to
+// take it out. Change them and every existing install is orphaned — a second
+// claude() function appended below the first, and an uninstall that reports
+// success while leaving the original in place.
+//
+// That is precisely the bug install.mjs had, from matching the project's old
+// name, and the reason it is worth a comment rather than a tidy-up.
 const BEGIN = '# >>> pixel-runner >>>'
 const END = '# <<< pixel-runner <<<'
 

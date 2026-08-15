@@ -39,13 +39,20 @@ const config = loadConfig()
 
 check('config readable', () => ({ ok: true, detail: `${Object.keys(config).length} settings` }))
 
+// Off is the intended state — the sprite moved into its own pane — so warning
+// about it marked every healthy fresh install as "something to look at".
 check('status line sprite', () => ({
   ok: true,
-  warn: !config.statusSprite,
-  detail: config.statusSprite ? `on, ${config.rows} rows, style ${config.style}` : 'off — text only',
+  detail: config.statusSprite ? `on, ${config.rows} rows, style ${config.style}` : 'off — the sprite lives in a pane',
 }))
 
 check('built frames', () => {
+  // Only the status line reads these, and it is off by default and no longer
+  // installed. Reporting a fresh clone as *broken* for not having built frames
+  // it will never read sends someone to `npm run build` to fix nothing — and a
+  // red mark on a first run reads as "this did not install properly".
+  if (!config.statusSprite) return { ok: true, detail: 'not needed — the sprite lives in a pane' }
+
   if (!existsSync(FRAMES_FILE)) return { ok: false, detail: 'missing — run npm run build' }
 
   const bundle = JSON.parse(readFileSync(FRAMES_FILE, 'utf8'))
@@ -242,7 +249,7 @@ check('auto-open', () => {
   }
 })
 
-console.log(`\n  ${DIM}pixel-runner${RESET}\n`)
+console.log(`\n  ${DIM}pokemanion${RESET}\n`)
 
 for (const { name, ok, warn, detail } of results) {
   const mark = !ok ? `${RED}✘${RESET}` : warn ? `${YELLOW}•${RESET}` : `${GREEN}✔${RESET}`

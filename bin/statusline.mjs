@@ -107,7 +107,7 @@ if (!config.statusSprite) {
 const bundle = loadFrames()
 
 if (!bundle) {
-  console.log(`${DIM}pixel-runner: no frames built — run \`npm run build\`${RESET}`)
+  console.log(`${DIM}pokemanion: no frames built — run \`npm run build\`${RESET}`)
   process.exit(0)
 }
 

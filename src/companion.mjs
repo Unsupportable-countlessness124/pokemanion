@@ -163,9 +163,9 @@ const openSplit = (rows, shrink, grow, id, species) => {
 
     console.error(
       /not allowed|assistive|-1719|-25211/i.test(message)
-        ? 'pixel-runner: macOS has not granted permission to control the computer.\n' +
+        ? 'pokemanion: macOS has not granted permission to control the computer.\n' +
             '  System Settings > Privacy & Security > Accessibility > enable Ghostty, then restart it.'
-        : `pixel-runner: could not open the split — ${message}`,
+        : `pokemanion: could not open the split — ${message}`,
     )
 
     return false
@@ -175,7 +175,7 @@ const openSplit = (rows, shrink, grow, id, species) => {
   // now would send it to whatever is focused instead — most likely the Claude
   // prompt. Better to do nothing.
   if (!waitForNewShell(before, 2000)) {
-    console.error('pixel-runner: the split did not open, so nothing was typed into it')
+    console.error('pokemanion: the split did not open, so nothing was typed into it')
 
     return false
   }
