@@ -12,8 +12,8 @@ whether anything is happening.
 [![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen.svg)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](package.json)
-[![Agents](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-8957e5.svg)](#install)
-[![Platform](https://img.shields.io/badge/tested%20on-macOS%20%2B%20Ghostty-lightgrey.svg)](#what-it-needs)
+[![Agents](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-8957e5.svg)](#quick-install)
+[![Platform](https://img.shields.io/badge/tested%20on-macOS%20%2B%20Ghostty-lightgrey.svg)](#requirements)
 
 </div>
 
@@ -65,10 +65,10 @@ the machine.
 
 ## Quick install
 
-**First, get [Ghostty](https://ghostty.org/download)** if you do not have it. The
-pane is a Ghostty split, so there is no pane without it — and it is the one thing
-here that cannot install itself, being a GUI app that asks for a password. chafa,
-the other requirement, *is* fetched for you in the background.
+**Get [Ghostty](https://ghostty.org/download) first** if you do not have it. The
+pane is a Ghostty split, so there is no pane without it, and it is the one thing
+here that cannot install itself. chafa, the other requirement, is fetched for
+you.
 
 Then, at your agent:
 
@@ -97,29 +97,28 @@ Then, at your agent:
 </tr>
 </table>
 
-> Codex says **add** where Claude Code says **install** — that is Codex's own
-> spelling, not a typo.
+> Codex says **add** where Claude Code says **install** — Codex's own spelling,
+> not a typo.
 
-Nothing to clone and nothing to build — the sprites ship with it. Two things are
-left, and neither is optional:
+Nothing to clone or build; the agent fetches the project itself and the sprites
+ship with it. Two things are left:
 
 - **Allow Ghostty in Accessibility** — System Settings → Privacy & Security →
   Accessibility. Opening the pane means pressing keys, and macOS blocks that
   until you say so. Skip it and everything installs perfectly and no pane ever
   appears.
-- **Restart your agent and Ghostty** — both read their configuration at startup.
+- **Restart your agent and Ghostty.** Both read their configuration at startup.
 
-The plugin says all of this itself the first time you send a message, so there is
-nothing to remember here.
+The plugin says both of these itself on your first message.
 
-Want `claude --pikachu` at launch too? That needs [the clone](#from-a-clone).
+Want `claude --pikachu` at launch? That needs [the clone](#from-a-clone).
 
 ---
 
-**[What it needs](#what-it-needs) · [Install](#install) · [Commands](#commands)
-· [Troubleshooting](#if-something-looks-wrong) · [Your own
-sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
-[Settings](#settings) · [Design notes](docs/design.md)**
+**[Requirements](#requirements) · [Commands](#commands) · [From a
+clone](#from-a-clone) · [Troubleshooting](#troubleshooting) · [Residents and
+guests](#residents-and-guests) · [Settings](#settings) · [Your own
+sprites](#your-own-sprites) · [Design notes](docs/design.md)**
 
 <details>
 <summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
@@ -148,83 +147,71 @@ sprites](#your-own-sprites) · [Residents and guests](#residents-and-guests) ·
 <!-- /gallery -->
 
 These animate — they are the sprite files themselves, not pictures of them.
-Seven work as their own shiny, the same animation recoloured with a white
-flash at the switch; seven were given animations of their own.
+Seven work as their own shiny, the same animation recoloured with a white flash
+at the switch; seven were given animations of their own.
 
 </details>
 
-## What it needs
+## Requirements
 
-**Node ≥ 20** (no dependencies), **chafa** (`brew install chafa`, or
-`sudo port install chafa`), and a terminal that speaks the [kitty graphics
-protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) — the sprite is a
-real image, not text.
+**Node ≥ 20** (no dependencies), **chafa**, and a terminal that speaks the
+[kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) —
+the sprite is a real image, not text.
 
-| | draws the sprite | opens the pane for you | `claude --pikachu` |
+| | draws the sprite | opens the pane | `claude --pikachu` |
 | --- | :---: | :---: | :---: |
 | **macOS + Ghostty** — the only tested setup | yes | yes | yes |
 | macOS + kitty, iTerm2, WezTerm, Warp | yes | no | yes |
 | Linux + kitty, Konsole | should | no | untested |
 | Alacritty, Terminal.app, Windows | no | no | no |
 
-Only the pane-opening is macOS-specific: it splits Ghostty through AppleScript.
-Everything else is portable Node. Where it says *no*, run the pane yourself in a
-second terminal — `npm run window 4 --session=<id>` — and the rest still works.
+Only the pane-opening is macOS-specific — it splits Ghostty through AppleScript.
+Where the table says *no*, run the pane yourself in a second terminal with
+`npm run window 4 --session=<id>`.
 
-**One permission, granted by hand.** Splitting Ghostty means pressing keys, and
-macOS blocks that until you allow it — **System Settings → Privacy & Security →
-Accessibility → enable Ghostty**. Nothing can script it, and without it no pane
-opens.
+## Commands
 
-The `claude --pikachu` wrapper works in **zsh and bash**, and installs into
-whichever you use — `~/.zshrc`, or `~/.bash_profile`/`~/.bashrc`. On any other
-shell you lose the launch flags only; everything typed *inside* a session goes
-through a hook and works regardless.
-
-## Install
-
-**As a plugin**, if you would rather not clone anything. In **Claude Code**:
+Typed inside a session. A hook answers these and blocks the prompt, so they
+never reach the model and cost no tokens:
 
 ```
-/plugin marketplace add khatriadbhut/pokemanion
-/plugin install pokemanion@pokemanion
+--squirtle          switch this pane, live
+--random            roll one
+--pokemon           list the residents
+
+--dex               what you have, and how many exist
+--dex dragonite     by name
+--dex ghost         by type
+--dex 149           by number
+--dex current       the one you're looking at — answers in the pane
+--dex random        be shown something
 ```
 
-In **Codex**, where the second command is `add` rather than `install`:
+Naming the Pokémon already on screen answers in the pane, like `--dex current`.
+Anything else answers in the conversation.
 
+**Send them while the agent is idle.** Text typed while a turn is running is
+folded into that turn and reaches the model as an ordinary message, so the pane
+does not change. Only a prompt that is *nothing but* the flag counts — `what
+does --pikachu do?` is a real question and passes through untouched.
+
+Punctuation is forgiven and form names work as written: `--ho-oh`,
+`--rotom-wash`, `--charizard-megax`.
+
+At launch, if you installed [from a clone](#from-a-clone):
+
+```sh
+claude --pikachu             # a particular one
+claude --flygon              # any of the 1256, fetched on first use
+claude --random              # be handed one
+claude --resume --charizard  # combines with everything else
 ```
-/plugin marketplace add khatriadbhut/pokemanion
-/plugin add pokemanion@pokemanion
-```
-
-Both were installed and run end to end before this was written. It registers the hooks, writes the Ghostty
-keybind, and fetches **chafa** through Homebrew in the background if you do not
-have it — so the sprite may take a minute to appear the very first time. With
-no Homebrew it cannot, and says so the next time you type a command rather than
-leaving you to wonder.
-
-Two things it deliberately does not do. **Ghostty** it leaves alone: it is a GUI
-app that can ask for a password, and the pane is a Ghostty split, so anyone who
-can see a pane already has it — if you do not, nothing appears, and the next
-command you type says so. And the **launch flags** need a shell function that
-only the clone route installs, so `claude --pikachu` and `codex --pikachu` will
-not work — everything typed *inside* a session will.
-
-It still needs [the four things no script can do](#then-four-things), the same
-as the clone route — **restarting your agent and Ghostty, and allowing Ghostty
-in Accessibility**. That last one is not optional: without it macOS blocks the
-keystroke that opens the split, and no pane appears at all. **It will tell you
-this itself**: the first message you send after installing is answered with the
-list instead of being sent, once and never again, because a hook that lets your
-prompt through has no way to say anything to you. Send it again afterwards.
-
-On Codex, also read [the two things specific to it](#two-things-specific-to-codex)
-— you will be asked to trust the hooks, and the pane arrives at your first
-message rather than at launch.
 
 <a id="from-a-clone"></a>
 
-**From a clone**, which is the full version:
+## From a clone
+
+The full version, and the only one with the launch flags:
 
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
@@ -234,24 +221,16 @@ npm run setup
 ```
 
 `setup` finds what you have — **Claude Code, Codex, or both** — and wires up
-each one. It fetches the sprites, renders them, registers the hooks, adds a
-`claude()` and `codex()` wrapper to your shell file, and sets the one Ghostty
-keybind the pane needs. It checks everything first and stops without touching a
-file if something is missing. Safe to run twice.
-
-<a id="then-four-things"></a>
+each: sprites, hooks, the `claude()`/`codex()` shell wrapper, and the one
+Ghostty keybind the pane needs. It checks everything first and stops without
+touching a file if something is missing. Safe to run twice.
 
 Then four things no script can do for you:
 
 1. **Restart your agent** — both read their hooks at startup.
 2. **Restart Ghostty** — it reads its config at startup.
 3. **Open a new terminal**, or `source ~/.zshrc`.
-4. **Allow Ghostty in Accessibility** — [see above](#what-it-needs), once.
-
-A pane should appear beside your next session. If it doesn't,
-[`npm run doctor`](#if-something-looks-wrong) says which piece is unhappy.
-
-<a id="two-things-specific-to-codex"></a>
+4. **Allow Ghostty in Accessibility** — once, as above.
 
 <details>
 <summary><b>Two things specific to Codex</b></summary>
@@ -259,47 +238,20 @@ A pane should appear beside your next session. If it doesn't,
 <br>
 
 **It will ask you to trust the hooks**, and it should — they are commands it is
-about to run for you, and they sit in `~/.codex/hooks.json` where you can read
-them first. Codex stores a hash per hook and skips any it has not reviewed, so
-after updating this project run **`/hooks`** inside Codex and trust them again.
-Until you do, it runs them not at all — silently — and the sprite stops
-reacting. Re-running `npm run setup` will not disturb this: it leaves the file
-alone when nothing has actually changed.
+about to run, and they sit in `~/.codex/hooks.json` where you can read them
+first. Codex stores a hash per hook and silently skips any it has not reviewed,
+so after updating this project run **`/hooks`** in Codex and trust them again.
 
 **The pane appears at your first message, not at launch.** Codex does not
-consider a session to exist until you say something, and offers no earlier hook
-to open one from. Claude Code opens it the moment the session starts. That is a
-difference between the two agents rather than something either of us can fix.
+consider a session to exist until you say something, and offers no earlier hook.
+Claude Code opens it the moment the session starts.
 
 </details>
 
 <details>
-<summary><b>Doing it a piece at a time</b></summary>
+<summary><b>What it touches outside this folder</b></summary>
 
 <br>
-
-Each step `setup` runs is its own command, for when only one needs redoing:
-
-```sh
-npm run roster                  # fetch the sprites
-npm run warm                    # render them for your pane height
-npm run install-statusline      # register the hooks with every agent found
-npm run shell -- --install      # add the claude()/codex() wrapper
-npm run ghostty -- --install    # the resize keybind, so the pane is a strip
-```
-
-`deps` uses Homebrew or MacPorts, whichever you have, and will not install a
-package manager for you — if you have neither it prints the route for each:
-Ghostty ships a [`.dmg`](https://ghostty.org/download), and chafa builds
-[from source](https://hpjansson.org/chafa/download/).
-
-The keybind is not optional: collapsing the new split into a strip is one press
-of a large resize step, and Ghostty's built-in step is ten pixels. Without it
-the pane arrives at half your window height.
-
-</details>
-
-### What it touches outside this folder
 
 Every file is backed up before the first write, and every one comes back out:
 
@@ -310,170 +262,55 @@ Every file is backed up before the first write, and every one comes back out:
 | `~/.zshrc` | the `claude()`/`codex()` wrapper | `npm run shell -- --remove` |
 | `~/.config/ghostty/config` | one resize keybind | `npm run ghostty -- --remove` |
 
-Only the agents you actually have are touched. Nothing else leaves the repo —
-undo those, delete the folder, and no trace is left.
+Only the agents you actually have are touched. Undo those, delete the folder,
+and no trace is left.
 
-## If something looks wrong
+</details>
+
+## Troubleshooting
 
 ```sh
 npm run doctor
 ```
 
-It checks each piece on its own: hooks registered per agent, chafa present, the
-frame cache matching your pane height, and which Pokémon are currently held.
+It checks each piece on its own — hooks registered per agent, chafa present, the
+frame cache matching your pane height, and which Pokémon are currently held —
+and names whichever is unhappy.
 
-**A sprite that stutters or freezes for a second** is the frame cache. Frames
-are rendered per pane height, so resizing the pane — or switching to one nobody
-has warmed — leaves it rendering on the fly. `doctor` names it exactly:
+**A sprite that stutters** is the frame cache. Frames are rendered per pane
+height, so resizing the pane leaves it rendering on the fly: warm sprites load in
+about 3 ms, cold ones take a second or two. `npm run warm -- <rows>` fixes it.
 
-```
-✘ cache matches the pane   pane is 4 rows but only 20 of 28 sprites are
-                           warmed for it — run: npm run warm -- 4
-```
-
-Warm sprites load in about **3 ms**, cold ones in **one to two seconds** — that
-is the stutter. A Pokémon summoned for the first time pays that once, roughly
-two seconds to fetch and render, and is instant every time after.
-
-## Commands
-
-Starting a session:
-
-```sh
-claude --pikachu             # a particular one
-claude --flygon              # any of the 1256, fetched on first use
-claude --random              # be handed one
-claude --pokemon             # pick from a list
-claude --resume --charizard  # combines with everything else
-```
-
-Typed at Claude, inside a session. These never reach the model — a hook answers
-them and blocks the prompt, so they cost no turn and no tokens:
-
-```
---squirtle          switch this pane, live, no restart
---random            roll one
---pokemon           list the residents
-
---dex               what you have, and how many exist
---dex ghost         every Ghost type
---dex 149           by number
---dex dragonite     by name
---dex current       the one you're looking at — answers in the pane
---dex ash           naming the one on screen answers there too
---dex random        be shown something
-```
-
-`--dex current` puts its card **beside the sprite**, not in the conversation:
-you asked about the Pokémon already on your screen, so that is where the answer
-goes. It fades after a few seconds. Naming that same one does the same thing —
-with Pikachu in the pane, `--dex pikachu` and `--dex current` are the same
-question and get the same answer in the same place.
-
-Everything else answers in the conversation, including `--dex random`, which
-describes one you have not summoned and would otherwise caption the wrong
-Pokémon.
-
-A prompt that is *only* the flag counts. `what does --pikachu do?` is a real
-question and reaches Claude untouched.
-
-**Send them while Claude is idle.** The hook that catches these runs when you
-submit a prompt, and a message typed while Claude is already working never fires
-it — Claude Code folds that text into the turn already running instead. So
-`--squirtle` sent mid-answer reaches the model as an ordinary message, and you
-get a reply about Squirtle rather than a Squirtle. Nothing breaks; the pane just
-does not change. Wait for it to finish and send it again.
-
-Punctuation is forgiven, and form names work as written: `--ho-oh` finds
-`hooh`, `--rotom-wash` and `--charizard-megax` are exactly themselves.
-
-### Everything you can run
-
-| command | what it does |
-| --- | --- |
-| `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
-| `npm run roster` | download any missing resident sprites (`-- --refresh` to redo them) |
-| `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
-| `npm run deps` | install chafa and Ghostty via Homebrew or MacPorts (`-- --dry` to preview) |
-| `npm run ghostty -- --install` | the resize keybind the pane needs (`--remove` to undo) |
-| `npm run prune` | evict guests now (`-- --dry` to see what would go, `-- --keep-days=0`) |
-| `npm run assigned` | which Pokemon each session was given, and why (`-- --forget` to reset) |
-| `npm run dex` | the Pokedex, from a terminal: `-- fire`, `-- 25`, `-- current`, `-- random` |
-| `npm run watch` | print the working/waiting decision the pane is making, live |
-| `npm run attribution` | regenerate the credits list (`-- --check` to fail if stale) |
-| `npm run shell -- --install` | add the `claude()` wrapper to `~/.zshrc` (`--remove` to undo) |
-| `npm run install-statusline` | register the hooks (`npm run uninstall-statusline` to undo) |
-| `npm run window` | run a pane by hand, for debugging |
-| `npm run build` | rebuild the status-line frames from `config.json` |
-| `npm run recolour` | repaint one sprite's palette to match another: `-- a.gif b.gif out.gif` |
-| `npm run flip` | mirror a sprite left to right: `-- in.gif out.gif` |
-
-`doctor` and `watch` are the two worth remembering. `doctor` answers "is this
-set up right", and `watch` answers "why is the sprite doing that" — it prints
-the same decision the pane is making and what it rested on.
-
-The rest are tools for tuning how a sprite is drawn, from working out what a
-terminal can render — `preview`, `compare`, `sizes`, `bakeoff`, `use`,
-`preset`, `fontcheck`, `cellcheck`, and `for-ghostty` / `for-terminal` /
-`for-exact` / `for-small`. [docs/design.md](docs/design.md) is what they are
-for. **`preset` and the `for-*` ones write to `config.json`** rather than just
-reporting, which is easy to trigger by accident while poking around.
-
-`choose` and `companion` are internal: the shell wrapper and the hooks call
-them, and there is no reason to run them by hand.
-
-## Your own sprites
-
-Any GIF works. Drop it in `assets/` and point a roster entry at it:
-
-```js
-// src/roster.mjs
-{ name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
-```
-
-Hand-picked files are never overwritten or re-downloaded, and they override the
-default — which is the Pokémon's own shiny palette, with a white flash between.
-
-Two tools for when a supplied animation is nearly right:
-
-- **`npm run recolour`** — the right Pokemon in the wrong shade. A GIF stores
-  pixels as indices into a colour table, so its colours change without touching
-  a single pixel or re-encoding anything.
-- **`npm run flip`** — facing the wrong way. This one does re-encode, because
-  mirroring moves every pixel, but it reuses the original palette so nothing is
-  lost. Flip the file rather than the drawing: GitHub strips `style` from
-  images, so a README cannot mirror anything and would disagree with the pane.
-
-Judge a candidate at the size the pane actually draws, about 68 pixels tall.
-File size lies in both directions: a 500×500 GIF that is really 40×39 upscaled
-is pixel art and scales beautifully, while a 407×295 smooth render shrinks to
-mush. `npm run attribution` regenerates the credits list when you add one.
+**The sprite is wrong at the wrong moment.** `npm run watch` prints the same
+working/waiting decision the pane is making, and what it rested on. There is no
+hook for pressing escape, so an interrupted turn looks like a running one — the
+pane also reads the transcript to tell them apart, which is Claude-only. On
+Codex an interrupted turn settles in about twenty seconds instead of one.
+[docs/known-issues.md](docs/known-issues.md) has the rest.
 
 ## Residents and guests
 
 **Residents** are the 14 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
-out. Pikachu goes to whoever is free to have it.
+out.
 
 **Guests** are the other 1242. They arrive when you name them — about two
-seconds, measured: roughly 1.3s to fetch and 0.6s to render — then stay while
-you use them and load in 2 ms thereafter. They are evicted least-recently-shown
-first, and one a pane is currently showing is never evicted, however long it has
-been sitting there.
+seconds to fetch and render — then load in 2 ms thereafter. They are evicted
+least-recently-shown first, and one a pane is currently showing is never
+evicted.
 
-Whichever you end up with, the session keeps it. The choice is written down and
-read back when a pane reopens, so closing a window and coming back gives you the
-same Pokemon rather than a fresh roll. Naming one still overrules that, always.
+Either way the session keeps it: the choice is written down and read back when a
+pane reopens, so closing a window and coming back gives you the same Pokémon.
+Naming one always overrules that.
 
 ```sh
-npm run prune            # evict now; happens on its own as sessions open
-npm run prune -- --dry
+npm run prune            # evict guests now; also happens on its own
 npm run assigned         # what each session was given, and why
 ```
 
-The whole set pre-rendered would be about **2.7 GB** of frame cache and
-twenty-five minutes of work, which is the entire reason for the split. Guests
-cost 1–5 MB each, bounded by `guestBudgetMb` (200) and `guestKeepDays` (14).
+The whole set pre-rendered would be about **2.7 GB** of frame cache, which is
+the entire reason for the split. Guests cost 1–5 MB each, bounded by
+`guestBudgetMb` (200) and `guestKeepDays` (14).
 
 ## Settings
 
@@ -490,46 +327,69 @@ cost 1–5 MB each, bounded by `guestBudgetMb` (200) and `guestKeepDays` (14).
 | `guestBudgetMb` | `200` | disk the guests may hold |
 | `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
-## How it knows the agent is working
+## Your own sprites
 
-This is inference rather than a signal, and it is the part most likely to
-surprise you. Both agents ring a hook when you submit a prompt and around each
-tool — but there is **no hook for pressing escape**, so an interrupted turn
-looks identical to a running one.
+Any GIF works. Drop it in `assets/` and point a roster entry at it:
 
-So the pane also reads the session transcript, where an interruption leaves an
-`interruptedMessageId`, and watches whether the transcript is growing at all.
-Where that frays, and why the thresholds are what they are, is in
-[docs/known-issues.md](docs/known-issues.md).
+```js
+// src/roster.mjs
+{ name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
+```
 
-That transcript trick is Claude-specific. On Codex an interrupted turn falls
-back to the slower signal — the sprite settles in about twenty seconds rather
-than one.
+Hand-picked files are never overwritten or re-downloaded, and they override the
+default — the Pokémon's own shiny palette, with a white flash between.
 
-When the sprite is wrong at the wrong moment, `npm run watch` prints the same
-decision the pane is making and what it rested on.
+Judge a candidate at the size the pane draws, about 68 pixels tall. File size
+lies in both directions: a 500×500 GIF that is really 40×39 upscaled is pixel
+art and scales beautifully, while a 407×295 smooth render shrinks to mush.
+
+Two tools for when an animation is nearly right: **`npm run recolour`** repaints
+one palette to match another without re-encoding, and **`npm run flip`** mirrors
+a sprite. Run `npm run attribution` after adding one.
+
+<details>
+<summary><b>Everything you can run</b></summary>
+
+<br>
+
+| command | what it does |
+| --- | --- |
+| `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
+| `npm run watch` | print the working/waiting decision the pane is making, live |
+| `npm run roster` | download any missing resident sprites (`-- --refresh` to redo) |
+| `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
+| `npm run deps` | install chafa and Ghostty (`-- --dry` to preview) |
+| `npm run ghostty -- --install` | the resize keybind the pane needs (`--remove` to undo) |
+| `npm run prune` | evict guests now (`-- --dry`, `-- --keep-days=0`) |
+| `npm run assigned` | which Pokémon each session was given (`-- --forget` to reset) |
+| `npm run dex` | the Pokédex from a terminal: `-- fire`, `-- 25`, `-- current` |
+| `npm run attribution` | regenerate the credits (`-- --check` to fail if stale) |
+| `npm run shell -- --install` | add the shell wrapper (`--remove` to undo) |
+| `npm run install-statusline` | register the hooks (`uninstall-statusline` to undo) |
+| `npm run window` | run a pane by hand, for debugging |
+| `npm run recolour` | repaint a palette: `-- a.gif b.gif out.gif` |
+| `npm run flip` | mirror a sprite: `-- in.gif out.gif` |
+| `npm run crop` | cut one figure out of a sheet: `-- in.gif out.gif --find=3` |
+
+The rest are tuning tools for working out what a terminal can draw —
+`preview`, `compare`, `sizes`, `bakeoff`, `use`, `preset`, `fontcheck`,
+`cellcheck`, and the `for-*` set. [docs/design.md](docs/design.md) explains
+them. **`preset` and `for-*` write to `config.json`** rather than just
+reporting.
+
+</details>
 
 ## Licence and artwork
 
-The **code** is MIT — see [LICENSE](LICENSE), and
-[ATTRIBUTION.md](ATTRIBUTION.md) for exactly what that covers.
+The **code** is MIT — see [LICENSE](LICENSE).
 
-The **artwork is not mine and is not covered by it.** The Gen-5 sprites are
-Game Freak's; the hand-picked GIFs are fan art found online. They ship with the
-project because several entries are only worth having because of them.
+The **artwork is not mine and is not covered by it.** The Gen-5 sprites are Game
+Freak's; the hand-picked GIFs are fan art found online.
 [ATTRIBUTION.md](ATTRIBUTION.md) names what came from where, and anything will
 be removed on request — sprites are read by path, so it is a one-line change.
 
 Pokémon is a trademark of Nintendo. This is a personal tool, unaffiliated with
 anyone, and nothing here is sold.
-
-## More
-
-- [docs/design.md](docs/design.md) — why it is built this way: why it is not in
-  the spinner line, how a sprite is scaled down without ruining it, and what a
-  terminal can actually draw.
-- [docs/known-issues.md](docs/known-issues.md) — where the working/waiting
-  detection frays, and the features that are built but deliberately dormant.
 
 ## Contributing
 
@@ -538,12 +398,11 @@ Issues and pull requests welcome, particularly:
 - **A sprite that reads better than one in the roster.** Bring the numbers —
   `docs/design.md` says how they are measured, and the bar is scale ≤ 1.8x with
   ≥ 24 frames at the size the pane draws.
-- **A Linux path.** Everything but the pane-opening is portable Node; it needs
-  a way to open a split that is not AppleScript.
-- **A bash version of the `claude()` wrapper**, generated the way
-  `src/shell.mjs` generates the zsh one.
+- **A Linux path.** Everything but the pane-opening is portable Node; it needs a
+  way to open a split that is not AppleScript.
 
-`npm test` before you push — it is 37 checks and takes under a second.
+`npm test` before you push.
 
-If you drew one of the sprites here and would rather it were not, open an issue
-and it goes. See [ATTRIBUTION.md](ATTRIBUTION.md).
+Also worth reading: [docs/design.md](docs/design.md) for why it is built this
+way, and [docs/known-issues.md](docs/known-issues.md) for what is deliberately
+wrong.
