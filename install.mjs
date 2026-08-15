@@ -4,9 +4,9 @@
 // Our entries are recognised by the path they run, so uninstalling only removes
 // what we added and leaves anything else in the file alone.
 
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { FRAMES_FILE, ROOT } from './src/config.mjs'
 
 const SETTINGS = join(homedir(), '.claude', 'settings.json')
@@ -61,6 +61,11 @@ const read = () => {
 }
 
 const write = (document) => {
+  // ~/.claude may not exist yet. Writing straight into it threw ENOENT with a
+  // node stack trace and — because this runs at the top level of a script that
+  // ends `process.exit(0)` — still exited 0, so `npm run setup` reported the
+  // step as done having written nothing at all.
+  mkdirSync(dirname(SETTINGS), { recursive: true })
   writeFileSync(SETTINGS, `${JSON.stringify(document, null, 2)}\n`)
 }
 

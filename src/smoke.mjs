@@ -264,6 +264,122 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
   }
 }
 
+// The three files that run their work the moment they are loaded.
+//
+// `MODULES` above cannot reach any of them: importing one would perform its job
+// — install the thing, write to your home directory, or in on-activity's case
+// call process.exit and end this test run *reporting success*. So they were the
+// only user-facing code with nothing but `node --check` behind them, and
+// `node --check` is exactly the check that missed MIN_DELAY.
+//
+// Run as subprocesses instead, each against the safe path it already documents.
+// That executes the real top-level code without importing it.
+{
+  const { spawnSync } = await import('node:child_process')
+  const { mkdtempSync, rmSync, readFileSync: read } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { sessionStateFile } = await import('./config.mjs')
+
+  const run = (file, { input = '', env = {} } = {}) =>
+    spawnSync(process.execPath, [file], {
+      cwd: ROOT,
+      input,
+      encoding: 'utf8',
+      env: { ...process.env, ...env },
+    })
+
+  // 1. The hook handler. Its whole body sits in `try { } catch {}` and then
+  //    exits 0, so a ReferenceError in it is not a crash — every hook silently
+  //    becomes a no-op that reports success, and the sprite just stops
+  //    responding with nothing said anywhere. Exit code proves nothing here;
+  //    the only proof is whether it did the work.
+  const hookSession = 'smoke-hook-0001'
+  const stateFile = sessionStateFile(hookSession)
+
+  try {
+    rmSync(stateFile, { force: true })
+  } catch {}
+
+  const hook = run('bin/on-activity.mjs', {
+    input: JSON.stringify({ hook_event_name: 'Stop', session_id: hookSession }),
+  })
+
+  let wrote = null
+
+  try {
+    wrote = JSON.parse(read(stateFile, 'utf8'))
+  } catch {}
+
+  check(
+    'the hook handler actually handles a hook',
+    hook.status === 0 && wrote?.state === 'idle',
+    wrote ? `state=${wrote.state}` : 'wrote no state — it exits 0 even when it does nothing',
+  )
+
+  try {
+    rmSync(stateFile, { force: true })
+  } catch {}
+
+  // 2. The installer, on the one path that is safe to run: a missing
+  //    prerequisite. With no PATH there is no chafa, so it must stop at the
+  //    preflight having written nothing. This is the promise the file makes in
+  //    its own output, so the test is that promise rather than a restatement of
+  //    the implementation.
+  const blocked = run('src/setup.mjs', { env: { PATH: '' } })
+
+  check(
+    'setup stops on a missing prerequisite without touching anything',
+    blocked.status === 1 && /nothing was changed/.test(blocked.stdout ?? ''),
+    `exit ${blocked.status}`,
+  )
+
+  // 3. install.mjs edits ~/.claude/settings.json, which makes it the one file
+  //    here worth testing most and the one hardest to test safely. homedir()
+  //    honours $HOME, so pointing that at a scratch directory gives it a real
+  //    settings file to edit that is not yours. Install then uninstall, because
+  //    the half that breaks quietly is the removal: it matches our hooks by
+  //    looking for 'pixel-runner' in the command, and leaving one behind means
+  //    a hook firing at a file that no longer exists.
+  const home = mkdtempSync(join(tmpdir(), 'pokemanion-smoke-'))
+
+  try {
+    const ours = (settings) =>
+      Object.values(settings.hooks ?? {})
+        .flat()
+        .filter((group) => JSON.stringify(group).includes('pixel-runner')).length
+
+    const installed = run('install.mjs', { env: { HOME: home } })
+    const after = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
+
+    check('install registers its hooks', installed.status === 0 && ours(after) > 0, `${ours(after)} hooks`)
+
+    const removed = run('install.mjs', { env: { HOME: home } })
+    const cleaned = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
+
+    // Re-running must not stack a second copy — that is what `withoutOurs` is
+    // for, and a duplicate would fire every hook twice.
+    check('and does not add them twice', removed.status === 0 && ours(cleaned) === ours(after), `${ours(cleaned)} hooks`)
+
+    const uninstalled = run('install.mjs', { env: { HOME: home } })
+
+    // `--uninstall` is passed by argv, not env, so it needs its own spawn.
+    const gone = spawnSync(process.execPath, ['install.mjs', '--uninstall'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, HOME: home },
+    })
+    const emptied = JSON.parse(read(join(home, '.claude', 'settings.json'), 'utf8'))
+
+    check('uninstall removes every one of them', gone.status === 0 && ours(emptied) === 0, `${ours(emptied)} left`)
+
+    void uninstalled
+  } catch (error) {
+    check('install.mjs runs against a scratch HOME', false, error.message.split('\n')[0])
+  } finally {
+    rmSync(home, { recursive: true, force: true })
+  }
+}
+
 // Every sprite the README shows has to be committed, or the gallery is broken
 // images for anyone who clones. The residents' sprites are tracked by an
 // explicit list in .gitignore, and nothing else would notice it drifting out of
