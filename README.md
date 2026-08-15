@@ -63,7 +63,14 @@ the machine.
 
 ---
 
-## Install it in two lines
+## Quick install
+
+**First, get [Ghostty](https://ghostty.org/download)** if you do not have it. The
+pane is a Ghostty split, so there is no pane without it — and it is the one thing
+here that cannot install itself, being a GUI app that asks for a password. chafa,
+the other requirement, *is* fetched for you in the background.
+
+Then, at your agent:
 
 <table>
 <tr>
@@ -93,11 +100,17 @@ the machine.
 > Codex says **add** where Claude Code says **install** — that is Codex's own
 > spelling, not a typo.
 
-Type them at your agent. Nothing to clone, nothing to build: the sprites ship
-with it. Then **[three things no plugin can do](#install)** — restart your agent
-and Ghostty, and allow Ghostty in **Accessibility**, without which macOS blocks
-the keystroke that opens the pane. It tells you this itself the first time you
-send a message.
+Nothing to clone and nothing to build — the sprites ship with it. Two things are
+left, and neither is optional:
+
+- **Allow Ghostty in Accessibility** — System Settings → Privacy & Security →
+  Accessibility. Opening the pane means pressing keys, and macOS blocks that
+  until you say so. Skip it and everything installs perfectly and no pane ever
+  appears.
+- **Restart your agent and Ghostty** — both read their configuration at startup.
+
+The plugin says all of this itself the first time you send a message, so there is
+nothing to remember here.
 
 Want `claude --pikachu` at launch too? That needs [the clone](#from-a-clone).
 
