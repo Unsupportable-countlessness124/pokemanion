@@ -149,10 +149,17 @@ try {
           // table. The same split the command line makes, because it is about
           // the shape of the answer rather than where it is being read.
           if (found.length === 0) {
-            const { suggest } = await import('../src/switch.mjs')
+            const { suggest, unregistered } = await import('../src/switch.mjs')
             const meant = suggest(asked.query, pool)
+            // Spelled correctly, drawn never. Worth saying, because "nothing
+            // matches" invites you to try spelling it again.
+            const known = unregistered(asked.query)
 
-            process.stderr.write(`nothing matches "${asked.query}"${meant ? `\n\ndid you mean: ${meant}` : ''}\n`)
+            process.stderr.write(
+              known
+                ? `${known.title} — #${known.num}, no data\n\nreal, but never drawn as a Gen 5 sprite, so it cannot be summoned\n`
+                : `nothing matches "${asked.query}"${meant ? `\n\ndid you mean: ${meant}` : ''}\n`,
+            )
           } else if (hit || found.length === 1) {
             const row = hit ? entry(hit) : found[0]
             const others = found.filter((other) => other.name !== row.name).length

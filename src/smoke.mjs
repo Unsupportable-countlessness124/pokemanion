@@ -107,6 +107,20 @@ check('so is a dashed name', suggest('--pikachu') === '--dex pikachu')
 // Silence beats a guess that leads to a second miss.
 check('nonsense gets no guess', suggest('--zzznope') === null)
 check('and a correct query needs none', suggest('current') === null)
+
+// A correctly spelled Pokemon that was never drawn in Gen 5 is not a typo, and
+// telling someone "no such one" invites them to try spelling it again.
+const { unregistered } = await import('./switch.mjs')
+
+check('a real but undrawn Pokemon is known as such', unregistered('urshifu')?.num === 892)
+check('including one spelled with punctuation', unregistered('sirfetchd')?.num === 865)
+check('nonsense is not mistaken for one', unregistered('zzznope') === null)
+// The whole point of the list is that these are absent from the roster — if one
+// ever gains a sprite it belongs in the dex, not in both places at once.
+check(
+  'and none of them is also summonable',
+  !['urshifu', 'sirfetchd', 'chespin'].some((name) => isKnown(name)),
+)
 check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
 // What a session was given, and getting it back.

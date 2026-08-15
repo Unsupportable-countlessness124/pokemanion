@@ -13,6 +13,9 @@
 // Only a prompt that is *entirely* the flag counts. Asking Claude about
 // `--pikachu` in a sentence is a real question and has to stay one.
 
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { ROOT } from './config.mjs'
 import { available, resolveName } from './roster.mjs'
 
 // `--pokemon` and its plural list; `--<name>` switches. Anything else that
@@ -55,6 +58,39 @@ export const parse = (prompt, pool = available()) => {
   if (resolved) return { kind: 'switch', name: resolved, guest: true }
 
   return { kind: 'unknown', word }
+}
+
+// Real Pokemon that this cannot show, and the reason they are missing.
+//
+// The sprites are Gen 5 animations, and Gen 5 ended at #649. Everything after
+// it exists only where an artist went back and drew it in that style, which
+// they did for most of Gen 6 and 7 and much less of Gen 8 and 9. So `--urshifu`
+// is not a typo — it is a correctly spelled Pokemon that was never drawn.
+//
+// Without this list the two are indistinguishable, because the bundled dex only
+// contains what has a sprite: a name that is missing from it is missing whether
+// it is a Pokemon or nonsense. 159 names is a small price for telling someone
+// they spelled it right.
+//
+// Generated once by diffing the national dex (PokeAPI's species list, 1025
+// entries) against the names this project can resolve. If a new sprite set ever
+// lands, that diff is how to rebuild it — there is no script, because it is a
+// thing that happens roughly never.
+const UNREGISTERED = JSON.parse(readFileSync(join(ROOT, 'assets', 'no-gen5-sprite.json'), 'utf8'))
+
+const UNREGISTERED_BY_NAME = new Map(UNREGISTERED.map((row) => [row.n, row]))
+
+export const unregistered = (word) => {
+  const key = String(word ?? '').trim().toLowerCase()
+
+  if (!key) return null
+
+  // Their names carry hyphens the way ours do not, so try both spellings.
+  const row = UNREGISTERED_BY_NAME.get(key) ?? UNREGISTERED.find((entry) => entry.n.replace(/[^a-z0-9]/g, '') === key.replace(/[^a-z0-9]/g, ''))
+
+  if (!row) return null
+
+  return { name: row.n, num: row.d, title: row.n.replace(/(^|-)([a-z])/g, (_, dash, letter) => (dash ? '-' : '') + letter.toUpperCase()) }
 }
 
 // What the user probably meant, when `--dex <something>` matched nothing.
@@ -105,6 +141,19 @@ export const describe = (result, pool = available(), current = null, extra = 0) 
   const rest = extra > 0 ? `\n\n...or name any of ${extra} others — they are fetched on the spot` : ''
 
   if (result.kind === 'list') return `${list}\n\ntype --<name> to switch${rest}`
+
+  // A real Pokemon that simply has no sprite reads as a typo otherwise, and it
+  // is the opposite: you spelled it correctly and it does not exist *here*.
+  // The Pokedex has a word for that, so it may as well use it.
+  const known = unregistered(result.word)
+
+  if (known) {
+    return (
+      `${known.title} — #${known.num}, no data\n\n` +
+      `Gen 5 ended at #649 and nothing after it was ever drawn in this style. ` +
+      `${UNREGISTERED.length} species are missing for that reason.\n\n${list}${rest}`
+    )
+  }
 
   return `no such one: ${result.word}\n\n${list}${rest}`
 }

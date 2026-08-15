@@ -37,6 +37,12 @@ Everything in `assets/pokemon/`, and the resting halves of most roster entries.
 pokedex data: names, numbers, types, sizes and abilities. Facts about Pokemon
 rather than artwork, but they came from there.
 
+`assets/no-gen5-sprite.json` is the 159 species that exist but have no Gen 5
+sprite — names and numbers only, worked out by diffing the national dex from
+[PokeAPI](https://pokeapi.co) against the names this project can resolve. It is
+there so that asking for one of them can say "real, never drawn" rather than
+"no such Pokemon".
+
 ## Hand-picked GIFs
 
 The numbered files in `assets/`. These are fan art found online, kept in the
