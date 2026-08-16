@@ -215,9 +215,7 @@ claude --resume --charizard  # combines with everything else
 
 ## Install from source
 
-**The plugin is the one to use.** This route exists for working on the code —
-it puts the project somewhere you can edit, and everything else about it is the
-same:
+**The plugin is the one to use.** This route exists for working on the code:
 
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
