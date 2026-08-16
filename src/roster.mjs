@@ -117,7 +117,28 @@ export const ROSTER = [
     },
   },
   { name: 'charmander' },
-  { name: 'squirtle' },
+  // Both halves supplied, and the working half built rather than found.
+  //
+  // The source was one still of Squirtle firing a water gun: the beam already
+  // drawn, leaving the mouth and reaching the far edge. An animation of a still
+  // like that is a question of what to hide. Revealing the beam from the mouth
+  // outward fires it; hiding it from the mouth outward lets the jet detach and
+  // dissipate. Eight frames of that is one burst, and looping it is a Squirtle
+  // spraying water for as long as the agent is working.
+  //
+  // The still was a smoothed upscale rather than clean pixel art — no run length
+  // divides out, so `recoverNative` has nothing to recover. Taking every third
+  // pixel keeps the edges hard where averaging would have made mush of them.
+  //
+  // Its body runs 6% cooler than the resting sprite's, which is inside the range
+  // the shinies above already cover, so there is no `transition` here: a white
+  // flash on top of a palette that has barely moved would be announcing nothing.
+  {
+    name: 'squirtle',
+    idle: 'assets/29-squirtle-standing.png',
+    busy: 'assets/30-squirtle-watergun.gif',
+    busySpeed: 1,
+  },
   { name: 'bulbasaur' },
   { name: 'eevee' },
   { name: 'munchlax' },
