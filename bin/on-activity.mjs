@@ -146,15 +146,18 @@ try {
               writeFileSync(note, JSON.stringify({ version: ours, roots: others }))
             } catch {}
 
+            // `~` rather than the full path. It is the only long thing in
+            // either message, and the message is read in a chat window.
+            const { homedir } = await import('node:os')
+            const short = others[0].startsWith(homedir()) ? `~${others[0].slice(homedir().length)}` : others[0]
+
             process.stderr.write(
-              (stale
-                ? `This plugin is ${ours}. The Pokemon beside you is ${theirs}, from ${others[0]}.\n\n` +
-                  '  --use-plugin   switch to this one\n' +
-                  `  or update it   cd ${others[0]} && git pull && npm run setup\n`
-                : `pokemanion is already installed at ${others[0]}, and that copy is the\n` +
-                  'one running — so you get one Pokemon rather than two.\n\n' +
-                  '  --use-plugin   switch to the plugin\n' +
-                  '  or ignore this, nothing is wrong\n'),
+              stale
+                ? `Running ${theirs} from ${short}. This plugin is ${ours}.\n\n` +
+                  '  --use-plugin   run this one instead\n' +
+                  `  or update it   cd ${short} && git pull && npm run setup\n`
+                : `Already running from ${short}, so the plugin is idle — one Pokemon, not two.\n\n` +
+                  '  --use-plugin   run the plugin instead\n',
             )
             process.exit(2)
           }
