@@ -234,15 +234,25 @@ check(
     // width — so the overflow would stay after the card had gone.
     const { updateCommand: commandFor } = await import('./update.mjs')
 
-    // The corner is one line beside the sprite, and the widest working sprite —
-    // Charizard's twenty columns of fire — leaves sixteen. Anything longer would
-    // be silently hidden exactly when it mattered.
-    const CORNER_ROOM = 16
+    // The corner takes the longest form that fits, so it says as much as the pane
+    // has room for and never overflows. A split spans the terminal, so it is
+    // usually the whole command; a narrow pane still gets something true.
+    const { cornerText } = await import('./update.mjs')
+    const plugin = '/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'
+
+    check('a wide pane gets the whole command', cornerText('1.2.0', '1.3.0', 120, plugin).includes('/plugin update pokemanion@pokemanion'))
+    check('a narrow one still says a version is out', cornerText('1.2.0', '1.3.0', 20, plugin) === '1.3.0 available')
+    check('and the narrowest falls back to the version', cornerText('1.2.0', '1.3.0', 8, plugin) === 'v1.2.0')
+    check('no update means no update text', cornerText('1.2.0', null, 120, plugin) === 'v1.2.0')
+
+    // Overflow is the thing to avoid: the pane erases by overwriting its own
+    // width, so anything wider than the space would wrap onto the sprite and
+    // stay there.
+    const widths = [200, 120, 80, 60, 40, 30, 20, 12, 8]
 
     check(
-      'the update notice fits in the corner beside the widest sprite',
-      `${'1.3.0'} available`.length <= CORNER_ROOM,
-      `${'1.3.0 available'.length} of ${CORNER_ROOM}`,
+      'nothing it chooses is wider than the room it was given',
+      widths.every((w) => cornerText('1.2.0', '1.3.0', w, plugin).length <= Math.max(w, 6)),
     )
 
     // The command belongs to --update, which answers in the conversation.

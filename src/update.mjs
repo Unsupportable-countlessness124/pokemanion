@@ -149,6 +149,26 @@ export const markAnnounced = (version) => {
 // happened to be, so a message built for one install could carry the other's
 // advice. Harmless in production, where they are always the same root — which is
 // exactly the kind of thing that is wrong for months without showing.
+// The longest thing that fits, given the room there actually is.
+//
+// The pane is a horizontal split, so its width is the terminal's — a hundred
+// columns and more, not the thirty-eight a separate window would get. Wide
+// enough for what Claude Code prints on its own update line, which is the whole
+// command. Narrow panes still get something true, just shorter.
+export const cornerText = (current, latest, width, root = ROOT) => {
+  if (!latest) return `v${current}`
+
+  const forms = [
+    `pokemanion ${latest} available — run: ${updateCommand(root)}`,
+    `${latest} available — ${updateCommand(root, { short: true })}`,
+    `${latest} available — --update`,
+    `${latest} available`,
+    `v${current}`,
+  ]
+
+  return forms.find((form) => form.length <= width) ?? `v${current}`
+}
+
 // The same thing the message says, folded to fit beside a sprite.
 //
 // Claude Code prints "Update available! Run: brew upgrade ..." across a whole

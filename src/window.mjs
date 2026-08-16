@@ -22,7 +22,7 @@ import { STATE_DIR, loadConfig, readState } from './config.mjs'
 import { MIN_DELAY, loadSprite } from './sprite.mjs'
 import { alignFor, busyFile, busySpeedFor, flipBusyFor, idleFile, touch, transitionFor } from './roster.mjs'
 import { entry as dexEntry, paneCard } from './dex.mjs'
-import { available as updateAvailable, installedVersion } from './update.mjs'
+import { available as updateAvailable, cornerText, installedVersion } from './update.mjs'
 
 const HIDE_CURSOR = '\x1b[?25l'
 const SHOW_CURSOR = '\x1b[?25h'
@@ -660,6 +660,7 @@ const ourVersion = installedVersion()
 
 let versionText = null
 let versionRead = 0
+let versionCols = 0
 let versionDrawn = 0
 
 const drawVersion = (sprite) => {
@@ -676,29 +677,30 @@ const drawVersion = (sprite) => {
     return
   }
 
-  // What Claude Code puts on its own line, in the space this pane has for it.
+  const cols = process.stdout.columns || config.windowCols || 0
+  const rows = process.stdout.rows || 0
+
+  // The same line Claude Code prints, in the room this pane actually has.
   //
-  // Claude has a whole terminal width and prints the command; the widest working
-  // sprite leaves sixteen columns here, which is enough to say a version exists
-  // and not enough to say what to type. So the corner carries the fact and
-  // `--update` prints the command in the conversation, where there is room.
+  // The pane is a horizontal split, so its width is the terminal's — wide enough
+  // for the whole command, which is what Claude prints on its own update line.
+  // The width is read each time rather than once, because a pane is resized by
+  // dragging and this has to still fit afterwards.
   //
-  // It sits in the corner rather than taking a card, because the cards are
-  // spoken for: the stats card on arrival, and `--dex` whenever you ask.
-  if (now - versionRead > VERSION_EVERY) {
+  // In the corner rather than in a card: the cards are spoken for, by the stats
+  // on arrival and by `--dex` whenever you ask for one.
+  if (now - versionRead > VERSION_EVERY || cols !== versionCols) {
     versionRead = now
+    versionCols = cols
 
     try {
-      const latest = updateAvailable()
-
-      versionText = latest ? `${latest} available` : `v${ourVersion}`
+      versionText = cornerText(ourVersion, updateAvailable(), Math.max(0, cols - (sprite?.cols ?? 0) - 2))
     } catch {
       versionText = `v${ourVersion}`
     }
   }
 
-  const cols = process.stdout.columns || config.windowCols || 0
-  const rows = process.stdout.rows || 0
+  if (!versionText) return
 
   const from = cols - versionText.length + 1
 

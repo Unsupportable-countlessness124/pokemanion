@@ -282,21 +282,19 @@ codex plugin marketplace upgrade             # plugin, Codex
 cd pokemanion && git pull && npm run setup   # from source
 ```
 
-The pane says it too, in its bottom-right corner — `v1.2.0` normally, and
-`1.3.0 available` while there is a newer one:
+The pane says it too, along its bottom edge:
 
 ```
-┌──────────────────────────────────────┐
-│########                              │
-│########                              │
-│########               1.3.0 available│
-└──────────────────────────────────────┘
+│####################                                                          │
+│####################                                                          │
+│####################   pokemanion 1.3.0 available — run: /plugin update pokem…│
 ```
 
-It sits there rather than taking a card, because the cards are spoken for: the
-stats on arrival, and `--dex` whenever you ask. Sixteen columns is enough to say
-a version exists and not enough to say what to type, so **`--update`** prints
-the command in the conversation.
+It takes the longest form that fits the pane you have — the whole command in a
+normal split, `1.3.0 available` in a narrow one, and plain `v1.2.0` when there
+is nothing to say. It never takes a card, because those are spoken for by the
+stats on arrival and by `--dex`. **`--update`** prints the same thing in the
+conversation.
 
 It never installs anything itself. `"updateCheck": false` turns the checks off,
 `"showVersion": false` hides the corner.
