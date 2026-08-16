@@ -27,6 +27,25 @@ Then four things no script can do for you:
 3. **Open a new terminal**, or `source ~/.zshrc`.
 4. **Allow Ghostty in Accessibility** — once, as above.
 
+## Adding a character
+
+```sh
+npm run add -- brock ~/Downloads/front.gif ~/Downloads/side.gif
+```
+
+Two files, one command. It copies them into `assets/` under the next number,
+writes the roster entry, regenerates the gallery, the counts and the credits,
+and stages the art. A character that is not a Pokémon also gets a Pokédex card
+to fill in, since the bundled dex has no people in it.
+
+It says what it thinks of the art first: how many frames the working half has,
+and whether either file was resampled rather than upscaled cleanly. Neither
+stops the install — the pane is the only place to judge a sprite — but both have
+sunk attempts here before.
+
+Then open a new session. A pane already running was started before the entry
+existed and cannot know about it.
+
 ## Adding a sprite
 
 Any GIF works. Drop it in `assets/` and point a roster entry at it:

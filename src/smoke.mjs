@@ -168,6 +168,25 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   }
 
   check('the counts in the docs are the real ones', wrong.length === 0, `${guests} guests, ${summonable} total; found ${wrong.join(', ')}`)
+
+  // The number of residents, which is two digits and so slipped past the check
+  // above. Both plugin manifests carried 14 for as long as it took to notice
+  // that Brock had made it 15 — and a manifest is the first thing anyone reads
+  // about this.
+  const shops = ['.claude-plugin/marketplace.json', '.codex-plugin/plugin.json'].map((file) => ({
+    file,
+    text: readFileSync(join(ROOT, file), 'utf8'),
+  }))
+
+  const stale = shops
+    .flatMap(({ file, text }) => [...text.matchAll(/(\d+) (?:built in|ship with it)/g)].map((m) => ({ file, said: Number(m[1]) })))
+    .filter(({ said }) => said !== everyone.length)
+
+  check(
+    'and so is the number of residents in the plugin manifests',
+    stale.length === 0,
+    `${everyone.length} residents; found ${stale.map((s) => `${s.file}: ${s.said}`).join(', ')}`,
+  )
 }
 
 // Two installs of this project, one pane.

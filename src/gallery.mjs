@@ -152,9 +152,12 @@ const counts = [
   [/the other \d+\./g, `the other ${guests}.`],
   [/any of the \d+/g, `any of the ${summonable}`],
   [/^\d+ ship with it, \d+ more/m, `${residents} ship with it, ${guests} more`],
+  // The plugin manifests, which are the first thing anyone reads about this.
+  [/\d+ built in, \d+ summonable/g, `${residents} built in, ${guests} summonable`],
+  [/\d+ ship with it and \d+ more/g, `${residents} ship with it and ${guests} more`],
 ]
 
-for (const file of ['README.md', 'CLAUDE.md']) {
+for (const file of ['README.md', 'CLAUDE.md', '.claude-plugin/marketplace.json', '.codex-plugin/plugin.json']) {
   const path = `${ROOT}/${file}`
   const before = readFileSync(path, 'utf8')
   const after = counts.reduce((body, [pattern, replacement]) => body.replace(pattern, replacement), before)

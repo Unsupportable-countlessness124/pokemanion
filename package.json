@@ -45,6 +45,7 @@
     "flip": "node src/flip.mjs",
     "key": "node src/key.mjs",
     "crop": "node src/crop.mjs",
-    "update-check": "node src/update.mjs"
+    "update-check": "node src/update.mjs",
+    "add": "node src/add.mjs"
   }
 }
