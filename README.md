@@ -184,15 +184,11 @@ they never reach the model and cost no tokens:
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
-**Send them while the agent is idle** — typed mid-turn they reach the model
-instead. Only a prompt that is *nothing but* the flag counts, so `what does
---pikachu do?` is a real question and passes through.
+**Send them while the agent is idle** — mid-turn they reach the model instead.
 
-So do flags that are nothing like a Pokémon, `--update` and `--force` among
-them. Typos do not: `--charizrd` gets a "did you mean".
-
-Punctuation is forgiven and form names work as written: `--ho-oh`,
-`--rotom-wash`, `--charizard-megax`.
+Only a bare flag counts, so `what does --pikachu do?` passes through, as does
+anything unlike a Pokémon's name: `--update`, `--force`. Typos get a "did you
+mean". Forms work as written: `--ho-oh`, `--rotom-wash`.
 
 At launch, from your terminal:
 
