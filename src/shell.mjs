@@ -74,8 +74,6 @@ ${END}`
 }
 
 const wrapper = (agent, portable = isPluginRoot()) => {
-  const residents = names().map((name) => `--${name}`).join('|')
-
   // Resolved once per launch rather than per lookup: the find costs about 4ms
   // and there are three places that would otherwise each pay it.
   const at = (...parts) => (portable ? `$pixel_runner_root/${parts.join('/')}` : join(ROOT, ...parts))
@@ -90,16 +88,20 @@ const wrapper = (agent, portable = isPluginRoot()) => {
       --random)
         pixel_runner_random=1
         ;;
-      ${residents})
-        pixel_runner_species="\${pixel_runner_arg#--}"
-        ;;
       --*)
-        # Everything the sprite folder has, which is far too many to spell out
-        # in a case pattern, so the list is consulted instead. Anything not in
-        # it is somebody else's flag and is passed straight through — which is
-        # what keeps --resume, --continue and the rest working.
+        # Both lists are consulted at run time rather than written in here.
+        #
+        # The residents used to be a case pattern, spelled out when the wrapper
+        # was installed — so adding one to the roster left every shell that had
+        # already sourced this unable to summon it, until the wrapper was
+        # reinstalled. Reading the roster instead means a new resident works
+        # immediately, and it is the same grep the guests already needed.
+        #
+        # Anything in neither list is somebody else's flag and is passed
+        # straight through, which is what keeps --resume and the rest working.
         pixel_runner_try="\${pixel_runner_arg#--}"
-        if grep -qi "\\"\${pixel_runner_try}\\"" "${at('assets', 'gen5-names.json')}" 2>/dev/null; then
+        if grep -q "name: '\${pixel_runner_try}'" "${at('src', 'roster.mjs')}" 2>/dev/null ||
+           grep -qi "\\"\${pixel_runner_try}\\"" "${at('assets', 'gen5-names.json')}" 2>/dev/null; then
           pixel_runner_species="$pixel_runner_try"
         else
           pixel_runner_args+=("$pixel_runner_arg")

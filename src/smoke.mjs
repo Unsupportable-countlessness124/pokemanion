@@ -464,7 +464,7 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
       ['is a dex lookup', () => exactMatch('testchar') === 'testchar'],
       ['has a dex card', () => detail(entry('testchar'), false).includes('Exists only for this test')],
       ['has a pane card', () => paneCard(entry('testchar'))[0] === 'Test Character'],
-      ['gets a launch flag in the shell wrapper', () => snippet(['claude']).includes('--testchar')],
+      ['is reachable from the shell wrapper', () => snippet(['claude']).includes('roster.mjs')],
     ]
 
     const missed = surfaces.filter(([, works]) => !works()).map(([what]) => what)
@@ -652,6 +652,11 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
         makeDir(join(cache, version, 'bin'), { recursive: true })
         put(join(cache, version, 'bin', 'run.sh'), `#!/bin/sh\necho ${version}\n`)
         chmod(join(cache, version, 'bin', 'run.sh'), 0o755)
+
+        // The wrapper reads the roster to decide whether a flag is a resident,
+        // so a plugin without one cannot resolve a name at all.
+        makeDir(join(cache, version, 'src'), { recursive: true })
+        put(join(cache, version, 'src', 'roster.mjs'), "export const ROSTER = [{ name: 'pikachu' }]\n")
       }
 
       const bin = join(home, 'bin')

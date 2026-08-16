@@ -22,5 +22,11 @@ const word = process.argv[2]
 if (word) {
   const close = nearest(word, { maxEdits: 1 })
 
-  if (close) process.stdout.write(close)
+  // Never suggest what was typed. It read as a joke — `claude --brock` answering
+  // "no such Pokemon brock — did you mean --brock?" — and it happened because
+  // the shell wrapper's list of residents was written when it was installed,
+  // while this runs fresh and knew about Brock. The wrapper reads the roster now
+  // and cannot fall behind, but a suggestion identical to the word is nonsense
+  // whatever caused it.
+  if (close && close.toLowerCase() !== word.trim().toLowerCase()) process.stdout.write(close)
 }
