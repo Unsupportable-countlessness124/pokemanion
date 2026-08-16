@@ -195,11 +195,9 @@ folded into that turn and reaches the model as an ordinary message, so the pane
 does not change. Only a prompt that is *nothing but* the flag counts — `what
 does --pikachu do?` is a real question and passes through untouched.
 
-A flag that is nothing like a Pokémon's name is left alone too, so `--update` or
-`--force` typed at your agent is your business rather than ours. A near miss is
-still caught, because that is what makes a "did you mean" worth having:
-`--charizrd` gets one, and so does `--urshifu`, which is spelled correctly and
-simply was never drawn.
+Flags that look nothing like a Pokémon — `--update`, `--force` — pass through
+untouched. Near misses do not: `--charizrd` gets a "did you mean", and
+`--urshifu` gets told it exists but was never drawn.
 
 Punctuation is forgiven and form names work as written: `--ho-oh`,
 `--rotom-wash`, `--charizard-megax`.
@@ -291,11 +289,9 @@ The pane says it too, along its bottom edge:
 │####################  pokemanion v1.4.0 available — run: /plugin update pokem…│
 ```
 
-It takes the longest form that fits the pane you have — the whole command in a
-normal split, `v1.4.0 available` in a narrow one, and plain `v1.3.0` when there
-is nothing to say. It never takes a card, because those are spoken for by the
-stats on arrival and by `--dex`. **`--pokemanion`** prints the same thing in
-the conversation.
+It shows as much as fits: the whole command in a normal split, just
+`v1.4.0 available` in a narrow one, and plain `v1.3.0` when there is nothing to
+say. **`--pokemanion`** prints the same thing in the conversation.
 
 It never installs anything itself. `"updateCheck": false` turns the checks off,
 `"showVersion": false` hides the corner.
@@ -314,12 +310,10 @@ and names whichever is unhappy.
 height, so resizing the pane leaves it rendering on the fly: warm sprites load in
 about 3 ms, cold ones take a second or two. `npm run warm -- <rows>` fixes it.
 
-**The sprite is wrong at the wrong moment.** `npm run watch` prints the same
-working/waiting decision the pane is making, and what it rested on. There is no
-hook for pressing escape, so an interrupted turn looks like a running one — the
-pane also reads the transcript to tell them apart, which is Claude-only. On
-Codex an interrupted turn settles in about twenty seconds instead of one.
-[docs/known-issues.md](docs/known-issues.md) has the rest.
+**The sprite is wrong at the wrong moment.** `npm run watch` prints the decision
+the pane is making and what it rested on.
+[docs/known-issues.md](docs/known-issues.md) explains where it frays — pressing
+escape is the hard case, since no hook fires for it.
 
 ## Residents and guests
 
