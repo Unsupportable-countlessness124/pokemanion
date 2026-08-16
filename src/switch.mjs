@@ -39,6 +39,12 @@ export const parse = (prompt, pool = available()) => {
   // into a pointer.
   if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim() }
 
+  // `--pokemanion add brock`, which takes a name after it and so cannot go
+  // through the bare-flag match below.
+  const adding = text.match(/^--pokemanion\s+add(?:\s+([a-z][a-z0-9-]*))?$/i)
+
+  if (adding) return { kind: 'add', name: adding[1] ?? null }
+
   const match = text.match(/^--([a-z][a-z0-9.:-]*)$/i)
 
   if (!match) return null

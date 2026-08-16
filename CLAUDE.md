@@ -74,9 +74,12 @@ At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 
 ## If the user wants to add a character
 
-There is a skill for this — `skills/adding-a-character/SKILL.md` — which the
-plugin ships to both agents. It carries the toolbox and the judgements. The
-short version:
+They may type `--pokemanion add brock`, which blocks nothing and simply hands
+you this job with the questions to ask. Or they may just say it in words. Either
+way the instructions are in `skills/adding-a-character/SKILL.md`, which the
+plugin ships to both agents and `npm run setup` links in for a clone.
+
+The short version:
 
 ```sh
 npm run add -- <name> <resting> <working> [--resting=0-8] [--working=12-17] [--halo]

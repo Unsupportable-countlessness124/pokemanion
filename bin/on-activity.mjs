@@ -274,6 +274,38 @@ try {
 
       // `--dex` answers and changes nothing. It is still blocked, because the
       // point is to look something up without spending a turn on it.
+      // Handing the job to the agent, rather than doing it in a hook.
+      //
+      // This is the one command here that does not block. A blocked prompt shows
+      // its stderr to you and stops; this needs the opposite — Claude Code adds a
+      // UserPromptSubmit hook's stdout to the context when it exits 0, so writing
+      // there and standing aside puts the instructions in front of the model and
+      // lets the prompt through.
+      //
+      // Which is the whole point. Everything else in this file is answerable by a
+      // program: switch the sprite, look up a name, report a version. Adding a
+      // character is not — something has to look at a sheet, work out which
+      // frames are the walk cycle, and write a Pokedex entry. So the flag is a
+      // way of asking the agent, and the skill is what it reads.
+      if (asked.kind === 'add') {
+        const who = asked.name ? `called "${asked.name}"` : '— they have not said which yet'
+
+        process.stdout.write(
+          `The user typed \`--pokemanion add\`: they want to add a character ${who} to pokemanion.\n\n` +
+            'Use the adding-a-character skill. Ask them, one at a time:\n' +
+            '  1. the resting animation — a gif or png of what it does while waiting\n' +
+            '  2. the working animation — what it does while the agent is busy\n' +
+            '     (the same file again is fine if both cycles live in one sheet)\n' +
+            '  3. whether anything needs cutting — frame ranges for a sheet of\n' +
+            '     several cycles, a crop for figures side by side, a recolour if the\n' +
+            '     two halves disagree\n\n' +
+            'Then look at the files before installing them, render them at the size\n' +
+            'the pane draws and check they read, run npm run add, and write the card\n' +
+            'if this is not a Pokemon.\n',
+        )
+        process.exit(0)
+      }
+
       // What the pane's corner cannot fit.
       if (asked.kind === 'update') {
         const { available, installedVersion, updateCommand } = await import('../src/update.mjs')

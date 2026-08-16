@@ -183,6 +183,7 @@ they never reach the model and cost no tokens:
 --dex random        be shown something
 
 --pokemanion        the version, and how to update it
+--pokemanion add <name>   hand your agent the job of adding one
 --use-plugin        switch to the plugin, if you have both installed
 ```
 

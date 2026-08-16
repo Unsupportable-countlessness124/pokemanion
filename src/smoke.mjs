@@ -443,6 +443,26 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   )
 }
 
+// The one command that must not block.
+//
+// Everything else here answers the prompt and stops it. This one hands the job
+// to the agent, which only works if the prompt goes through — Claude Code adds
+// a UserPromptSubmit hook's stdout to the context on exit 0, and throws it away
+// on exit 2 along with the prompt. Get that backwards and the flag does nothing
+// but delete what you typed.
+{
+  const { spawnSync: ask } = await import('node:child_process')
+  const said = ask(process.execPath, ['bin/on-activity.mjs'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', session_id: 'smoke-add-0001', prompt: '--pokemanion add brock' }),
+  })
+
+  check('--pokemanion add lets the prompt through', said.status === 0, `exit ${said.status}`)
+  check('and says so on stdout, where the model reads it', /adding-a-character/.test(said.stdout ?? ''), (said.stdout ?? '').slice(0, 40))
+  check('and names the character it was given', /brock/.test(said.stdout ?? ''))
+}
+
 // The skill both agents ship, which is how an agent learns the toolbox.
 //
 // It is a file in a directory with a name, and nothing else validates it: a
@@ -584,6 +604,7 @@ check('--use-plugin is its own command', parse('--use-plugin')?.kind === 'use-pl
 // generic verb, and a hook that answers one blocks the prompt — so asking Claude
 // to update anything else would have been caught and answered with a version.
 check('--pokemanion reports the version', parse('--pokemanion')?.kind === 'update')
+check('--pokemanion add names a character', parse('--pokemanion add brock')?.name === 'brock')
 
 // Which flags this project answers at all. A prompt that is only `--word` was
 // always caught, so `--update`, `--force` and the rest were answered with a

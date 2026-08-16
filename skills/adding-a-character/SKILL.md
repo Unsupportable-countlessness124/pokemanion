@@ -7,6 +7,25 @@ The user has a picture and wants it living in their terminal. Your job is the
 judgement: which frames, whether the art will survive being shrunk, and what to
 write on its Pokédex card. The mechanical half is one command.
 
+## What to ask
+
+They may arrive here by typing `--pokemanion add brock`, which does nothing but
+hand you this job. Ask one thing at a time and wait — several questions at once
+gets one answer.
+
+1. **The resting animation.** A gif or png of what it does while waiting. They
+   can drag the file in.
+2. **The working animation** — what it does while the agent is busy. The same
+   file again is fine when both cycles live in one sheet.
+3. **Whether anything needs cutting.** Say what you can see, so they are
+   choosing rather than guessing: "this has 36 frames, so it looks like four
+   walk cycles — shall I take the front-facing ones for resting and the side-on
+   ones for working?" A sheet of figures side by side needs `crop` instead, and
+   two halves whose colours disagree need `recolour`.
+
+If they gave you everything in the first message, do not ask again — go and
+look at the files.
+
 Everything here needs a source install — it writes to `src/roster.mjs`. A plugin
 copy is version-stamped and replaced on the next `/plugin update`, so anything
 added there is lost. If they installed the plugin, say so before starting.
