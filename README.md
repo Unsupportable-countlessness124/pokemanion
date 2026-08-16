@@ -271,9 +271,8 @@ and no trace is left.
 
 ## Updating
 
-It tells you. Once a day it asks GitHub whether there is a newer version, in a
-background process nothing waits on, and if there is it says so once — with the
-command for however you installed it:
+Each route updates with one command, and pokemanion tells you when there is one
+to run — it checks GitHub once a day:
 
 ```
 /plugin update pokemanion@pokemanion         # plugin, Claude Code
@@ -281,20 +280,11 @@ codex plugin marketplace upgrade             # plugin, Codex
 cd pokemanion && git pull && npm run setup   # from source
 ```
 
-The pane says it too, along its bottom edge:
+The pane's bottom edge carries the version, and the command when an update is
+waiting. **`--pokemanion`** prints it in the conversation. Nothing is ever
+installed for you.
 
-```
-│####################                                                          │
-│####################                                                          │
-│####################  pokemanion v1.4.0 available — run: /plugin update pokem…│
-```
-
-It shows as much as fits: the whole command in a normal split, just
-`v1.4.0 available` in a narrow one, and plain `v1.3.0` when there is nothing to
-say. **`--pokemanion`** prints the same thing in the conversation.
-
-It never installs anything itself. `"updateCheck": false` turns the checks off,
-`"showVersion": false` hides the corner.
+`"updateCheck": false` stops the checks, `"showVersion": false` hides the corner.
 
 ## Troubleshooting
 
