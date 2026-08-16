@@ -159,10 +159,10 @@ export const cornerText = (current, latest, width, root = ROOT) => {
   if (!latest) return `v${current}`
 
   const forms = [
-    `pokemanion ${latest} available — run: ${updateCommand(root)}`,
-    `${latest} available — ${updateCommand(root, { short: true })}`,
-    `${latest} available — --update`,
-    `${latest} available`,
+    `pokemanion v${latest} available — run: ${updateCommand(root)}`,
+    `v${latest} available — ${updateCommand(root, { short: true })}`,
+    `v${latest} available — --update`,
+    `v${latest} available`,
     `v${current}`,
   ]
 
@@ -188,11 +188,11 @@ export const updateLines = (latest, width, root = ROOT) => {
 
   if (line) lines.push(line)
 
-  return [`${latest} available`, ...lines]
+  return [`v${latest} available`, ...lines]
 }
 
 export const notice = ({ current, latest, command }, root = ROOT) =>
-  `pokemanion ${latest} is out — you have ${current}\n\n  ${command}\n` +
+  `pokemanion v${latest} is out — you have v${current}\n\n  ${command}\n` +
   `${isPluginRoot(root) ? '  then restart the agent\n' : ''}`
 
 // Reading it by hand: npm run update-check

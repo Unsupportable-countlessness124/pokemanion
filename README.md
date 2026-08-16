@@ -287,11 +287,11 @@ The pane says it too, along its bottom edge:
 ```
 │####################                                                          │
 │####################                                                          │
-│####################   pokemanion 1.3.0 available — run: /plugin update pokem…│
+│####################  pokemanion v1.4.0 available — run: /plugin update pokem…│
 ```
 
 It takes the longest form that fits the pane you have — the whole command in a
-normal split, `1.3.0 available` in a narrow one, and plain `v1.2.0` when there
+normal split, `v1.4.0 available` in a narrow one, and plain `v1.3.0` when there
 is nothing to say. It never takes a card, because those are spoken for by the
 stats on arrival and by `--dex`. **`--update`** prints the same thing in the
 conversation.

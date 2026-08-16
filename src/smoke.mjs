@@ -241,7 +241,14 @@ check(
     const plugin = '/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'
 
     check('a wide pane gets the whole command', cornerText('1.2.0', '1.3.0', 120, plugin).includes('/plugin update pokemanion@pokemanion'))
-    check('a narrow one still says a version is out', cornerText('1.2.0', '1.3.0', 20, plugin) === '1.3.0 available')
+    check('a narrow one still says a version is out', cornerText('1.2.0', '1.3.0', 20, plugin) === 'v1.3.0 available')
+
+    // Every version this prints wears its v. Bare numbers next to words read as
+    // quantities — "1.3.0 available" could be a count of something.
+    check(
+      'versions are written with a v',
+      [120, 60, 40, 20, 8].every((w) => /v\d/.test(cornerText('1.2.0', '1.3.0', w, plugin))),
+    )
     check('and the narrowest falls back to the version', cornerText('1.2.0', '1.3.0', 8, plugin) === 'v1.2.0')
     check('no update means no update text', cornerText('1.2.0', null, 120, plugin) === 'v1.2.0')
 

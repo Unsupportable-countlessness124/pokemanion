@@ -153,7 +153,7 @@ try {
 
             process.stderr.write(
               stale
-                ? `Running ${theirs} from ${short}. This plugin is ${ours}.\n\n` +
+                ? `Running v${theirs} from ${short}. This plugin is v${ours}.\n\n` +
                   '  --use-plugin   run this one instead\n' +
                   `  or update it   cd ${short} && git pull && npm run setup\n`
                 : `Already running from ${short}, so the plugin is idle — one Pokemon, not two.\n\n` +
@@ -281,8 +281,8 @@ try {
 
         process.stderr.write(
           latest
-            ? `pokemanion ${latest} is out — you have ${installedVersion()}\n\n  ${updateCommand()}\n`
-            : `pokemanion ${installedVersion()} — nothing newer that I know of\n`,
+            ? `pokemanion v${latest} is out — you have v${installedVersion()}\n\n  ${updateCommand()}\n`
+            : `pokemanion v${installedVersion()} — nothing newer that I know of\n`,
         )
         process.exit(2)
       }
