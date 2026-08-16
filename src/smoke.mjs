@@ -210,6 +210,21 @@ check(
   // would stand down against its own hooks and never run at all.
   check('and the one asking is not one of them', !ask(cloneA).includes(cloneA))
 
+  // Which of the two is stale, which is what decides whether the standing-down
+  // copy gets to speak again.
+  //
+  // Updating the plugin while the source install holds the hooks changes nothing
+  // on screen: the pane goes on running the older copy. The message that would
+  // explain that has already been spent, so it is keyed by version and a copy
+  // that has just been updated past the running one may say so.
+  {
+    const { isNewer, versionAt } = await import('./update.mjs')
+
+    check('a copy can tell it is newer than the one running', isNewer('1.3.0', '1.2.0') && !isNewer('1.2.0', '1.3.0'))
+    check('and reads a version off another install', versionAt(ROOT) === JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version)
+    check('and says nothing about one that is not there', versionAt(join(home, 'no-such-install')) === null)
+  }
+
   // A clone deleted by hand leaves its hooks behind in the config. Standing
   // down for a path that is gone leaves no pane at all, which is worse than the
   // two panes this check exists to prevent.

@@ -80,6 +80,15 @@ export const checkInBackground = (now = Date.now()) => {
   }
 }
 
+// The version of another install, read off its own package.json.
+export const versionAt = (root) => {
+  try {
+    return JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version ?? null
+  } catch {
+    return null
+  }
+}
+
 // What to run, which depends on how it was installed — and telling a plugin user
 // to `git pull` is how a helpful message becomes a confusing one.
 export const updateCommand = (root = ROOT) => {

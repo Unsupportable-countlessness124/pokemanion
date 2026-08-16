@@ -109,8 +109,10 @@ ship with it. Three things are left:
   --pikachu`.
 
 Already installed it from source? Install the plugin as well and it will notice,
-stand aside and tell you, so you get one Pokémon rather than two. Keep whichever
-you prefer.
+stand aside and tell you, so you get one Pokémon rather than two — and it says
+which command switches you either way. If you later update the plugin while the
+source copy is still the active one, it says that too, rather than letting you
+believe an update took effect when nothing changed.
 
 ---
 

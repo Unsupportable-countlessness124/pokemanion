@@ -95,21 +95,55 @@ try {
       const others = otherInstalls(ROOT)
 
       if (others.length > 0) {
-        if (event === 'UserPromptSubmit' && !existsSync(join(STATE_DIR, 'deferred'))) {
-          try {
-            mkdirSync(STATE_DIR, { recursive: true })
-            writeFileSync(join(STATE_DIR, 'deferred'), others.join('\n'))
-          } catch {}
+        if (event === 'UserPromptSubmit') {
+          const { installedVersion, versionAt, isNewer } = await import('../src/update.mjs')
+          const note = join(STATE_DIR, 'deferred')
 
-          process.stderr.write(
-            `pokemanion is already installed at ${others[0]}\n\n` +
-              'The plugin is staying out of the way, so you get one Pokemon rather\n' +
-              'than two. Nothing to fix — keep whichever you prefer:\n\n' +
-              '  keep the clone   /plugin uninstall pokemanion@pokemanion\n' +
-              `  keep the plugin  cd ${others[0]} && npm run uninstall-statusline\n\n` +
-              'Shown once.\n',
-          )
-          process.exit(2)
+          const ours = installedVersion()
+          const theirs = versionAt(others[0])
+
+          // Said once — and said again whenever this copy becomes newer than the
+          // one actually running.
+          //
+          // Updating the plugin while the source install holds the hooks changes
+          // nothing you can see: the pane goes on running the older copy, and the
+          // one message that would explain it has already been spent. So the
+          // record is keyed by version, and a plugin that has just been updated
+          // past the running install gets to say so.
+          const said = (() => {
+            try {
+              return JSON.parse(readFileSync(note, 'utf8'))
+            } catch {
+              return null
+            }
+          })()
+
+          const stale = ours && theirs && isNewer(ours, theirs)
+          const owed = !said || (stale && said.version !== ours)
+
+          if (owed) {
+            try {
+              mkdirSync(STATE_DIR, { recursive: true })
+              writeFileSync(note, JSON.stringify({ version: ours, roots: others }))
+            } catch {}
+
+            process.stderr.write(
+              (stale
+                ? `This plugin is version ${ours}, but the Pokemon beside you is coming from\n` +
+                  `the source install at ${others[0]}, which is version ${theirs}.\n\n` +
+                  'Updating the plugin changed nothing on screen, because that copy is the\n' +
+                  'one wired into your agent. Either of these fixes it:\n\n' +
+                  `  use the plugin from now on   cd ${others[0]} && npm run uninstall-statusline\n` +
+                  `  update the source copy       cd ${others[0]} && git pull && npm run setup\n`
+                : `pokemanion is already installed at ${others[0]}\n\n` +
+                  'The plugin is staying out of the way, so you get one Pokemon rather\n' +
+                  'than two. Nothing to fix — keep whichever you prefer:\n\n' +
+                  '  keep the source install   /plugin uninstall pokemanion@pokemanion\n' +
+                  `  use the plugin instead    cd ${others[0]} && npm run uninstall-statusline\n`) +
+                '\nThen restart the agent.\n',
+            )
+            process.exit(2)
+          }
         }
 
         process.exit(0)
