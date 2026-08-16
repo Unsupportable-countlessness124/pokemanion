@@ -117,24 +117,7 @@ export const ROSTER = [
     },
   },
   { name: 'charmander' },
-  // Its Gen-5 sprite while it waits, and a Squirtle in sunglasses while it
-  // works — built out of two stills of the same character in different poses.
-  //
-  // Neither still was animated. Two of them are, together: standing upright, and
-  // braced with its weight forward. Held two frames each and aligned on their
-  // feet, they read as one Squirtle shifting its stance rather than as two
-  // pictures being swapped.
-  //
-  // The braced one is repainted into the standing one's sixteen colours. They
-  // came from different renders, one blue and one teal, and alternating them as
-  // they arrived read as a colour flashing rather than as a movement — which is
-  // the whole reason for using two poses.
-  //
-  // A water-gun animation was built from a third still first, growing the beam
-  // out of the mouth and letting the jet detach. It worked, and it read as a
-  // diagram rather than as a sprite: the beam is a static cone that changes
-  // size, and nothing about the Squirtle itself moves. It is kept in assets/.
-  { name: 'squirtle', busy: 'assets/31-squirtle-shades.gif', busySpeed: 1 },
+  { name: 'squirtle' },
   { name: 'bulbasaur' },
   { name: 'eevee' },
   { name: 'munchlax' },
