@@ -43,6 +43,21 @@ const MODULES = [
 const results = []
 const check = (name, ok, detail = '') => results.push({ name, ok, detail })
 
+// Mark the plugin hello spent before anything drives the hook.
+//
+// It arms itself when there is no record of a setup having run, which on a fresh
+// checkout is true — so on CI it armed and ate the first prompt of whichever
+// test ran next, while passing here, where a node-path left by a real install
+// happens to sit. It has moved up the file twice now, once per test added above
+// the line it used to sit on, so it lives at the top where nothing can be added
+// before it. Its own test clears it deliberately and puts it back.
+//
+// Not wrapped in a catch: the first version was, mkdirSync was not in scope, the
+// ReferenceError was swallowed, and the guard did nothing while looking exactly
+// like it worked.
+mkdirSync(STATE_DIR, { recursive: true })
+writeFileSync(join(STATE_DIR, 'greeted'), 'smoke')
+
 for (const name of MODULES) {
   try {
     await import(`./${name}.mjs`)
@@ -1083,18 +1098,7 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       env: { ...process.env, ...env },
     })
 
-  // Mark the plugin hello spent before any of this runs.
-  //
-  // It arms itself when there is no record of a setup having run, and on a fresh
-  // checkout that is true — so on CI it armed, ate the first prompt of two later
-  // tests and failed both, while passing here, where a node-path left by a real
-  // install happens to sit. The hello has its own test below, which clears this
-  // deliberately and puts it back.
-  // Not wrapped in a catch. The first version of this was, mkdirSync was not in
-  // scope here, the ReferenceError was swallowed, and the guard did nothing at
-  // all while looking exactly like it worked.
-  mkdirSync(STATE_DIR, { recursive: true })
-  writeFileSync(join(STATE_DIR, 'greeted'), 'smoke')
+
 
   // 1. The hook handler. Its whole body sits in `try { } catch {}` and then
   //    exits 0, so a ReferenceError in it is not a crash — every hook silently
