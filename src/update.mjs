@@ -96,7 +96,12 @@ export const updateCommand = (root = ROOT, { short = false } = {}) => {
   const home = homedir()
   const where = short && root.startsWith(home) ? `~${root.slice(home.length)}` : root
 
-  if (!isPluginRoot(root)) return `cd ${where} && git pull && npm run setup`
+  // The pane gets no `cd`. A clone can live at any path, and CI's is long enough
+  // that the card ran to five lines there while fitting in three on my machine —
+  // the card would have overflowed onto the sprite for anyone whose clone sits
+  // somewhere deep. You know where your own clone is; the message says it in
+  // full.
+  if (!isPluginRoot(root)) return short ? 'git pull && npm run setup' : `cd ${where} && git pull && npm run setup`
 
   // Codex takes two steps, and the pane has room for one. It gets the first —
   // the one that fetches — while the message, which has a whole chat window to

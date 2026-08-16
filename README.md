@@ -281,8 +281,20 @@ codex plugin marketplace upgrade             # plugin, Codex
 cd pokemanion && git pull && npm run setup   # from source
 ```
 
-It never installs anything itself. `"updateCheck": false` in `config.json` turns
-the checks off.
+The pane says it too. When a session opens and there is a newer version, it
+takes the place of the usual stats card:
+
+```
+######## 1.3.0 available
+######## /plugin update
+######## pokemanion@pokemanion
+```
+
+and afterwards the bottom-right corner keeps `v1.2.0 → 1.3.0`, or plain
+`v1.2.0` when you are current.
+
+It never installs anything itself. `"updateCheck": false` turns the checks off,
+`"showVersion": false` hides the corner.
 
 ## Troubleshooting
 
