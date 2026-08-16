@@ -118,9 +118,14 @@ export const markAnnounced = (version) => {
   } catch {}
 }
 
-export const notice = ({ current, latest, command }) =>
+// Both halves from the same root. They used to disagree: the command was derived
+// from the root passed in and the restart line from whatever this process
+// happened to be, so a message built for one install could carry the other's
+// advice. Harmless in production, where they are always the same root — which is
+// exactly the kind of thing that is wrong for months without showing.
+export const notice = ({ current, latest, command }, root = ROOT) =>
   `pokemanion ${latest} is out — you have ${current}.\n\n  ${command}\n\n` +
-  `${isPluginRoot() ? 'Restart the agent afterwards.\n' : ''}` +
+  `${isPluginRoot(root) ? 'Restart the agent afterwards.\n' : ''}` +
   'Nothing breaks if you stay on this one; you would just miss whatever is new.\n' +
   'Turn these off with "updateCheck": false in config.json.\n'
 

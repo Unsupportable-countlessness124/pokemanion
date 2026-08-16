@@ -284,6 +284,18 @@ check(
 
   // Telling a plugin user to `git pull` is how a helpful message becomes a
   // baffling one, so the command follows the install rather than the agent.
+  // Both halves of the message from the same root. They used to disagree — the
+  // command from the root passed in, the "restart the agent" line from whatever
+  // this process happened to be — so a plugin's message could arrive without it.
+  {
+    const { notice } = await import('./update.mjs')
+    const plug = '/Users/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'
+    const built = notice({ current: '1.2.0', latest: '1.3.0', command: updateCommand(plug) }, plug)
+
+    check('a plugin update notice says to restart', built.includes('/plugin update') && built.includes('Restart the agent'))
+    check('and a source one does not', !notice({ current: '1.2.0', latest: '1.3.0', command: updateCommand(ROOT) }, ROOT).includes('Restart the agent'))
+  }
+
   check(
     'the update command matches how it was installed',
     updateCommand('/Users/x/pokemanion').includes('git pull') &&
