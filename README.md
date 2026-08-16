@@ -299,14 +299,12 @@ Pressing escape is the hard case, because no hook fires for it.
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out.
 
-**Guests** are the other 1242. They arrive when you name them, taking about two
-seconds to fetch and render, and load in 2 ms after that. They are evicted
-least-recently-shown first, and one a pane is currently showing is never
-evicted.
+**Guests** are the other 1242. Naming one for the first time takes a few seconds
+while it downloads and renders; after that it is instant. The least recently
+seen are evicted first, and one a pane is showing is never evicted.
 
-Either way the session keeps it: the choice is written down and read back when a
-pane reopens, so closing a window and coming back gives you the same Pokémon.
-Naming one always overrules that.
+Either way the session keeps it, so closing a window and coming back gives you
+the same Pokémon. Naming one always overrules that.
 
 ```sh
 npm run prune            # evict guests now; also happens on its own
@@ -344,9 +342,9 @@ Any GIF works. Drop it in `assets/` and point a roster entry at it:
 Hand-picked files are never overwritten or re-downloaded. They replace the
 default, which is the Pokémon's own shiny palette with a white flash between.
 
-Judge a candidate at the size the pane draws, about 68 pixels tall. File size
-lies in both directions: a 500×500 GIF that is really 40×39 upscaled is pixel
-art and scales beautifully, while a 407×295 smooth render shrinks to mush.
+Judge a candidate at the size the pane draws, not at full size — a big smooth
+render can shrink to mush while a small pixel-art one scales cleanly.
+[docs/design.md](docs/design.md) has the measurements.
 
 Two tools for when an animation is nearly right: **`npm run recolour`** repaints
 one palette to match another without re-encoding, and **`npm run flip`** mirrors
@@ -400,9 +398,8 @@ anyone, and nothing here is sold.
 
 Issues and pull requests welcome, particularly:
 
-- **A sprite that reads better than one in the roster.** Bring the numbers.
-  `docs/design.md` says how to measure them. The bar is scale ≤ 1.8x with ≥ 24
-  frames at the size the pane draws.
+- **A sprite that reads better than one in the roster.** Bring the numbers;
+  `docs/design.md` says which ones and what the bar is.
 - **A Linux path.** Everything but the pane-opening is portable Node; it needs a
   way to open a split that is not AppleScript.
 
