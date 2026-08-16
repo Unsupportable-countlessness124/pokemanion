@@ -187,17 +187,12 @@ they never reach the model and cost no tokens:
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
-Naming the Pokémon already on screen answers in the pane, like `--dex current`.
-Anything else answers in the conversation.
+**Send them while the agent is idle** — typed mid-turn they reach the model
+instead. Only a prompt that is *nothing but* the flag counts, so `what does
+--pikachu do?` is a real question and passes through.
 
-**Send them while the agent is idle.** Text typed while a turn is running is
-folded into that turn and reaches the model as an ordinary message, so the pane
-does not change. Only a prompt that is *nothing but* the flag counts — `what
-does --pikachu do?` is a real question and passes through untouched.
-
-Flags that look nothing like a Pokémon — `--update`, `--force` — pass through
-untouched. Near misses do not: `--charizrd` gets a "did you mean", and
-`--urshifu` gets told it exists but was never drawn.
+So do flags that are nothing like a Pokémon, `--update` and `--force` among
+them. Typos do not: `--charizrd` gets a "did you mean".
 
 Punctuation is forgiven and form names work as written: `--ho-oh`,
 `--rotom-wash`, `--charizard-megax`.
