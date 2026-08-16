@@ -83,9 +83,10 @@ unlisted rather than silently going unnamed.
 | `27-ash-standing.gif` | ash resting |
 | `28-ash-pikachu-running.gif` | ash working |
 | `29-squirtle-standing.png` | kept, not currently used |
-| `30-squirtle-watergun.gif` | squirtle working |
+| `30-squirtle-watergun.gif` | kept, not currently used |
+| `31-squirtle-shades.gif` | squirtle working |
 
-20 files.
+21 files.
 
 <!-- /files -->
 

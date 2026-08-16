@@ -117,25 +117,24 @@ export const ROSTER = [
     },
   },
   { name: 'charmander' },
-  // Its Gen-5 sprite while it waits, a supplied one while it works, like
-  // Psyduck. The working half was built rather than found.
+  // Its Gen-5 sprite while it waits, and a Squirtle in sunglasses while it
+  // works — built out of two stills of the same character in different poses.
   //
-  // The source was one still of Squirtle firing a water gun: the beam already
-  // drawn, leaving the mouth and reaching the far edge. An animation of a still
-  // like that is a question of what to hide. Revealing the beam from the mouth
-  // outward fires it; hiding it from the mouth outward lets the jet detach and
-  // dissipate. Eight frames of that is one burst, and looping it is a Squirtle
-  // spraying water for as long as the agent is working.
+  // Neither still was animated. Two of them are, together: standing upright, and
+  // braced with its weight forward. Held two frames each and aligned on their
+  // feet, they read as one Squirtle shifting its stance rather than as two
+  // pictures being swapped.
   //
-  // The still was a smoothed upscale rather than clean pixel art — no run length
-  // divides out, so `recoverNative` has nothing to recover. Taking every third
-  // pixel keeps the edges hard where averaging would have made mush of them.
+  // The braced one is repainted into the standing one's sixteen colours. They
+  // came from different renders, one blue and one teal, and alternating them as
+  // they arrived read as a colour flashing rather than as a movement — which is
+  // the whole reason for using two poses.
   //
-  // A matching standing sprite came with it and is not used: the Gen-5 one is
-  // what a resting Squirtle looks like everywhere else here. That leaves the two
-  // halves 10% apart in colour, which is Squirtle's own shiny distance, so there
-  // is no `transition` — a white flash would be announcing a change that small.
-  { name: 'squirtle', busy: 'assets/30-squirtle-watergun.gif', busySpeed: 1 },
+  // A water-gun animation was built from a third still first, growing the beam
+  // out of the mouth and letting the jet detach. It worked, and it read as a
+  // diagram rather than as a sprite: the beam is a static cone that changes
+  // size, and nothing about the Squirtle itself moves. It is kept in assets/.
+  { name: 'squirtle', busy: 'assets/31-squirtle-shades.gif', busySpeed: 1 },
   { name: 'bulbasaur' },
   { name: 'eevee' },
   { name: 'munchlax' },
