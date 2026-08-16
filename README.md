@@ -65,10 +65,8 @@ the machine.
 
 ## Quick install
 
-**Get [Ghostty](https://ghostty.org/download) first** if you do not have it. The
-pane is a Ghostty split, so there is no pane without it, and it is the one thing
-here that cannot install itself. chafa, the other requirement, is fetched for
-you.
+**Get [Ghostty](https://ghostty.org/download) first** if you do not have it —
+the pane is a Ghostty split. chafa, the other requirement, is fetched for you.
 
 Then, at your agent:
 
@@ -101,8 +99,7 @@ Nothing to clone or build; the agent fetches the project itself and the sprites
 ship with it. Three things are left:
 
 - **Allow Ghostty in Accessibility** — System Settings → Privacy & Security →
-  Accessibility. Opening the pane means pressing keys, and macOS blocks that
-  until you say so. Skip it and everything installs perfectly and no pane ever
+  Accessibility. Skip it and everything installs perfectly and no pane ever
   appears.
 - **Restart your agent and Ghostty.** Both read their configuration at startup.
 - **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
@@ -234,14 +231,12 @@ Then four things no script can do for you:
 
 <br>
 
-**It will ask you to trust the hooks**, and it should — they are commands it is
-about to run, and they sit in `~/.codex/hooks.json` where you can read them
-first. Codex stores a hash per hook and silently skips any it has not reviewed,
-so after updating this project run **`/hooks`** in Codex and trust them again.
+**It will ask you to trust the hooks**, and they are worth reading first — they
+sit in `~/.codex/hooks.json`. Codex silently skips any it has not reviewed, so
+after updating this project run **`/hooks`** in Codex and trust them again.
 
-**The pane appears at your first message, not at launch.** Codex does not
-consider a session to exist until you say something, and offers no earlier hook.
-Claude Code opens it the moment the session starts.
+**The pane appears at your first message, not at launch** — Codex offers no
+earlier hook. Claude Code opens it the moment the session starts.
 
 </details>
 
@@ -292,9 +287,9 @@ It checks each piece on its own — hooks registered per agent, chafa present, t
 frame cache matching your pane height, and which Pokémon are currently held —
 and names whichever is unhappy.
 
-**A sprite that stutters** is the frame cache. Frames are rendered per pane
-height, so resizing the pane leaves it rendering on the fly: warm sprites load in
-about 3 ms, cold ones take a second or two. `npm run warm -- <rows>` fixes it.
+**A sprite that stutters** is the frame cache — frames are rendered per pane
+height, so resizing leaves it rendering on the fly. `npm run warm -- <rows>`
+fixes it.
 
 **The sprite is wrong at the wrong moment.** `npm run watch` prints the decision
 the pane is making and what it rested on.
