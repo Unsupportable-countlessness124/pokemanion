@@ -37,6 +37,7 @@ const MODULES = [
   'ghostty',
   'hint',
   'agents',
+  'update',
 ]
 
 const results = []
@@ -223,6 +224,57 @@ check(
   )
 
   shopDrop(home, { recursive: true, force: true })
+}
+
+// One version, in all four places that declare one.
+//
+// The plugin cache is version-stamped and `plugin update` compares versions, so
+// a version that never moves means an installed copy can sit on old code
+// forever. It sat at 1.1.0 for 31 commits, including the release that made the
+// Codex plugin install work at all.
+{
+  const declared = {
+    'package.json': JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version,
+    '.claude-plugin/plugin.json': JSON.parse(readFileSync(join(ROOT, '.claude-plugin', 'plugin.json'), 'utf8')).version,
+    '.codex-plugin/plugin.json': JSON.parse(readFileSync(join(ROOT, '.codex-plugin', 'plugin.json'), 'utf8')).version,
+  }
+  const shop = JSON.parse(readFileSync(join(ROOT, '.claude-plugin', 'marketplace.json'), 'utf8'))
+
+  declared['marketplace.json'] = shop.version
+  declared['marketplace plugin entry'] = shop.plugins[0].version
+
+  const values = [...new Set(Object.values(declared))]
+
+  check(
+    'every manifest declares the same version',
+    values.length === 1,
+    Object.entries(declared).map(([where, what]) => `${where}=${what}`).join(' '),
+  )
+}
+
+// Newer means newer, and 1.10.0 is newer than 1.9.0 — which string comparison
+// gets backwards, the same trap as the plugin path resolver.
+{
+  const { isNewer, updateCommand } = await import('./update.mjs')
+
+  check(
+    'a newer version is recognised as newer',
+    isNewer('1.2.0', '1.1.0') && isNewer('1.10.0', '1.9.0') && isNewer('2.0.0', '1.99.99'),
+  )
+
+  check(
+    'and the same or older is not',
+    !isNewer('1.2.0', '1.2.0') && !isNewer('1.1.0', '1.2.0') && !isNewer('', '1.0.0'),
+  )
+
+  // Telling a plugin user to `git pull` is how a helpful message becomes a
+  // baffling one, so the command follows the install rather than the agent.
+  check(
+    'the update command matches how it was installed',
+    updateCommand('/Users/x/pokemanion').includes('git pull') &&
+      updateCommand('/Users/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0') === '/plugin update pokemanion@pokemanion' &&
+      updateCommand('/Users/x/.codex/plugins/cache/pokemanion/pokemanion/1.2.0').startsWith('codex plugin'),
+  )
 }
 
 // Both marketplace manifests point at the plugin in a way each agent accepts.

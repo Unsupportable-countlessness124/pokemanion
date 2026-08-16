@@ -205,6 +205,12 @@ export const DEFAULTS = {
   // — so anything much tighter settles the sprite mid-thought and it flickers
   // between the two animations, which looks far worse than a late finish.
   idleAfterMs: 20_000,
+
+  // Ask GitHub whether a newer version exists, at most once a day, in a detached
+  // process nothing waits on — and say so once per version. It never installs
+  // anything: updating is one command, and which command depends on how this was
+  // installed, so both routes are told the right one.
+  updateCheck: true,
 }
 
 export const loadConfig = () => {

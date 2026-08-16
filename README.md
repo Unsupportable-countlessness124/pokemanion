@@ -114,7 +114,7 @@ you prefer.
 
 ---
 
-**[Requirements](#requirements) · [Commands](#commands) · [From source](#install-from-source) · [Troubleshooting](#troubleshooting) · [Residents and
+**[Requirements](#requirements) · [Commands](#commands) · [From source](#install-from-source) · [Updating](#updating) · [Troubleshooting](#troubleshooting) · [Residents and
 guests](#residents-and-guests) · [Settings](#settings) · [Your own
 sprites](#your-own-sprites) · [Design notes](docs/design.md)**
 
@@ -207,8 +207,9 @@ claude --resume --charizard  # combines with everything else
 
 ## Install from source
 
-The same install, done by hand — useful if you want the project somewhere you
-can edit it:
+**The plugin is the one to use.** This route exists for working on the code —
+it puts the project somewhere you can edit, and everything else about it is the
+same:
 
 ```sh
 git clone https://github.com/khatriadbhut/pokemanion.git
@@ -263,6 +264,21 @@ Only the agents you actually have are touched. Undo those, delete the folder,
 and no trace is left.
 
 </details>
+
+## Updating
+
+It tells you. Once a day it asks GitHub whether there is a newer version, in a
+background process nothing waits on, and if there is it says so once — with the
+command for however you installed it:
+
+```
+/plugin update pokemanion@pokemanion         # plugin, Claude Code
+codex plugin marketplace upgrade             # plugin, Codex
+cd pokemanion && git pull && npm run setup   # from source
+```
+
+It never installs anything itself. `"updateCheck": false` in `config.json` turns
+the checks off.
 
 ## Troubleshooting
 
@@ -322,6 +338,7 @@ the entire reason for the split. Guests cost 1–5 MB each, bounded by
 | `pokeball` | `true` | open a Pokéball when one arrives |
 | `cardMs` | `8000` | how long the stats stay beside the sprite; `0` disables |
 | `guestBudgetMb` | `200` | disk the guests may hold |
+| `updateCheck` | `true` | look for a newer version once a day, and say so once |
 | `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
 ## Your own sprites

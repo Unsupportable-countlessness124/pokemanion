@@ -72,6 +72,16 @@ reaches the model as an ordinary message and the pane does not change.
 At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 `claude --resume --charizard`.
 
+## Releasing
+
+Bump the version in **four** files — `package.json`, `.claude-plugin/plugin.json`,
+`.codex-plugin/plugin.json`, and both places in `.claude-plugin/marketplace.json`.
+`npm test` fails if they disagree.
+
+This matters more than it looks: the plugin cache is version-stamped and
+`plugin update` compares versions, so a version that never moves leaves
+installed copies on old code. It sat at 1.1.0 for 31 commits.
+
 ## Working on the code
 
 - `npm test` — the smoke suite, and the bar for a change being finished.

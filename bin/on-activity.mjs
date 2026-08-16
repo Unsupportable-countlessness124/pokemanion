@@ -188,6 +188,27 @@ try {
       process.exit(2)
     }
 
+    // A version you do not have, mentioned once and never installed for you.
+    //
+    // Same one-prompt cost as the hello, and for the same reason: a hook that
+    // lets your prompt through has no way to tell you anything. Marked announced
+    // before it is written, so a crash costs the message rather than repeating
+    // it. The check itself is a detached background fetch, throttled to once a
+    // day, that nothing ever waits on.
+    if (loadConfig().updateCheck !== false) {
+      const { checkInBackground, pendingUpdate, markAnnounced, notice } = await import('../src/update.mjs')
+
+      checkInBackground()
+
+      const pending = pendingUpdate()
+
+      if (pending) {
+        markAnnounced(pending.latest)
+        process.stderr.write(notice(pending))
+        process.exit(2)
+      }
+    }
+
     const { parse, describe } = await import('../src/switch.mjs')
     const { available, ensure, knownCount } = await import('../src/roster.mjs')
     const { speciesFileFor } = await import('../src/companion.mjs')

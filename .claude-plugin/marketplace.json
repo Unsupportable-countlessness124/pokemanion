@@ -1,13 +1,13 @@
 {
   "name": "pokemanion",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Pokemon beside every coding session.",
   "owner": { "name": "khatriadbhut", "url": "https://github.com/khatriadbhut" },
   "plugins": [
     {
       "name": "pokemanion",
       "description": "A Pokemon in a terminal pane beside every session, resting while the agent waits and animating while it works. 14 built in, 1242 summonable by name, with a Pokedex.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": { "name": "khatriadbhut" },
       "source": "./",
       "category": "productivity"

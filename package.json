@@ -1,6 +1,6 @@
 {
   "name": "pokemanion",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -44,6 +44,7 @@
     "recolour": "node src/recolour.mjs",
     "flip": "node src/flip.mjs",
     "key": "node src/key.mjs",
-    "crop": "node src/crop.mjs"
+    "crop": "node src/crop.mjs",
+    "update-check": "node src/update.mjs"
   }
 }
