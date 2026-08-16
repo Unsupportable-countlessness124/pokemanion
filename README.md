@@ -108,11 +108,8 @@ ship with it. Three things are left:
 - **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
   --pikachu`.
 
-Already installed it from source? Install the plugin as well and it will notice,
-stand aside and tell you, so you get one Pokémon rather than two — and it says
-which command switches you either way. If you later update the plugin while the
-source copy is still the active one, it says that too, rather than letting you
-believe an update took effect when nothing changed.
+Already have it from source? Installing the plugin too is harmless — it stands
+aside rather than doubling up, and says how to switch.
 
 ---
 
@@ -171,8 +168,8 @@ Where the table says *no*, run the pane yourself in a second terminal with
 
 ## Commands
 
-Typed inside a session. A hook answers these and blocks the prompt, so they
-never reach the model and cost no tokens:
+Typed inside a session. pokemanion answers these itself and stops them there, so
+they never reach the model and cost no tokens:
 
 ```
 --squirtle          switch this pane, live
