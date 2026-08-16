@@ -116,6 +116,21 @@ check(
   `${cardWidth} cols available, longest line ${Math.max(...paneCard(entry('ash')).map((l) => l.length))}`,
 )
 
+// A setting the README mentions in passing but never lists.
+//
+// `showVersion` was named in a sentence about turning the corner off and left
+// out of the table of settings, so the only way to find it was to have read that
+// sentence. The table is deliberately partial — most of these are for tuning how
+// a sprite is drawn — but anything the prose tells you to set belongs in it.
+{
+  const md = readFileSync(join(ROOT, 'README.md'), 'utf8')
+  const table = md.slice(md.indexOf('## Settings'), md.indexOf('## Your own sprites'))
+  const promised = [...md.matchAll(/`"([a-zA-Z]+)":\s*(?:false|true|\d+)`/g)].map((m) => m[1])
+  const unlisted = [...new Set(promised)].filter((key) => !table.includes(`\`${key}\``))
+
+  check('every setting the prose names is in the settings table', unlisted.length === 0, unlisted.join(' '))
+}
+
 // The counts written in prose, against the counts that are true.
 //
 // README, CLAUDE.md and both plugin manifests each state how many ship and how

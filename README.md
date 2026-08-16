@@ -364,6 +364,7 @@ the entire reason for the split. Guests cost 1–5 MB each, bounded by
 | `cardMs` | `8000` | how long the stats stay beside the sprite; `0` disables |
 | `guestBudgetMb` | `200` | disk the guests may hold |
 | `updateCheck` | `true` | look for a newer version once a day, and say so once |
+| `showVersion` | `true` | the version along the pane's bottom edge |
 | `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
 ## Your own sprites
