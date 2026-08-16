@@ -243,6 +243,15 @@ check(
     check('a wide pane gets the whole command', cornerText('1.2.0', '1.3.0', 120, plugin).includes('/plugin update pokemanion@pokemanion'))
     check('a narrow one still says a version is out', cornerText('1.2.0', '1.3.0', 20, plugin) === 'v1.3.0 available')
 
+    // Where there is no room for the command, it names the one that explains it
+    // — and says what that does. `--pokemanion` alone reads as the project's
+    // name rather than as something to type.
+    check(
+      'a middling one points at the command that explains it',
+      cornerText('1.2.0', '1.3.0', 45, plugin) === 'v1.3.0 available — --pokemanion to update',
+      cornerText('1.2.0', '1.3.0', 45, plugin),
+    )
+
     // Every version this prints wears its v. Bare numbers next to words read as
     // quantities — "1.3.0 available" could be a count of something.
     check(
