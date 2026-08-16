@@ -243,6 +243,32 @@ export const ROSTER = [
     busy: 'assets/22-cubone-swinging.gif',
     busySpeed: 1,
   },
+  // The third trainer, out of a four-direction sheet like Brock's — front while
+  // it waits, side on while it works, frames 0-8 and 12-17.
+  //
+  // Her side-on walk crops tighter than her standing frames, so she is drawn a
+  // little larger while working. That is the same trade Ash makes and it reads
+  // as leaning into it rather than as an error.
+  {
+    name: 'misty',
+    idle: 'assets/34-misty-resting.gif',
+    busy: 'assets/35-misty-working.gif',
+    busySpeed: 1,
+    card: {
+      title: 'Misty',
+      blurb:
+        'The youngest of the four Sensational Sisters and Gym Leader of Cerulean City, ' +
+        'who left the gym to travel with Ash after fishing him out of a river. She ' +
+        'trains Water types and means to become the greatest Water Pokémon Master.',
+      facts: [
+        ['species', 'Human'],
+        ['from', 'Cerulean City'],
+        ['gym', 'Water type'],
+        ['goal', 'Water Pokémon Master'],
+      ],
+      pane: ['Misty', 'Cerulean City Gym', 'Type : Water', 'Goal : Water Master'],
+    },
+  },
 ]
 
 // Showdown's Gen-5 animated set rather than PokeAPI's, which is the same

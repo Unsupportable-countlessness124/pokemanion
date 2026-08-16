@@ -50,7 +50,7 @@ is happening.
 </tr>
 </table>
 
-Fifteen hand-tuned residents ship with it. **1242 more** can be summoned by
+Sixteen hand-tuned residents ship with it. **1242 more** can be summoned by
 name and are fetched on the spot.
 
 <img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
@@ -116,7 +116,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 [Working on it](docs/developer.md)**
 
 <details>
-<summary><b>All fifteen residents</b> — resting on the left, working on the right</summary>
+<summary><b>All sixteen residents</b> — resting on the left, working on the right</summary>
 
 <br>
 
@@ -139,6 +139,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" width="65" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" width="70" alt="meowth working"> |
 | **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" width="89" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" width="166" alt="gengar working"> |
 | **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" width="85" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" width="97" alt="cubone working"> |
+| **misty**<br><sub>own animation</sub> | <img src="assets/34-misty-resting.gif" width="55" alt="misty resting"> | <img src="assets/35-misty-working.gif" width="44" alt="misty working"> |
 
 <!-- /gallery -->
 
@@ -198,7 +199,7 @@ At launch, from your terminal:
 
 ```sh
 claude --pikachu             # a particular one
-claude --flygon              # any of the 1257, fetched on first use
+claude --flygon              # any of the 1258, fetched on first use
 codex --random               # either agent, same flags
 claude --resume --charizard  # combines with everything else
 ```
@@ -278,7 +279,7 @@ Pressing escape is the hard case, because no hook fires for it.
 
 ## Residents and guests
 
-**Residents** are the 15 in `src/roster.mjs`: hand-tuned, always on disk,
+**Residents** are the 16 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out.
 
