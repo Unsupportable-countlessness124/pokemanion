@@ -72,6 +72,41 @@ reaches the model as an ordinary message and the pane does not change.
 At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 `claude --resume --charizard`.
 
+## If the user wants to add a character
+
+```sh
+npm run add -- <name> <resting> <working> [--resting=0-8] [--working=12-17] [--halo]
+```
+
+One command does all of it: prepares the art, copies it into `assets/`, writes
+the roster entry, regenerates the gallery, every count and the credits, and
+stages the files. Then they open a new session — a running pane predates the
+entry and cannot know about it.
+
+Your part is the judgement the command cannot make:
+
+1. **Look at the files first.** Decode them and say how many frames each has and
+   how big they are. A working half of one frame will barely move, and every
+   attempt here to animate a still has been reverted.
+2. **If it is a sheet, find the ranges.** Render the frames and read them —
+   a four-direction walk is usually front, side, back, side. Pass them as
+   `--resting=` and `--working=`.
+3. **Render it at the size the pane draws** — about 68 pixels tall — and look at
+   it before committing. Measurements have been wrong here twice; looking has
+   not.
+4. **`--halo` only if the art is a blurry upscale.** It removes every pale
+   colourless pixel, which is right for a white-outlined sprite and blinds one
+   with white eyes.
+5. **Write the card if they are not a Pokémon.** The command leaves `blurb` and
+   `pane` empty in `src/roster.mjs`; the bundled dex has no people in it, so
+   nothing else can answer `--dex brock`.
+
+Then `npm test`. It checks the sprites are committed, the counts match and the
+cards fit the pane.
+
+Not available to plugin users: it edits `src/roster.mjs`, and the plugin's copy
+is version-stamped and replaced on the next update.
+
 ## Releasing
 
 Bump the version in **four** files — `package.json`, `.claude-plugin/plugin.json`,
