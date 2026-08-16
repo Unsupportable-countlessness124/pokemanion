@@ -274,7 +274,7 @@ reading the documentation.
   `--pikachu` cost no turn and no tokens.
 - **Messages typed while Claude is already working never fire
   `UserPromptSubmit`.** They are injected into the running turn, so a
-  mid-turn `--pokerandom` reaches the model as an ordinary prompt and nothing
+  mid-turn `--random` reaches the model as an ordinary prompt and nothing
   intercepts it.
 - **`SessionStart` fires for background agents too**, which is why opening the
   agents list used to split whichever Ghostty window had focus. They are

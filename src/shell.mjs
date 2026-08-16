@@ -66,7 +66,7 @@ export const snippet = (agents = null, portable = isPluginRoot()) => {
 ${wrappers.map((name) => `# Summon a specific one: ${name} --pikachu, ${name} --resume --ash`).join('\n')}
 # Or any of the others:  --flygon      (fetched the first time)
 # Pick from a list:      --pokemon
-# Roll the dice:         --pokerandom
+# Roll the dice:         --random
 # Remove with: node ${portable ? '"$(pokemanion_root)/src/shell.mjs"' : join(ROOT, 'src', 'shell.mjs')} --remove
 ${portable ? `${RESOLVER}\n` : ''}
 ${wrappers.map((name) => wrapper(name, portable)).join('\n\n')}
@@ -87,7 +87,7 @@ const wrapper = (agent, portable = isPluginRoot()) => {
       --pokemon|--pokemons)
         pixel_runner_menu=1
         ;;
-      --pokerandom)
+      --random)
         pixel_runner_random=1
         ;;
       ${residents})
@@ -120,7 +120,7 @@ const wrapper = (agent, portable = isPluginRoot()) => {
     esac
   done
 
-  # --pokerandom beats the menu: asking for a surprise and then being shown a list
+  # --random beats the menu: asking for a surprise and then being shown a list
   # to choose from would be answering a question nobody asked.
   if [ -n "$pixel_runner_random" ] && [ -z "$pixel_runner_species" ]; then
     pixel_runner_species="$("${at('bin', 'run.sh')}" src/choose.mjs --random)" || return $?

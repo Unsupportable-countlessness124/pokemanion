@@ -59,8 +59,8 @@ Typed at Claude, mid-session — a hook answers these and blocks the prompt, so
 they reach no model and cost no tokens:
 
 - `--squirtle` — switch the pane to any of the 1256, live
-- `--pokerandom`, `--pokemon` — roll one, or list the residents
-- `--dex dragonite`, `--dex ghost`, `--dex pokerandom` — look things up, answered in chat
+- `--random`, `--pokemon` — roll one, or list the residents
+- `--dex dragonite`, `--dex ghost`, `--dex random` — look things up, answered in chat
 - `--dex current` — the one on screen, answered **in the pane** rather than in chat.
   Naming that same one (`--dex ash` with Ash in the pane) is the same question and
   answers in the same place. Naming a different one stays in chat.
@@ -69,7 +69,7 @@ Send them while Claude is **idle**. Text typed while a turn is already running
 never fires the hook — Claude Code folds it into the running turn — so it
 reaches the model as an ordinary message and the pane does not change.
 
-At launch, via the shell wrapper: `claude --pikachu`, `claude --pokerandom`,
+At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 `claude --resume --charizard`.
 
 ## Releasing

@@ -63,10 +63,7 @@ export const parse = (prompt, pool = available()) => {
 
   // Resolved to an actual name by the caller, not here, so that parsing stays
   // a pure reading of the text and the dice are rolled once.
-  // `--pokerandom` rather than `--random`, for the reason `--pokemanion` is not
-  // `--update`: a hook that answers a word blocks the prompt, and `--random` is
-  // a word anything could mean.
-  if (word === 'pokerandom') return { kind: 'random' }
+  if (word === 'random') return { kind: 'random' }
 
   if (pool.includes(word)) return { kind: 'switch', name: word }
 
@@ -239,7 +236,7 @@ export const suggest = (query, pool = available()) => {
   const leadsSomewhere = (value) => {
     const word = value.toLowerCase()
 
-    return word === 'current' || word === 'pokerandom' || pool.includes(word) || Boolean(resolveName(word)) || /^\d+$/.test(word)
+    return word === 'current' || word === 'random' || pool.includes(word) || Boolean(resolveName(word)) || /^\d+$/.test(word)
   }
 
   // Already a valid query. Whatever went wrong is not the spelling, so there is

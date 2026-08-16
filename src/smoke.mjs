@@ -500,8 +500,7 @@ check('--pokemanion reports the version', parse('--pokemanion')?.kind === 'updat
   check('and so is one that exists but was never drawn', ours('urshifu'))
 }
 check('and --update is not one of ours', parse('--update')?.kind === 'unknown')
-check('--pokerandom rolls', parse('--pokerandom')?.kind === 'random')
-check('and --random is not ours', parse('--random')?.kind === 'unknown')
+check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 // The argument is taken exactly as typed — one spelling to remember, not one
 // plus a set of near-misses. The help lives in the failure instead.
@@ -560,7 +559,7 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
 // Every path this writes into a shell command has to be quoted, because the
 // repo may sit somewhere with a space in it — ~/Documents/My Projects is an
-// ordinary place to put things. Unquoted, `claude --pokerandom` died with
+// ordinary place to put things. Unquoted, `claude --random` died with
 // "no such file or directory: /Users/you/My" and the typo hint silently
 // stopped working, while `claude --pikachu` kept working, which is the worst
 // possible spread of symptoms to debug from.
@@ -669,11 +668,11 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
           env: { ...process.env, HOME: home, PATH: `${bin}:${process.env.PATH}`, PIXEL_RUNNER_SPECIES: '', ...env },
         }).stdout ?? ''
 
-      // A resident needs no plugin at all to resolve; --pokerandom has to run the
+      // A resident needs no plugin at all to resolve; --random has to run the
       // launcher, which is the part that has to find the right directory.
       check('a shell to test the wrapper in', Boolean(shell), shell ?? 'neither zsh nor bash on this machine')
       check('a plugin wrapper resolves a resident', ask('claude --pikachu').includes('pikachu'), shell)
-      check('and reaches the newest version of the plugin', ask('claude --pokerandom').includes('1.10.0'), ask('claude --pokerandom'))
+      check('and reaches the newest version of the plugin', ask('claude --random').includes('1.10.0'), ask('claude --random'))
 
       // The plugin uninstalled. The wrapper must not become a broken `claude`.
       drop(join(home, '.claude'), { recursive: true, force: true })
@@ -1080,7 +1079,7 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     )
 
     const before = inPane
-    const random = ask('--dex pokerandom')
+    const random = ask('--dex random')
     const afterRandom = (() => {
       try {
         return read(card, 'utf8')
@@ -1090,7 +1089,7 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
     })()
 
     check(
-      '--dex pokerandom answers in the conversation and leaves the pane alone',
+      '--dex random answers in the conversation and leaves the pane alone',
       /no\./.test(random.stderr) && afterRandom === before,
       afterRandom === before ? 'pane untouched' : 'pane was overwritten',
     )
