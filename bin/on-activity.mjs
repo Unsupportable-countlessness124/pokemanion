@@ -102,7 +102,7 @@ try {
           // It unregisters the other install's hooks; it does not delete
           // anything. Removing the folder frees disk and is the one step with no
           // undo — that stays the owner's decision, not a hook's.
-          if (/^\s*--use-plugin\s*$/.test(payload.prompt ?? '')) {
+          if (/^\s*--pokemanion\s+use\s+plugin\s*$/i.test(payload.prompt ?? '')) {
             const { spawnSync: switchOver } = await import('node:child_process')
             const done = switchOver(process.execPath, [join(others[0], 'install.mjs'), '--uninstall'], { encoding: 'utf8' })
 
@@ -154,10 +154,10 @@ try {
             process.stderr.write(
               stale
                 ? `Running v${theirs} from ${short}. This plugin is v${ours}.\n\n` +
-                  '  --use-plugin   run this one instead\n' +
+                  '  --pokemanion use plugin   run this one instead\n' +
                   `  or update it   cd ${short} && git pull && npm run setup\n`
                 : `Already running from ${short}, so the plugin is idle — one Pokemon, not two.\n\n` +
-                  '  --use-plugin   run the plugin instead\n',
+                  '  --pokemanion use plugin   run the plugin instead\n',
             )
             process.exit(2)
           }

@@ -613,8 +613,9 @@ const { parse } = await import('./switch.mjs')
 
 check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 // Only meaningful where two installs exist, and parsed here with everything else
-// so it is never mistaken for a Pokemon named "use-plugin".
-check('--use-plugin is its own command', parse('--use-plugin')?.kind === 'use-plugin')
+// so it is never mistaken for a Pokemon of that name.
+check('--pokemanion use plugin is its own command', parse('--pokemanion use plugin')?.kind === 'use-plugin')
+check('and the bare word is nobody\'s', parse('--use-plugin')?.kind === 'unknown')
 // Named after the project rather than after what it does. `--update` is a
 // generic verb, and a hook that answers one blocks the prompt — so asking Claude
 // to update anything else would have been caught and answered with a version.

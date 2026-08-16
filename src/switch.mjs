@@ -39,11 +39,15 @@ export const parse = (prompt, pool = available()) => {
   // into a pointer.
   if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim() }
 
-  // `--pokemanion add brock`, which takes a name after it and so cannot go
-  // through the bare-flag match below.
+  // The two `--pokemanion <verb>` commands, which take a word after them and so
+  // cannot go through the bare-flag match below.
   const adding = text.match(/^--pokemanion\s+add(?:\s+([a-z][a-z0-9-]*))?$/i)
 
   if (adding) return { kind: 'add', name: adding[1] ?? null }
+
+  // Only meaningful where two installs exist, and answered by the one standing
+  // down.
+  if (/^--pokemanion\s+use\s+plugin$/i.test(text)) return { kind: 'use-plugin' }
 
   const match = text.match(/^--([a-z][a-z0-9.:-]*)$/i)
 
@@ -53,10 +57,7 @@ export const parse = (prompt, pool = available()) => {
 
   if (word === 'pokemon' || word === 'pokemons') return { kind: 'list' }
 
-  // Only meaningful where two installs exist, and answered by the one standing
-  // down. Parsed here with everything else so it cannot be mistaken for a
-  // Pokemon named "use-plugin" and sent looking for a sprite.
-  if (word === 'use-plugin') return { kind: 'use-plugin' }
+
 
   // Named after the project, not after what it does.
   //
