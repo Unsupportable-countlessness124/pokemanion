@@ -117,7 +117,8 @@ export const ROSTER = [
     },
   },
   { name: 'charmander' },
-  // Both halves supplied, and the working half built rather than found.
+  // Its Gen-5 sprite while it waits, a supplied one while it works, like
+  // Psyduck. The working half was built rather than found.
   //
   // The source was one still of Squirtle firing a water gun: the beam already
   // drawn, leaving the mouth and reaching the far edge. An animation of a still
@@ -130,15 +131,11 @@ export const ROSTER = [
   // divides out, so `recoverNative` has nothing to recover. Taking every third
   // pixel keeps the edges hard where averaging would have made mush of them.
   //
-  // Its body runs 6% cooler than the resting sprite's, which is inside the range
-  // the shinies above already cover, so there is no `transition` here: a white
-  // flash on top of a palette that has barely moved would be announcing nothing.
-  {
-    name: 'squirtle',
-    idle: 'assets/29-squirtle-standing.png',
-    busy: 'assets/30-squirtle-watergun.gif',
-    busySpeed: 1,
-  },
+  // A matching standing sprite came with it and is not used: the Gen-5 one is
+  // what a resting Squirtle looks like everywhere else here. That leaves the two
+  // halves 10% apart in colour, which is Squirtle's own shiny distance, so there
+  // is no `transition` — a white flash would be announcing a change that small.
+  { name: 'squirtle', busy: 'assets/30-squirtle-watergun.gif', busySpeed: 1 },
   { name: 'bulbasaur' },
   { name: 'eevee' },
   { name: 'munchlax' },

@@ -82,7 +82,7 @@ unlisted rather than silently going unnamed.
 | `25-gengar-attack.gif` | gengar working |
 | `27-ash-standing.gif` | ash resting |
 | `28-ash-pikachu-running.gif` | ash working |
-| `29-squirtle-standing.png` | squirtle resting |
+| `29-squirtle-standing.png` | kept, not currently used |
 | `30-squirtle-watergun.gif` | squirtle working |
 
 20 files.

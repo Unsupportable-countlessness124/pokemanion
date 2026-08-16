@@ -127,7 +127,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" width="71" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" width="94" alt="pikachu working"> |
 | **ash**<br><sub>own animation</sub> | <img src="assets/27-ash-standing.gif" width="52" alt="ash resting"> | <img src="assets/28-ash-pikachu-running.gif" width="210" alt="ash working"> |
 | **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" width="68" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" width="68" alt="charmander working"> |
-| **squirtle**<br><sub>own animation</sub> | <img src="assets/29-squirtle-standing.png" width="64" alt="squirtle resting"> | <img src="assets/30-squirtle-watergun.gif" width="160" alt="squirtle working"> |
+| **squirtle**<br><sub>own animation</sub> | <img src="assets/pokemon/squirtle/idle.gif" width="64" alt="squirtle resting"> | <img src="assets/30-squirtle-watergun.gif" width="160" alt="squirtle working"> |
 | **bulbasaur**<br><sub>its shiny</sub> | <img src="assets/pokemon/bulbasaur/idle.gif" width="81" alt="bulbasaur resting"> | <img src="assets/pokemon/bulbasaur/busy-shiny.gif" width="81" alt="bulbasaur working"> |
 | **eevee**<br><sub>its shiny</sub> | <img src="assets/pokemon/eevee/idle.gif" width="69" alt="eevee resting"> | <img src="assets/pokemon/eevee/busy-shiny.gif" width="69" alt="eevee working"> |
 | **munchlax**<br><sub>its shiny</sub> | <img src="assets/pokemon/munchlax/idle.gif" width="66" alt="munchlax resting"> | <img src="assets/pokemon/munchlax/busy-shiny.gif" width="66" alt="munchlax working"> |
