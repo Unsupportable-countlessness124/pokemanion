@@ -313,9 +313,7 @@ npm run prune            # evict guests now; also happens on its own
 npm run assigned         # what each session was given, and why
 ```
 
-Rendering all of them would take about **2.7 GB** of frame cache. That is why
-there are two kinds. Guests cost 1–5 MB each, limited by `guestBudgetMb` (200)
-and `guestKeepDays` (14).
+Guests are limited by `guestBudgetMb` (200) and `guestKeepDays` (14).
 
 ## Settings
 
