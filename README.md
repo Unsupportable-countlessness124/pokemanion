@@ -110,9 +110,10 @@ aside instead of doubling up, and tells you how to switch.
 
 ---
 
-**[Requirements](#requirements) · [Commands](#commands) · [From source](#install-from-source) · [Updating](#updating) · [Troubleshooting](#troubleshooting) · [Residents and
-guests](#residents-and-guests) · [Settings](#settings) · [Your own
-sprites](#your-own-sprites) · [Design notes](docs/design.md)**
+**[Requirements](#requirements) · [Commands](#commands) · [Codex](#using-it-with-codex)
+· [Updating](#updating) · [Troubleshooting](#troubleshooting) · [Residents and
+guests](#residents-and-guests) · [Settings](#settings) ·
+[Working on it](docs/developing.md)**
 
 <details>
 <summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
@@ -200,28 +201,7 @@ codex --random               # either agent, same flags
 claude --resume --charizard  # combines with everything else
 ```
 
-## Install from source
-
-**The plugin is the one to use.** This route exists for working on the code:
-
-```sh
-git clone https://github.com/khatriadbhut/pokemanion.git
-cd pokemanion
-npm run deps      # chafa and Ghostty — skip if you have them
-npm run setup
-```
-
-`setup` finds what you have, **Claude Code, Codex, or both**, and sets up each
-of them: sprites, hooks, the `claude()`/`codex()` shell wrapper, and the one
-Ghostty keybind the pane needs. It checks everything first and stops without
-touching a file if something is missing. Safe to run twice.
-
-Then four things no script can do for you:
-
-1. **Restart your agent** — both read their hooks at startup.
-2. **Restart Ghostty** — it reads its config at startup.
-3. **Open a new terminal**, or `source ~/.zshrc`.
-4. **Allow Ghostty in Accessibility** — once, as above.
+## Using it with Codex
 
 <details>
 <summary><b>Two things specific to Codex</b></summary>
@@ -330,58 +310,6 @@ Guests are limited by `guestBudgetMb` (200) and `guestKeepDays` (14).
 | `showVersion` | `true` | the version along the pane's bottom edge |
 | `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
 
-## Your own sprites
-
-Any GIF works. Drop it in `assets/` and point a roster entry at it:
-
-```js
-// src/roster.mjs
-{ name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
-```
-
-Hand-picked files are never overwritten or re-downloaded. They replace the
-default, which is the Pokémon's own shiny palette with a white flash between.
-
-Judge a candidate at the size the pane draws, not at full size — a big smooth
-render can shrink to mush while a small pixel-art one scales cleanly.
-[docs/design.md](docs/design.md) has the measurements.
-
-Two tools for when an animation is nearly right: **`npm run recolour`** repaints
-one palette to match another without re-encoding, and **`npm run flip`** mirrors
-a sprite. Run `npm run attribution` after adding one.
-
-<details>
-<summary><b>Everything you can run</b></summary>
-
-<br>
-
-| command | what it does |
-| --- | --- |
-| `npm run doctor` | check every piece: hooks, chafa, cache, who holds what |
-| `npm run watch` | print the working/waiting decision the pane is making, live |
-| `npm run roster` | download any missing resident sprites (`-- --refresh` to redo) |
-| `npm run warm` | render the residents for a pane height (`-- 5` for five rows) |
-| `npm run deps` | install chafa and Ghostty (`-- --dry` to preview) |
-| `npm run ghostty -- --install` | the resize keybind the pane needs (`--remove` to undo) |
-| `npm run prune` | evict guests now (`-- --dry`, `-- --keep-days=0`) |
-| `npm run assigned` | which Pokémon each session was given (`-- --forget` to reset) |
-| `npm run dex` | the Pokédex from a terminal: `-- fire`, `-- 25`, `-- current` |
-| `npm run attribution` | regenerate the credits (`-- --check` to fail if stale) |
-| `npm run shell -- --install` | add the shell wrapper (`--remove` to undo) |
-| `npm run install-statusline` | register the hooks (`uninstall-statusline` to undo) |
-| `npm run window` | run a pane by hand, for debugging |
-| `npm run recolour` | repaint a palette: `-- a.gif b.gif out.gif` |
-| `npm run flip` | mirror a sprite: `-- in.gif out.gif` |
-| `npm run crop` | cut one figure out of a sheet: `-- in.gif out.gif --find=3` |
-
-The rest are tuning tools for working out what a terminal can draw:
-`preview`, `compare`, `sizes`, `bakeoff`, `use`, `preset`, `fontcheck`,
-`cellcheck`, and the `for-*` set. [docs/design.md](docs/design.md) explains
-them. **`preset` and the `for-*` tools write to `config.json`** instead of just
-printing what they find.
-
-</details>
-
 ## Licence and artwork
 
 The **code** is MIT. See [LICENSE](LICENSE).
@@ -396,15 +324,6 @@ anyone, and nothing here is sold.
 
 ## Contributing
 
-Issues and pull requests welcome, particularly:
-
-- **A sprite that reads better than one in the roster.** Bring the numbers;
-  `docs/design.md` says which ones and what the bar is.
-- **A Linux path.** Everything but the pane-opening is portable Node; it needs a
-  way to open a split that is not AppleScript.
-
-`npm test` before you push.
-
-Also worth reading: [docs/design.md](docs/design.md) for why it is built this
-way, and [docs/known-issues.md](docs/known-issues.md) for what is deliberately
-wrong.
+Issues and pull requests welcome, particularly a sprite that reads better than
+one in the roster, or a Linux path. [docs/developing.md](docs/developing.md) is
+where to start.
