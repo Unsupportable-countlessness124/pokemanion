@@ -99,6 +99,18 @@ export const updateCommand = (root = ROOT) => {
     : '/plugin update pokemanion@pokemanion'
 }
 
+// Is there a newer one, regardless of whether it has been mentioned.
+//
+// `pendingUpdate` goes quiet once the message has been shown, which is right for
+// a message and wrong for the pane: the pane is a status display, and a version
+// you are behind on stays true after you have been told once.
+export const available = () => {
+  const current = installedVersion()
+  const latest = stamp(LATEST)?.version
+
+  return current && latest && isNewer(latest, current) ? latest : null
+}
+
 // A version worth mentioning: newer than this one, and not already mentioned.
 export const pendingUpdate = () => {
   const current = installedVersion()
@@ -124,10 +136,8 @@ export const markAnnounced = (version) => {
 // advice. Harmless in production, where they are always the same root — which is
 // exactly the kind of thing that is wrong for months without showing.
 export const notice = ({ current, latest, command }, root = ROOT) =>
-  `pokemanion ${latest} is out — you have ${current}.\n\n  ${command}\n\n` +
-  `${isPluginRoot(root) ? 'Restart the agent afterwards.\n' : ''}` +
-  'Nothing breaks if you stay on this one; you would just miss whatever is new.\n' +
-  'Turn these off with "updateCheck": false in config.json.\n'
+  `pokemanion ${latest} is out — you have ${current}\n\n  ${command}\n` +
+  `${isPluginRoot(root) ? '  then restart the agent\n' : ''}`
 
 // Reading it by hand: npm run update-check
 if (process.argv[1] && process.argv[1].endsWith('update.mjs')) {

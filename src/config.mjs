@@ -211,6 +211,11 @@ export const DEFAULTS = {
   // anything: updating is one command, and which command depends on how this was
   // installed, so both routes are told the right one.
   updateCheck: true,
+
+  // The version in the pane's bottom-right corner, and an arrow to the newer one
+  // when there is a newer one. Hidden while the stats card is up, and wherever
+  // the working sprite is wide enough to reach that corner.
+  showVersion: true,
 }
 
 export const loadConfig = () => {

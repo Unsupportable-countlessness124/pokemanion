@@ -221,6 +221,12 @@ check(
     const { isNewer, versionAt } = await import('./update.mjs')
 
     check('a copy can tell it is newer than the one running', isNewer('1.3.0', '1.2.0') && !isNewer('1.2.0', '1.3.0'))
+
+    // What the pane reads. Unlike the message, it keeps answering after the
+    // message has been shown — a version you are behind on stays true.
+    const { available } = await import('./update.mjs')
+
+    check('the pane can ask whether an update exists without announcing it', available() === null || typeof available() === 'string')
     check('and reads a version off another install', versionAt(ROOT) === JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version)
     check('and says nothing about one that is not there', versionAt(join(home, 'no-such-install')) === null)
   }
@@ -292,8 +298,8 @@ check(
     const plug = '/Users/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'
     const built = notice({ current: '1.2.0', latest: '1.3.0', command: updateCommand(plug) }, plug)
 
-    check('a plugin update notice says to restart', built.includes('/plugin update') && built.includes('Restart the agent'))
-    check('and a source one does not', !notice({ current: '1.2.0', latest: '1.3.0', command: updateCommand(ROOT) }, ROOT).includes('Restart the agent'))
+    check('a plugin update notice says to restart', built.includes('/plugin update') && /restart the agent/i.test(built))
+    check('and a source one does not', !/restart the agent/i.test(notice({ current: '1.2.0', latest: '1.3.0', command: updateCommand(ROOT) }, ROOT)))
   }
 
   check(
@@ -399,6 +405,9 @@ check('forms are counted by prefix, not by matching', forms('mew') === 0 && form
 const { parse } = await import('./switch.mjs')
 
 check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
+// Only meaningful where two installs exist, and parsed here with everything else
+// so it is never mistaken for a Pokemon named "use-plugin".
+check('--use-plugin is its own command', parse('--use-plugin')?.kind === 'use-plugin')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 // The argument is taken exactly as typed — one spelling to remember, not one

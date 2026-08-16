@@ -47,6 +47,11 @@ export const parse = (prompt, pool = available()) => {
 
   if (word === 'pokemon' || word === 'pokemons') return { kind: 'list' }
 
+  // Only meaningful where two installs exist, and answered by the one standing
+  // down. Parsed here with everything else so it cannot be mistaken for a
+  // Pokemon named "use-plugin" and sent looking for a sprite.
+  if (word === 'use-plugin') return { kind: 'use-plugin' }
+
   // Resolved to an actual name by the caller, not here, so that parsing stays
   // a pure reading of the text and the dice are rolled once.
   if (word === 'random') return { kind: 'random' }

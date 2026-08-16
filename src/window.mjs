@@ -22,6 +22,7 @@ import { STATE_DIR, loadConfig, readState } from './config.mjs'
 import { MIN_DELAY, loadSprite } from './sprite.mjs'
 import { alignFor, busyFile, busySpeedFor, flipBusyFor, idleFile, touch, transitionFor } from './roster.mjs'
 import { entry as dexEntry, paneCard } from './dex.mjs'
+import { available as updateAvailable, installedVersion } from './update.mjs'
 
 const HIDE_CURSOR = '\x1b[?25l'
 const SHOW_CURSOR = '\x1b[?25h'
@@ -645,6 +646,64 @@ const drawCard = (sprite) => {
   cardDrawnAt = showing ? cardLines.length : 0
 }
 
+// The version, bottom right, and what to do about it if there is a newer one.
+//
+// The same thing Claude Code does with its own update line: a status display
+// says what it is and what is out of date without interrupting anything. The
+// pane is the natural place — it is already on screen, already saying what the
+// session is doing, and its bottom-right corner is empty.
+//
+// Re-read on a timer rather than per frame. The pane draws several times a
+// second and this is two small files.
+const VERSION_EVERY = 30_000
+const ourVersion = installedVersion()
+
+let versionText = null
+let versionRead = 0
+let versionDrawn = 0
+
+const drawVersion = (sprite) => {
+  if (config.showVersion === false || !ourVersion) return
+
+  // Never on top of something that matters. The card can reach the bottom row,
+  // and a wide working sprite — Charizard's fire is twenty columns — can reach
+  // across to where this would sit.
+  if (Date.now() < cardUntil) {
+    versionDrawn = 0
+
+    return
+  }
+
+  const now = Date.now()
+
+  if (now - versionRead > VERSION_EVERY) {
+    versionRead = now
+
+    try {
+      const latest = updateAvailable()
+
+      versionText = latest ? `v${ourVersion} \u2192 ${latest}` : `v${ourVersion}`
+    } catch {
+      versionText = `v${ourVersion}`
+    }
+  }
+
+  if (!versionText) return
+
+  const cols = process.stdout.columns || config.windowCols || 0
+  const rows = process.stdout.rows || 0
+
+  const from = cols - versionText.length + 1
+
+  // Only where there is room for it beside whatever else is drawn.
+  if (cols < versionText.length + 2 || rows < 2 || (sprite?.cols ?? 0) + 2 > from) return
+
+  const pad = Math.max(0, versionDrawn - versionText.length)
+
+  process.stdout.write(`\x1b[${rows};${Math.max(1, from)}H\x1b[2m${versionText}\x1b[0m${' '.repeat(pad)}`)
+  versionDrawn = versionText.length
+}
+
 let index = 0
 let working = false
 
@@ -700,6 +759,7 @@ const tick = () => {
   process.stdout.write(DELETE_PLACEMENTS + originFor(sprite) + sprite.frames[frame])
 
   drawCard(sprite)
+  drawVersion(sprite)
 
   index++
 

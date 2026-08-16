@@ -185,6 +185,8 @@ never reach the model and cost no tokens:
 --dex 149           by number
 --dex current       the one you're looking at — answers in the pane
 --dex random        be shown something
+
+--use-plugin        switch to the plugin, if you have both installed
 ```
 
 Naming the Pokémon already on screen answers in the pane, like `--dex current`.

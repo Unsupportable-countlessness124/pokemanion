@@ -96,6 +96,25 @@ try {
 
       if (others.length > 0) {
         if (event === 'UserPromptSubmit') {
+          // The switch, typed rather than run in a terminal. Handled by the copy
+          // standing down, because it is the only one that knows both paths.
+          //
+          // It unregisters the other install's hooks; it does not delete
+          // anything. Removing the folder frees disk and is the one step with no
+          // undo — that stays the owner's decision, not a hook's.
+          if (/^\s*--use-plugin\s*$/.test(payload.prompt ?? '')) {
+            const { spawnSync: switchOver } = await import('node:child_process')
+            const done = switchOver(process.execPath, [join(others[0], 'install.mjs'), '--uninstall'], { encoding: 'utf8' })
+
+            process.stderr.write(
+              done.status === 0
+                ? `switched — this plugin now runs it, ${others[0]} no longer does\n\n  restart the agent\n`
+                : `could not switch: ${(done.stderr || done.stdout || 'no output').trim().split('\n')[0]}\n\n` +
+                  `  try: cd ${others[0]} && npm run uninstall-statusline\n`,
+            )
+            process.exit(2)
+          }
+
           const { installedVersion, versionAt, isNewer } = await import('../src/update.mjs')
           const note = join(STATE_DIR, 'deferred')
 
@@ -129,18 +148,13 @@ try {
 
             process.stderr.write(
               (stale
-                ? `This plugin is version ${ours}, but the Pokemon beside you is coming from\n` +
-                  `the source install at ${others[0]}, which is version ${theirs}.\n\n` +
-                  'Updating the plugin changed nothing on screen, because that copy is the\n' +
-                  'one wired into your agent. Either of these fixes it:\n\n' +
-                  `  use the plugin from now on   cd ${others[0]} && npm run uninstall-statusline\n` +
-                  `  update the source copy       cd ${others[0]} && git pull && npm run setup\n`
-                : `pokemanion is already installed at ${others[0]}\n\n` +
-                  'The plugin is staying out of the way, so you get one Pokemon rather\n' +
-                  'than two. Nothing to fix — keep whichever you prefer:\n\n' +
-                  '  keep the source install   /plugin uninstall pokemanion@pokemanion\n' +
-                  `  use the plugin instead    cd ${others[0]} && npm run uninstall-statusline\n`) +
-                '\nThen restart the agent.\n',
+                ? `This plugin is ${ours}. The Pokemon beside you is ${theirs}, from ${others[0]}.\n\n` +
+                  '  --use-plugin   switch to this one\n' +
+                  `  or update it   cd ${others[0]} && git pull && npm run setup\n`
+                : `pokemanion is already installed at ${others[0]}, and that copy is the\n` +
+                  'one running — so you get one Pokemon rather than two.\n\n' +
+                  '  --use-plugin   switch to the plugin\n' +
+                  '  or ignore this, nothing is wrong\n'),
             )
             process.exit(2)
           }
