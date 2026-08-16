@@ -186,7 +186,7 @@ never reach the model and cost no tokens:
 --dex current       the one you're looking at — answers in the pane
 --dex random        be shown something
 
---update            the version, and how to update it
+--pokemanion        the version, and how to update it
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
@@ -197,6 +197,12 @@ Anything else answers in the conversation.
 folded into that turn and reaches the model as an ordinary message, so the pane
 does not change. Only a prompt that is *nothing but* the flag counts — `what
 does --pikachu do?` is a real question and passes through untouched.
+
+A flag that is nothing like a Pokémon's name is left alone too, so `--update` or
+`--force` typed at your agent is your business rather than ours. A near miss is
+still caught, because that is what makes a "did you mean" worth having:
+`--charizrd` gets one, and so does `--urshifu`, which is spelled correctly and
+simply was never drawn.
 
 Punctuation is forgiven and form names work as written: `--ho-oh`,
 `--rotom-wash`, `--charizard-megax`.
@@ -293,8 +299,8 @@ The pane says it too, along its bottom edge:
 It takes the longest form that fits the pane you have — the whole command in a
 normal split, `v1.4.0 available` in a narrow one, and plain `v1.3.0` when there
 is nothing to say. It never takes a card, because those are spoken for by the
-stats on arrival and by `--dex`. **`--update`** prints the same thing in the
-conversation.
+stats on arrival and by `--dex`. **`--pokemanion`** prints the same thing in
+the conversation.
 
 It never installs anything itself. `"updateCheck": false` turns the checks off,
 `"showVersion": false` hides the corner.

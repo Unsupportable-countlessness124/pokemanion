@@ -52,9 +52,14 @@ export const parse = (prompt, pool = available()) => {
   // Pokemon named "use-plugin" and sent looking for a sprite.
   if (word === 'use-plugin') return { kind: 'use-plugin' }
 
-  // The pane's corner can say a version is out but not what to type — sixteen
-  // columns beside the widest sprite. This is where the command goes.
-  if (word === 'update') return { kind: 'update' }
+  // Named after the project, not after what it does.
+  //
+  // It was `--update`, which is a generic verb this has no business claiming: a
+  // hook that answers it blocks the prompt, so asking Claude to update anything
+  // else — a dependency, a branch, the repo you are actually in — would have been
+  // caught here and answered with a version number. Every other flag is a
+  // Pokemon and could never be meant for something else.
+  if (word === 'pokemanion') return { kind: 'update' }
 
   // Resolved to an actual name by the caller, not here, so that parsing stays
   // a pure reading of the text and the dice are rolled once.

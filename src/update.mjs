@@ -161,7 +161,7 @@ export const cornerText = (current, latest, width, root = ROOT) => {
   const forms = [
     `pokemanion v${latest} available — run: ${updateCommand(root)}`,
     `v${latest} available — ${updateCommand(root, { short: true })}`,
-    `v${latest} available — --update`,
+    `v${latest} available — --pokemanion`,
     `v${latest} available`,
     `v${current}`,
   ]

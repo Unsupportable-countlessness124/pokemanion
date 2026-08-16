@@ -451,7 +451,29 @@ check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 // Only meaningful where two installs exist, and parsed here with everything else
 // so it is never mistaken for a Pokemon named "use-plugin".
 check('--use-plugin is its own command', parse('--use-plugin')?.kind === 'use-plugin')
-check('--update is its own command', parse('--update')?.kind === 'update')
+// Named after the project rather than after what it does. `--update` is a
+// generic verb, and a hook that answers one blocks the prompt — so asking Claude
+// to update anything else would have been caught and answered with a version.
+check('--pokemanion reports the version', parse('--pokemanion')?.kind === 'update')
+
+// Which flags this project answers at all. A prompt that is only `--word` was
+// always caught, so `--update`, `--force` and the rest were answered with a
+// Pokemon roster and never reached the model. Now only words near a real name
+// are — the suggestion is worth having, the interception is not.
+{
+  const { nearest, unregistered } = await import('./switch.mjs')
+  const ours = (word) => Boolean(nearest(word) || unregistered(word))
+
+  check(
+    'a flag unlike any Pokemon is left alone',
+    !ours('update') && !ours('force') && !ours('verbose') && !ours('dry-run'),
+    ['update', 'force', 'verbose', 'dry-run'].filter(ours).join(' '),
+  )
+
+  check('but a near miss is still caught', ours('charizrd') && ours('pikchu'))
+  check('and so is one that exists but was never drawn', ours('urshifu'))
+}
+check('and --update is not one of ours', parse('--update')?.kind === 'unknown')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 // The argument is taken exactly as typed — one spelling to remember, not one

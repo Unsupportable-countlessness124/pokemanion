@@ -441,6 +441,23 @@ try {
       // Exit 2 blocks the prompt and erases it, and shows this to you as the
       // reason. That is what keeps `--pikachu` from being sent to Claude as a
       // message and answered as one.
+      // A flag that is nobody's Pokemon belongs to whoever typed it.
+      //
+      // Any prompt that is only `--word` used to be caught here and answered with
+      // "no such one" — so asking Claude `--update` while working on something
+      // else got a Pokemon roster back and the prompt never arrived. Every flag
+      // this project owns is a Pokemon or a word about Pokemon; anything a long
+      // way from all of them was meant for something else.
+      //
+      // Near misses are still caught, which is the point of the suggestion:
+      // `--charizrd` deserves a "did you mean", and so does `--urshifu`, spelled
+      // correctly and simply never drawn.
+      if (asked.kind === 'unknown') {
+        const { nearest, unregistered } = await import('../src/switch.mjs')
+
+        if (!nearest(asked.word) && !unregistered(asked.word)) process.exit(0)
+      }
+
       // The one place we can actually reach someone.
       //
       // Every other channel is a hook whose output goes nowhere: SessionStart
