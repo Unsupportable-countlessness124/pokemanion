@@ -5,8 +5,8 @@
 **Your Pokémon companion for Claude Code and Codex.**
 
 One lives in a pane beside every session: it rests while the agent waits, and
-does something else while it works — so you can tell from the corner of your eye
-whether anything is happening.
+does something else while it works, so you can tell at a glance whether anything
+is happening.
 
 [![CI](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
@@ -65,8 +65,8 @@ the machine.
 
 ## Quick install
 
-**Get [Ghostty](https://ghostty.org/download) first** if you do not have it —
-the pane is a Ghostty split. chafa, the other requirement, is fetched for you.
+**Get [Ghostty](https://ghostty.org/download) first** if you do not have it. The
+pane is a Ghostty split. The other requirement, chafa, is fetched for you.
 
 Then, at your agent:
 
@@ -105,8 +105,8 @@ ship with it. Three things are left:
 - **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
   --pikachu`.
 
-Already have it from source? Installing the plugin too is harmless — it stands
-aside rather than doubling up, and says how to switch.
+Already have it from source? Installing the plugin too is harmless. It stands
+aside instead of doubling up, and tells you how to switch.
 
 ---
 
@@ -140,7 +140,7 @@ sprites](#your-own-sprites) · [Design notes](docs/design.md)**
 
 <!-- /gallery -->
 
-These animate — they are the sprite files themselves, not pictures of them.
+These animate. They are the sprite files themselves, not pictures of them.
 Seven work as their own shiny, the same animation recoloured with a white flash
 at the switch; seven were given animations of their own.
 
@@ -149,8 +149,8 @@ at the switch; seven were given animations of their own.
 ## Requirements
 
 **Node ≥ 20** (no dependencies), **chafa**, and a terminal that speaks the
-[kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) —
-the sprite is a real image, not text.
+[kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/).
+The sprite is a real image, not text.
 
 | | draws the sprite | opens the pane | `claude --pikachu` |
 | --- | :---: | :---: | :---: |
@@ -159,7 +159,7 @@ the sprite is a real image, not text.
 | Linux + kitty, Konsole | should | no | untested |
 | Alacritty, Terminal.app, Windows | no | no | no |
 
-Only the pane-opening is macOS-specific — it splits Ghostty through AppleScript.
+Only the pane-opening is macOS-specific. It splits Ghostty using AppleScript.
 Where the table says *no*, run the pane yourself in a second terminal with
 `npm run window 4 --session=<id>`.
 
@@ -184,7 +184,8 @@ they never reach the model and cost no tokens:
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
-**Send them while the agent is idle** — mid-turn they reach the model instead.
+**Send them while the agent is idle.** Sent mid-turn, they go to the model
+instead.
 
 Only a bare flag counts, so `what does --pikachu do?` passes through, as does
 anything unlike a Pokémon's name: `--update`, `--force`. Typos get a "did you
@@ -210,8 +211,8 @@ npm run deps      # chafa and Ghostty — skip if you have them
 npm run setup
 ```
 
-`setup` finds what you have — **Claude Code, Codex, or both** — and wires up
-each: sprites, hooks, the `claude()`/`codex()` shell wrapper, and the one
+`setup` finds what you have, **Claude Code, Codex, or both**, and sets up each
+of them: sprites, hooks, the `claude()`/`codex()` shell wrapper, and the one
 Ghostty keybind the pane needs. It checks everything first and stops without
 touching a file if something is missing. Safe to run twice.
 
@@ -227,12 +228,12 @@ Then four things no script can do for you:
 
 <br>
 
-**It will ask you to trust the hooks**, and they are worth reading first — they
-sit in `~/.codex/hooks.json`. Codex silently skips any it has not reviewed, so
-after updating this project run **`/hooks`** in Codex and trust them again.
+**It will ask you to trust the hooks.** They are worth reading first, in
+`~/.codex/hooks.json`. Codex silently skips any it has not reviewed, so after
+updating this project, run **`/hooks`** in Codex and trust them again.
 
-**The pane appears at your first message, not at launch** — Codex offers no
-earlier hook. Claude Code opens it the moment the session starts.
+**The pane appears at your first message, not at launch.** Codex offers no
+earlier hook. Claude Code opens it as soon as the session starts.
 
 </details>
 
@@ -257,8 +258,8 @@ and no trace is left.
 
 ## Updating
 
-pokemanion tells you when there is a newer version — it checks GitHub once a
-day — and each route has its own command:
+pokemanion checks GitHub once a day and tells you when there is a newer version.
+Each route has its own command:
 
 ```
 /plugin update pokemanion@pokemanion         # plugin, Claude Code
@@ -279,18 +280,18 @@ installed for you.
 npm run doctor
 ```
 
-It checks each piece on its own — hooks registered per agent, chafa present, the
-frame cache matching your pane height, and which Pokémon are currently held —
-and names whichever is unhappy.
+It checks each piece on its own: hooks registered per agent, chafa present, the
+frame cache matching your pane height, and which Pokémon are currently held. It
+names whichever one is unhappy.
 
-**A sprite that stutters** is the frame cache — frames are rendered per pane
+**A sprite that stutters** is the frame cache. Frames are rendered for one pane
 height, so resizing leaves it rendering on the fly. `npm run warm -- <rows>`
 fixes it.
 
 **The sprite is wrong at the wrong moment.** `npm run watch` prints the decision
 the pane is making and what it rested on.
-[docs/known-issues.md](docs/known-issues.md) explains where it frays — pressing
-escape is the hard case, since no hook fires for it.
+[docs/known-issues.md](docs/known-issues.md) explains where it gets this wrong.
+Pressing escape is the hard case, because no hook fires for it.
 
 ## Residents and guests
 
@@ -298,8 +299,8 @@ escape is the hard case, since no hook fires for it.
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out.
 
-**Guests** are the other 1242. They arrive when you name them — about two
-seconds to fetch and render — then load in 2 ms thereafter. They are evicted
+**Guests** are the other 1242. They arrive when you name them, taking about two
+seconds to fetch and render, and load in 2 ms after that. They are evicted
 least-recently-shown first, and one a pane is currently showing is never
 evicted.
 
@@ -312,9 +313,9 @@ npm run prune            # evict guests now; also happens on its own
 npm run assigned         # what each session was given, and why
 ```
 
-The whole set pre-rendered would be about **2.7 GB** of frame cache, which is
-the entire reason for the split. Guests cost 1–5 MB each, bounded by
-`guestBudgetMb` (200) and `guestKeepDays` (14).
+Rendering all of them would take about **2.7 GB** of frame cache. That is why
+there are two kinds. Guests cost 1–5 MB each, limited by `guestBudgetMb` (200)
+and `guestKeepDays` (14).
 
 ## Settings
 
@@ -342,8 +343,8 @@ Any GIF works. Drop it in `assets/` and point a roster entry at it:
 { name: 'meowth', busy: 'assets/18-meowth-jumping.gif', busySpeed: 1 },
 ```
 
-Hand-picked files are never overwritten or re-downloaded, and they override the
-default — the Pokémon's own shiny palette, with a white flash between.
+Hand-picked files are never overwritten or re-downloaded. They replace the
+default, which is the Pokémon's own shiny palette with a white flash between.
 
 Judge a candidate at the size the pane draws, about 68 pixels tall. File size
 lies in both directions: a 500×500 GIF that is really 40×39 upscaled is pixel
@@ -377,22 +378,22 @@ a sprite. Run `npm run attribution` after adding one.
 | `npm run flip` | mirror a sprite: `-- in.gif out.gif` |
 | `npm run crop` | cut one figure out of a sheet: `-- in.gif out.gif --find=3` |
 
-The rest are tuning tools for working out what a terminal can draw —
+The rest are tuning tools for working out what a terminal can draw:
 `preview`, `compare`, `sizes`, `bakeoff`, `use`, `preset`, `fontcheck`,
 `cellcheck`, and the `for-*` set. [docs/design.md](docs/design.md) explains
-them. **`preset` and `for-*` write to `config.json`** rather than just
-reporting.
+them. **`preset` and the `for-*` tools write to `config.json`** instead of just
+printing what they find.
 
 </details>
 
 ## Licence and artwork
 
-The **code** is MIT — see [LICENSE](LICENSE).
+The **code** is MIT. See [LICENSE](LICENSE).
 
 The **artwork is not mine and is not covered by it.** The Gen-5 sprites are Game
 Freak's; the hand-picked GIFs are fan art found online.
 [ATTRIBUTION.md](ATTRIBUTION.md) names what came from where, and anything will
-be removed on request — sprites are read by path, so it is a one-line change.
+be removed on request. Sprites are read by path, so it is a one-line change.
 
 Pokémon is a trademark of Nintendo. This is a personal tool, unaffiliated with
 anyone, and nothing here is sold.
@@ -401,9 +402,9 @@ anyone, and nothing here is sold.
 
 Issues and pull requests welcome, particularly:
 
-- **A sprite that reads better than one in the roster.** Bring the numbers —
-  `docs/design.md` says how they are measured, and the bar is scale ≤ 1.8x with
-  ≥ 24 frames at the size the pane draws.
+- **A sprite that reads better than one in the roster.** Bring the numbers.
+  `docs/design.md` says how to measure them. The bar is scale ≤ 1.8x with ≥ 24
+  frames at the size the pane draws.
 - **A Linux path.** Everything but the pane-opening is portable Node; it needs a
   way to open a split that is not AppleScript.
 
