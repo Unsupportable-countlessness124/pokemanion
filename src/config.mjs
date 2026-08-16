@@ -161,15 +161,19 @@ export const DEFAULTS = {
   autoFit: false,
   windowRows: 3,
 
-  // 38 rather than 34 because of one line of text. The dex card draws beside the
-  // sprite, and Ash's ends with `Goal : Become a "Pokemon Master"` — 32 columns,
-  // against the 28 left once a 5-column sprite and its gap had taken theirs.
-  // Four columns short wraps onto the next row and lands on the sprite, and the
-  // card is erased by overwriting its own width, so the wrapped remainder would
-  // not be cleaned up either.
+  // Only used by `windowMode: 'window'`, and as a fallback when there is no
+  // terminal to ask. A split has no width of its own — it spans the terminal —
+  // so in the mode almost everyone runs, this number does nothing.
   //
-  // Widening is the fix that keeps the wording. It applies to every pane rather
-  // than only Ash's, which is the cost.
+  // 38 rather than 34 because of one line of text, in that narrow mode: the dex
+  // card draws beside the sprite, and Ash's ends with `Goal : Become a "Pokemon
+  // Master"` — 32 columns against the 28 that a 5-column sprite and its gap left.
+  // Four columns short wraps onto the next row, onto the sprite, and the card is
+  // erased by overwriting its own width, so the remainder would stay after the
+  // card had gone.
+  //
+  // I widened this believing it was the width of the pane you actually see. It
+  // is not, and in a split Ash's card always had the room.
   windowCols: 38,
 
   // Whether the status line draws the sprite at all. Off leaves it as plain

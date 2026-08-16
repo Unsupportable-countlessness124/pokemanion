@@ -96,13 +96,15 @@ const { detail, paneCard } = await import('./dex.mjs')
 check('a resident who is not a Pokemon is still a lookup', exactMatch('ash') === 'ash')
 check('and has a description rather than an empty fact table', detail(entry('ash'), false).includes('Pallet Town'))
 check('and never rolls on the dice', !Array.from({ length: 50 }, pickRandom).includes('ash'))
-// Measured against the pane it is drawn in rather than a number typed here:
-// the card sits beside the sprite, so what it gets is the pane minus the widest
-// resident sprite and the gap. This is the check that would have caught Ash's
-// Goal line wrapping onto the sprite.
-// The card starts at `sprite.cols + CARD_GAP` and runs to the edge. Ash renders
-// 5 columns wide at pane height, measured rather than guessed — and his card is
-// only ever drawn beside his own sprite, so that is the width that matters.
+// Ash's card, against the narrowest pane anyone can have.
+//
+// `windowCols` is the width of a `windowMode: 'window'` pane — a separate window
+// rather than a split. A split spans the terminal and has room to spare, so this
+// is the worst case rather than the usual one, which is what makes it worth
+// checking: a card that fits here fits everywhere.
+//
+// The card starts at `sprite.cols + CARD_GAP` and runs to the edge, and Ash
+// renders 5 columns wide at pane height.
 const { DEFAULTS: paneDefaults } = await import('./config.mjs')
 const CARD_GAP = 2
 const ASH_COLS = 5

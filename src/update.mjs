@@ -169,28 +169,6 @@ export const cornerText = (current, latest, width, root = ROOT) => {
   return forms.find((form) => form.length <= width) ?? `v${current}`
 }
 
-// The same thing the message says, folded to fit beside a sprite.
-//
-// Claude Code prints "Update available! Run: brew upgrade ..." across a whole
-// terminal. The pane has 38 columns and the sprite takes the first several, so
-// the command goes onto its own lines rather than onto one.
-export const updateLines = (latest, width, root = ROOT) => {
-  const words = updateCommand(root, { short: true }).split(' ')
-  const lines = []
-  let line = ''
-
-  for (const word of words) {
-    if (line && line.length + 1 + word.length > width) {
-      lines.push(line)
-      line = word
-    } else line = line ? `${line} ${word}` : word
-  }
-
-  if (line) lines.push(line)
-
-  return [`v${latest} available`, ...lines]
-}
-
 export const notice = ({ current, latest, command }, root = ROOT) =>
   `pokemanion v${latest} is out — you have v${current}\n\n  ${command}\n` +
   `${isPluginRoot(root) ? '  then restart the agent\n' : ''}`
