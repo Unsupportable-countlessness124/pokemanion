@@ -207,7 +207,7 @@ At launch, from your terminal:
 ```sh
 claude --pikachu             # a particular one
 claude --flygon              # any of the 1256, fetched on first use
-claude --random              # be handed one
+codex --random               # either agent, same flags
 claude --resume --charizard  # combines with everything else
 ```
 
@@ -271,12 +271,13 @@ and no trace is left.
 
 ## Updating
 
-Each route updates with one command, and pokemanion tells you when there is one
-to run — it checks GitHub once a day:
+pokemanion tells you when there is a newer version — it checks GitHub once a
+day — and each route has its own command:
 
 ```
 /plugin update pokemanion@pokemanion         # plugin, Claude Code
-codex plugin marketplace upgrade             # plugin, Codex
+codex plugin marketplace upgrade &&          # plugin, Codex
+  codex plugin add pokemanion@pokemanion
 cd pokemanion && git pull && npm run setup   # from source
 ```
 
