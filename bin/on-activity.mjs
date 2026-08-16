@@ -260,42 +260,6 @@ try {
     const { available, ensure, knownCount } = await import('../src/roster.mjs')
     const { speciesFileFor } = await import('../src/companion.mjs')
 
-    // Mid-flow answers: a path where a path was asked for, a range where a range
-    // was. Anything else falls through to the model with nothing done to it, so
-    // an unfinished flow can never eat a message meant for the agent.
-    {
-      const wizard = await import('../src/wizard.mjs')
-
-      if (wizard.inProgress(session)) {
-        const reply = wizard.answer(session, payload.prompt)
-
-        if (typeof reply === 'string') {
-          process.stderr.write(reply)
-          process.exit(2)
-        }
-
-        if (reply && reply.run) {
-          const { spawnSync: build } = await import('node:child_process')
-          const parts = wizard.command(reply.run)
-          const done = build(parts[0], parts.slice(1), { cwd: wizard.ROOT_DIR, encoding: 'utf8' })
-
-          wizard.stop(session)
-
-          // npm's own two lines of preamble say nothing anyone needs.
-          const said = (done.stdout || done.stderr || '')
-            .split('\n')
-            .filter((line) => !line.startsWith('>') && line.trim() !== '')
-            .join('\n')
-
-          process.stderr.write(
-            `${wizard.asTyped(parts)}\n\n${said}\n` +
-              (done.status === 0 ? `\nopen a new session to see ${reply.run.name}\n` : ''),
-          )
-          process.exit(2)
-        }
-      }
-    }
-
     const asked = parse(payload.prompt)
 
     if (asked) {
@@ -310,22 +274,6 @@ try {
 
       // `--dex` answers and changes nothing. It is still blocked, because the
       // point is to look something up without spending a turn on it.
-      // Adding a character, one question per prompt.
-      if (asked.kind === 'add' || asked.kind === 'add-cancel') {
-        const wizard = await import('../src/wizard.mjs')
-
-        if (asked.kind === 'add-cancel') {
-          const running = wizard.inProgress(session)
-
-          wizard.stop(session)
-          process.stderr.write(running ? `stopped adding ${running.name}\n` : 'nothing to stop\n')
-          process.exit(2)
-        }
-
-        process.stderr.write(wizard.begin(session, asked.name))
-        process.exit(2)
-      }
-
       // What the pane's corner cannot fit.
       if (asked.kind === 'update') {
         const { available, installedVersion, updateCommand } = await import('../src/update.mjs')

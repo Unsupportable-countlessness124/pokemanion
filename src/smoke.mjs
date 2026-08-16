@@ -443,56 +443,6 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   )
 }
 
-// Adding a character from inside a session, and the one thing that flow must
-// never do: eat a prompt meant for the agent.
-//
-// It keeps state between prompts, so every message you send while it is waiting
-// passes through it. It answers only what plausibly answers its question — a
-// file where it asked for a file, a range where it asked for a range — and any
-// other prompt reaches the model untouched, with the question still waiting.
-{
-  const { begin, answer, stop, inProgress, command, asTyped } = await import('./wizard.mjs')
-  const session = 'smoke-wizard-0001'
-
-  stop(session)
-
-  check('it refuses a name already taken', begin(session, 'pikachu').includes('already a resident'))
-  check('and asks for the first file', begin(session, 'somebodynew').includes('resting'))
-
-  check('a question mid-flow is not an answer', answer(session, 'why is the sprite frozen?') === null)
-  check('nor is a sentence that merely mentions a gif', answer(session, 'should I use a gif or a png here?') === null)
-  check('and the flow is still waiting afterwards', inProgress(session)?.step === 'resting')
-
-  check('a file that is not there says so', String(answer(session, '/no/such/file.gif')).includes('no such file'))
-
-  const real = join(ROOT, 'assets', '3-standing.gif')
-
-  check('a real file moves it on', String(answer(session, real)).includes('working'))
-  check('and the second one asks about frames', String(answer(session, real)).includes('frames'))
-
-  const ran = answer(session, 'all') && answer(session, 'all')
-
-  check('two ranges finish it', Boolean(ran && ran.run), JSON.stringify(ran).slice(0, 60))
-
-  // Paths with spaces in them are the normal case for downloaded sprites.
-  const quoted = asTyped(command({ name: 'x', resting: '/a b/c.gif', working: '/d/e.gif' }))
-
-  check('the command it prints can be pasted', quoted.includes('"/a b/c.gif"'), quoted)
-
-  stop(session)
-
-  check('cancelling leaves nothing behind', inProgress(session) === null)
-
-  // An abandoned flow is not a paused one. Without this it waits forever, and
-  // the next thing pasted into that session that happens to end in .gif is read
-  // as an answer to a question asked days ago.
-  begin(session, 'somebodynew')
-
-  check('a flow left for an hour is forgotten', inProgress(session, Date.now() + 3600e3) === null)
-
-  stop(session)
-}
-
 // The GIF writer, which `add` leans on to save art it has changed.
 //
 // Round trip rather than byte comparison: what matters is that a decoder sees

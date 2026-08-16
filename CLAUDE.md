@@ -74,20 +74,6 @@ At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 
 ## If the user wants to add a character
 
-From inside a session, which asks for each piece in turn:
-
-    --pokemanion add brock
-    <path to the resting animation>
-    <path to the working animation>
-    0-8
-    12-17
-
-It only treats a prompt as an answer if it looks like one, so anything you say
-to the agent mid-flow reaches the agent and the question waits. `--pokemanion
-cancel` stops it.
-
-Or in one line, which is the same thing and what the flow runs:
-
 ```sh
 npm run add -- <name> <resting> <working> [--resting=0-8] [--working=12-17] [--halo]
 ```

@@ -39,12 +39,6 @@ export const parse = (prompt, pool = available()) => {
   // into a pointer.
   if (dex) return { kind: 'dex', query: (dex[1] ?? '').trim() }
 
-  // `--pokemanion add brock` and `--pokemanion cancel`, which take a word after
-  // them and so cannot go through the bare-flag match below.
-  const wizard = text.match(/^--pokemanion\s+(add|cancel)(?:\s+([a-z][a-z0-9-]*))?$/i)
-
-  if (wizard) return { kind: wizard[1].toLowerCase() === 'add' ? 'add' : 'add-cancel', name: wizard[2] ?? null }
-
   const match = text.match(/^--([a-z][a-z0-9.:-]*)$/i)
 
   if (!match) return null

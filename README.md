@@ -183,7 +183,6 @@ they never reach the model and cost no tokens:
 --dex random        be shown something
 
 --pokemanion        the version, and how to update it
---pokemanion add    add a character, a question at a time (source install)
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
