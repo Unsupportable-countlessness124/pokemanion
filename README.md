@@ -113,7 +113,7 @@ aside instead of doubling up, and tells you how to switch.
 **[Requirements](#requirements) · [Commands](#commands) · [Codex](#using-it-with-codex)
 · [Updating](#updating) · [Troubleshooting](#troubleshooting) · [Residents and
 guests](#residents-and-guests) · [Settings](#settings) ·
-[Working on it](docs/developing.md)**
+[Working on it](docs/developer.md)**
 
 <details>
 <summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
@@ -325,5 +325,5 @@ anyone, and nothing here is sold.
 ## Contributing
 
 Issues and pull requests welcome, particularly a sprite that reads better than
-one in the roster, or a Linux path. [docs/developing.md](docs/developing.md) is
+one in the roster, or a Linux path. [docs/developer.md](docs/developer.md) is
 where to start.

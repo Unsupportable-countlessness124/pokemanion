@@ -87,7 +87,7 @@ installed copies on old code. It sat at 1.1.0 for 31 commits.
 - `npm test` — the smoke suite, and the bar for a change being finished.
 - `npm run watch` — prints the working/waiting decision the pane is making, live.
 - Two docs carry the reasoning, and are worth reading before changing behaviour:
-  [docs/developing.md](docs/developing.md) to work on it,
+  [docs/developer.md](docs/developer.md) to work on it,
   [docs/design.md](docs/design.md) for why it is built this way, and
   [docs/known-issues.md](docs/known-issues.md) for what is deliberately wrong.
 - The pane is a long-lived process. Editing a file changes nothing about a pane
