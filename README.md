@@ -290,8 +290,9 @@ takes the place of the usual stats card:
 ######## pokemanion@pokemanion
 ```
 
-and afterwards the bottom-right corner keeps `v1.2.0 → 1.3.0`, or plain
-`v1.2.0` when you are current.
+It takes the stats card's turn rather than sharing the pane with it, so only one
+of the two is ever up. The bottom-right corner always shows plain `v1.2.0`,
+which is the answer to "what am I running" and nothing else.
 
 It never installs anything itself. `"updateCheck": false` turns the checks off,
 `"showVersion": false` hides the corner.

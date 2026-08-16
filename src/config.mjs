@@ -212,9 +212,10 @@ export const DEFAULTS = {
   // installed, so both routes are told the right one.
   updateCheck: true,
 
-  // The version in the pane's bottom-right corner, and an arrow to the newer one
-  // when there is a newer one. Hidden while the stats card is up, and wherever
-  // the working sprite is wide enough to reach that corner.
+  // The version in the pane's bottom-right corner, and nothing else — it said
+  // `v1.2.0 -> 1.3.0` when an update was waiting, which asks you to work out
+  // which number is which. Hidden while a card is up, and wherever the working
+  // sprite is wide enough to reach that corner. Also gates the update card.
   showVersion: true,
 }
 

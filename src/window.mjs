@@ -655,11 +655,9 @@ const drawCard = (sprite) => {
 //
 // Re-read on a timer rather than per frame. The pane draws several times a
 // second and this is two small files.
-const VERSION_EVERY = 30_000
 const ourVersion = installedVersion()
 
 let versionText = null
-let versionRead = 0
 let versionDrawn = 0
 
 const drawVersion = (sprite) => {
@@ -674,21 +672,12 @@ const drawVersion = (sprite) => {
     return
   }
 
-  const now = Date.now()
-
-  if (now - versionRead > VERSION_EVERY) {
-    versionRead = now
-
-    try {
-      const latest = updateAvailable()
-
-      versionText = latest ? `v${ourVersion} \u2192 ${latest}` : `v${ourVersion}`
-    } catch {
-      versionText = `v${ourVersion}`
-    }
-  }
-
-  if (!versionText) return
+  // Only ever which version this is. It said `v1.2.0 -> 1.3.0` when an update was
+  // waiting, which asks you to work out which number is which — and left the
+  // corner answering two questions in the space of one. The update has a card of
+  // its own when the session opens, and a message in the conversation. This
+  // stays the answer to "what am I running".
+  versionText = `v${ourVersion}`
 
   const cols = process.stdout.columns || config.windowCols || 0
   const rows = process.stdout.rows || 0
