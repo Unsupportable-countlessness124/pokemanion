@@ -50,7 +50,7 @@ is happening.
 </tr>
 </table>
 
-Fourteen hand-tuned residents ship with it. **1242 more** can be summoned by
+Fifteen hand-tuned residents ship with it. **1242 more** can be summoned by
 name and are fetched on the spot.
 
 <img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
@@ -116,7 +116,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 [Working on it](docs/developer.md)**
 
 <details>
-<summary><b>All fourteen residents</b> — resting on the left, working on the right</summary>
+<summary><b>All fifteen residents</b> — resting on the left, working on the right</summary>
 
 <br>
 
@@ -127,6 +127,7 @@ guests](#residents-and-guests) · [Settings](#settings) ·
 | **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" width="71" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" width="94" alt="pikachu working"> |
 | **ash**<br><sub>own animation</sub> | <img src="assets/27-ash-standing.gif" width="52" alt="ash resting"> | <img src="assets/28-ash-pikachu-running.gif" width="210" alt="ash working"> |
 | **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" width="68" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" width="68" alt="charmander working"> |
+| **brock**<br><sub>own animation</sub> | <img src="assets/32-brock-standing.gif" width="41" alt="brock resting"> | <img src="assets/33-brock-walking.gif" width="42" alt="brock working"> |
 | **squirtle**<br><sub>its shiny</sub> | <img src="assets/pokemon/squirtle/idle.gif" width="64" alt="squirtle resting"> | <img src="assets/pokemon/squirtle/busy-shiny.gif" width="64" alt="squirtle working"> |
 | **bulbasaur**<br><sub>its shiny</sub> | <img src="assets/pokemon/bulbasaur/idle.gif" width="81" alt="bulbasaur resting"> | <img src="assets/pokemon/bulbasaur/busy-shiny.gif" width="81" alt="bulbasaur working"> |
 | **eevee**<br><sub>its shiny</sub> | <img src="assets/pokemon/eevee/idle.gif" width="69" alt="eevee resting"> | <img src="assets/pokemon/eevee/busy-shiny.gif" width="69" alt="eevee working"> |
@@ -196,7 +197,7 @@ At launch, from your terminal:
 
 ```sh
 claude --pikachu             # a particular one
-claude --flygon              # any of the 1256, fetched on first use
+claude --flygon              # any of the 1257, fetched on first use
 codex --random               # either agent, same flags
 claude --resume --charizard  # combines with everything else
 ```
@@ -275,7 +276,7 @@ Pressing escape is the hard case, because no hook fires for it.
 
 ## Residents and guests
 
-**Residents** are the 14 in `src/roster.mjs`: hand-tuned, always on disk,
+**Residents** are the 15 in `src/roster.mjs`: hand-tuned, always on disk,
 pre-rendered so a session starts instantly, and the only ones the rotation hands
 out.
 

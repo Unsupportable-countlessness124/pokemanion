@@ -85,8 +85,10 @@ unlisted rather than silently going unnamed.
 | `29-squirtle-standing.png` | kept, not currently used |
 | `30-squirtle-watergun.gif` | kept, not currently used |
 | `31-squirtle-shades.gif` | kept, not currently used |
+| `32-brock-standing.gif` | brock resting |
+| `33-brock-walking.gif` | brock working |
 
-21 files.
+23 files.
 
 <!-- /files -->
 

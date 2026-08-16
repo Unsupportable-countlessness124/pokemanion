@@ -117,6 +117,37 @@ export const ROSTER = [
     },
   },
   { name: 'charmander' },
+  // The second trainer, and the first sprite here that came with its own walk
+  // cycles rather than needing them invented.
+  //
+  // The source is one GIF of 36 frames: a small overworld Brock walking in four
+  // directions. Frames 0-8 face you, 12-17 are side on, and the rest walk away.
+  // Front while it waits, side on while it works — the same division Ash has,
+  // out of one file, so the two halves cannot disagree about anything.
+  //
+  // Keyed on saturation rather than on brightness. It is a smoothed upscale, so
+  // the figure carries a soft grey halo that no white test could take off
+  // without eating his skin as well; everything actually drawn has colour in it
+  // and the halo has none, which separates them cleanly.
+  {
+    name: 'brock',
+    idle: 'assets/32-brock-standing.gif',
+    busy: 'assets/33-brock-walking.gif',
+    busySpeed: 1,
+    card: {
+      title: 'Brock',
+      blurb:
+        'The Rock-type Gym Leader of Pewter City, who handed the gym to his father and ' +
+        'left to travel with Ash as the group\'s cook, nurse and voice of reason. He ' +
+        'wants to become the world\'s best Pokémon Breeder.',
+      facts: [
+        ['from', 'Pewter City'],
+        ['gym', 'Rock type'],
+        ['goal', 'Pokémon Breeder'],
+      ],
+      pane: ['Brock', 'Pewter City Gym', 'Type : Rock', 'Goal : Pokemon Breeder'],
+    },
+  },
   { name: 'squirtle' },
   { name: 'bulbasaur' },
   { name: 'eevee' },

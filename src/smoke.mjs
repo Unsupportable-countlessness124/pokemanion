@@ -110,11 +110,22 @@ const CARD_GAP = 2
 const ASH_COLS = 5
 const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
 
-check(
-  'his pane card fits the pane it is drawn in',
-  paneCard(entry('ash')).every((line) => line.length <= cardWidth),
-  `${cardWidth} cols available, longest line ${Math.max(...paneCard(entry('ash')).map((l) => l.length))}`,
-)
+// Every card, not only Ash's. There are two now, and a card that overflows
+// wraps onto the sprite and stays there — the pane erases by overwriting its
+// own width, so the remainder outlives the card.
+{
+  const { ROSTER: withCards } = await import('./roster.mjs')
+  const tooWide = withCards
+    .filter((row) => row.card)
+    .flatMap((row) => paneCard(entry(row.name)).map((line) => ({ who: row.name, line })))
+    .filter(({ line }) => line.length > cardWidth)
+
+  check(
+    'every pane card fits the pane it is drawn in',
+    tooWide.length === 0,
+    `${cardWidth} cols; too wide: ${tooWide.map((t) => `${t.who} "${t.line}"`).join(', ')}`,
+  )
+}
 
 // A setting the README mentions in passing but never lists.
 //
