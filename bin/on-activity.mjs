@@ -4,7 +4,7 @@
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { STATE_DIR, clearState, loadConfig, readState, writeState } from '../src/config.mjs'
+import { ROOT, STATE_DIR, clearState, loadConfig, readState, writeState } from '../src/config.mjs'
 import { closeWindow, openWindow } from '../src/companion.mjs'
 
 const WORKING = new Set(['UserPromptSubmit', 'PreToolUse', 'PostToolUse'])
@@ -72,6 +72,50 @@ try {
   }
 
   const event = payload?.hook_event_name
+
+  // Two installs, one pane.
+  //
+  // Installing the plugin when a clone is already wired up used to give you two
+  // Pokemon beside one session: both sets of hooks fire, each with its own state
+  // directory, neither aware of the other. It reads as a bug in the pane rather
+  // than as having installed the same thing twice.
+  //
+  // The plugin is the one that stands down, because the clone is the deliberate
+  // install — someone cloned it and ran setup — and it owns the shell wrapper.
+  // Nothing is uninstalled and nothing is refused: the plugin stays listed and
+  // enabled, it simply does not act, and says so once. Remove the clone's hooks
+  // and it takes over on the next session.
+  //
+  // Checked live rather than recorded, so removing one is noticed immediately.
+  {
+    const { isPluginRoot } = await import('../src/shell.mjs')
+
+    if (isPluginRoot()) {
+      const { otherInstalls } = await import('../src/agents.mjs')
+      const others = otherInstalls(ROOT)
+
+      if (others.length > 0) {
+        if (event === 'UserPromptSubmit' && !existsSync(join(STATE_DIR, 'deferred'))) {
+          try {
+            mkdirSync(STATE_DIR, { recursive: true })
+            writeFileSync(join(STATE_DIR, 'deferred'), others.join('\n'))
+          } catch {}
+
+          process.stderr.write(
+            `pokemanion is already installed at ${others[0]}\n\n` +
+              'The plugin is staying out of the way, so you get one Pokemon rather\n' +
+              'than two. Nothing to fix — keep whichever you prefer:\n\n' +
+              '  keep the clone   /plugin uninstall pokemanion@pokemanion\n' +
+              `  keep the plugin  cd ${others[0]} && npm run uninstall-statusline\n\n` +
+              'Shown once.\n',
+          )
+          process.exit(2)
+        }
+
+        process.exit(0)
+      }
+    }
+  }
 
   // Arm the hello on the very first hook of any kind.
   //

@@ -108,6 +108,10 @@ ship with it. Three things are left:
 - **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
   --pikachu`.
 
+Already installed it from source? Install the plugin as well and it will notice,
+stand aside and tell you, so you get one Pokémon rather than two. Keep whichever
+you prefer.
+
 ---
 
 **[Requirements](#requirements) · [Commands](#commands) · [From source](#install-from-source) · [Troubleshooting](#troubleshooting) · [Residents and

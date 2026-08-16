@@ -141,6 +141,66 @@ check(
   check('the counts in the docs are the real ones', wrong.length === 0, `${guests} guests, ${summonable} total; found ${wrong.join(', ')}`)
 }
 
+// Two installs of this project, one pane.
+//
+// A clone registers its hooks in the agent's config and a plugin registers its
+// own, neither aware of the other, so installing both put two Pokemon beside
+// one session. The plugin stands down when it finds another install — which
+// rests entirely on being able to pick the other install's path out of two
+// different config shapes.
+{
+  const { mkdtempSync: shopTemp, mkdirSync: shopDir, writeFileSync: shopPut, rmSync: shopDrop } = await import('node:fs')
+  const { spawnSync: shopRun } = await import('node:child_process')
+  const { tmpdir: shopRoot } = await import('node:os')
+
+  const home = shopTemp(join(shopRoot(), 'pokemanion-dual-'))
+
+  shopDir(join(home, '.claude'), { recursive: true })
+  shopDir(join(home, '.codex'), { recursive: true })
+
+  // Claude's shape: hooks buried in a settings file holding much else besides.
+  shopPut(
+    join(home, '.claude', 'settings.json'),
+    JSON.stringify({
+      model: 'something-else',
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: '"/Users/someone/pokemanion/bin/run.sh" on-activity.mjs' }] }] },
+    }),
+  )
+
+  // Codex's shape: a file that is nothing but hooks.
+  shopPut(
+    join(home, '.codex', 'hooks.json'),
+    JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: 'command', command: '"/opt/elsewhere/pokemanion/bin/run.sh" on-activity.mjs' }] }] } }),
+  )
+
+  const ask = (ours) =>
+    JSON.parse(
+      shopRun(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          `const { otherInstalls } = await import(${JSON.stringify(join(ROOT, 'src', 'agents.mjs'))}); console.log(JSON.stringify(otherInstalls(${JSON.stringify(ours)})))`,
+        ],
+        { encoding: 'utf8', env: { ...process.env, HOME: home } },
+      ).stdout || '[]',
+    )
+
+  const seen = ask('/Users/me/somewhere-else')
+
+  check(
+    'another install is found in either agent config shape',
+    seen.includes('/Users/someone/pokemanion') && seen.includes('/opt/elsewhere/pokemanion'),
+    seen.join(' '),
+  )
+
+  // The point of the check is finding *other* installs. One that counted itself
+  // would stand down against its own hooks and never run at all.
+  check('and the one asking is not one of them', !ask('/Users/someone/pokemanion').includes('/Users/someone/pokemanion'))
+
+  shopDrop(home, { recursive: true, force: true })
+}
+
 // Both marketplace manifests point at the plugin in a way each agent accepts.
 //
 // Codex's said `git-subdir`, which it parses without complaint and then cannot

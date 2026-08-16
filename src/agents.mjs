@@ -14,7 +14,7 @@
 // which would have produced hooks pointing at a program that is not there.
 
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
@@ -56,6 +56,37 @@ export const isInstalled = (agent) => onPath(agent.name)
 export const isStale = (agent) => !isInstalled(agent) && existsSync(agent.dir())
 
 export const detected = () => AGENTS.filter(isInstalled)
+
+// Other copies of this project already wired into an agent.
+//
+// A clone registers its hooks in the agent's own config; a plugin registers its
+// own separately. Install both and both fire, each with its own state
+// directory, and you get two Pokemon beside one session — which looks like a
+// bug in the pane rather than like having installed the same thing twice.
+//
+// Read live rather than cached, so removing one is noticed the next time a hook
+// runs rather than needing anything to be re-run.
+export const otherInstalls = (ours) => {
+  const roots = new Set()
+
+  for (const agent of AGENTS) {
+    let text = ''
+
+    try {
+      text = readFileSync(agent.file(), 'utf8')
+    } catch {
+      continue
+    }
+
+    // The command is a quoted path to bin/run.sh. Whatever sits before it is a
+    // root, and any root that is not this one is another install.
+    for (const [, root] of text.matchAll(/"?([^"\s]+)\/bin\/run\.sh"?/g)) {
+      if (root !== ours) roots.add(root)
+    }
+  }
+
+  return [...roots]
+}
 
 // `--claude` / `--codex` force a choice. Without one, whatever is installed.
 export const chosen = (argv = process.argv) => {
