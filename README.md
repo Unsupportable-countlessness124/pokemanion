@@ -171,7 +171,7 @@ they never reach the model and cost no tokens:
 
 ```
 --squirtle          switch this pane, live
---random            roll one
+--pokerandom        roll one
 --pokemon           list the residents
 
 --dex               what you have, and how many exist
@@ -179,7 +179,7 @@ they never reach the model and cost no tokens:
 --dex ghost         by type
 --dex 149           by number
 --dex current       the one you're looking at — answers in the pane
---dex random        be shown something
+--dex pokerandom    be shown something
 
 --pokemanion        the version, and how to update it
 --use-plugin        switch to the plugin, if you have both installed
@@ -197,7 +197,7 @@ At launch, from your terminal:
 ```sh
 claude --pikachu             # a particular one
 claude --flygon              # any of the 1256, fetched on first use
-codex --random               # either agent, same flags
+codex --pokerandom           # either agent, same flags
 claude --resume --charizard  # combines with everything else
 ```
 

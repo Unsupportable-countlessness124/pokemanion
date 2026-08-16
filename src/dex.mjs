@@ -102,9 +102,9 @@ export const search = (query) => {
 
   if (!text) return []
 
-  // Safe as keywords: nothing is named "random" or "current", and neither is a
-  // type, so they cannot shadow a real search.
-  if (text === 'random') return [entry(pickRandom())]
+  // Safe as keywords: nothing is named "pokerandom" or "current", and neither is
+  // a type, so they cannot shadow a real search.
+  if (text === 'pokerandom') return [entry(pickRandom())]
 
   if (text === 'current') return currentlyOut().map(entry)
 
@@ -151,7 +151,7 @@ export const exactMatch = (query) => {
   const text = String(query ?? '').trim().toLowerCase()
 
   // Numbers, types and the dice are genuine searches, not names.
-  if (!text || text === 'random' || text === 'current' || /^\d+$/.test(text) || TYPES.has(text)) return null
+  if (!text || text === 'pokerandom' || text === 'current' || /^\d+$/.test(text) || TYPES.has(text)) return null
 
   // A trailing dash asks for the forms — `pikachu-` means Pikachu-Alola and the
   // rest, which is what the card itself suggests typing. Without this it is not
