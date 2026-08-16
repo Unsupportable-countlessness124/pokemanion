@@ -17,7 +17,7 @@ import { decodeGif } from './gif.mjs'
 import { decodeSprite } from './png.mjs'
 import { prepare } from './prepare.mjs'
 import { sharedBounds } from './render.mjs'
-import { ROSTER, busyFile, idleFile, isFetched } from './roster.mjs'
+import { ROSTER, busyFile, idleFile, isFetched, knownCount } from './roster.mjs'
 
 // Width, not height — and that is not a style choice.
 //
@@ -125,4 +125,41 @@ const next = text.slice(0, from) + table + text.slice(to + END.length)
 
 writeFileSync(readme, next)
 
-console.log(`\n  ${present.length} residents in the README gallery${next === text ? ' (unchanged)' : ''}\n`)
+console.log(`\n  ${present.length} residents in the README gallery${next === text ? ' (unchanged)' : ''}`)
+
+// And the counts, which are prose rather than a table.
+//
+// They were maintained by hand and drifted every time: 1238 guests when there
+// were 1242, "14 ship with it" when fifteen did, a cache figure out by a factor
+// of three. Adding a character should not mean remembering six numbers across
+// two files, so they are written from the roster here — and the suite fails if
+// they are ever wrong.
+const residents = ROSTER.length
+const summonable = knownCount() + ROSTER.filter((entry) => entry.card).length
+const guests = summonable - residents
+
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+  'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty']
+const spelled = WORDS[residents] ?? String(residents)
+const Spelled = spelled[0].toUpperCase() + spelled.slice(1)
+const anyWord = WORDS.join('|')
+
+const counts = [
+  [new RegExp(`\\b(?:${anyWord}) hand-tuned residents`, 'gi'), `${Spelled} hand-tuned residents`],
+  [/\*\*\d+ more\*\*/g, `**${guests} more**`],
+  [new RegExp(`All (?:${anyWord}) residents`, 'gi'), `All ${spelled} residents`],
+  [/the \d+ in `src\/roster\.mjs`/g, `the ${residents} in \`src/roster.mjs\``],
+  [/the other \d+\./g, `the other ${guests}.`],
+  [/any of the \d+/g, `any of the ${summonable}`],
+  [/^\d+ ship with it, \d+ more/m, `${residents} ship with it, ${guests} more`],
+]
+
+for (const file of ['README.md', 'CLAUDE.md']) {
+  const path = `${ROOT}/${file}`
+  const before = readFileSync(path, 'utf8')
+  const after = counts.reduce((body, [pattern, replacement]) => body.replace(pattern, replacement), before)
+
+  if (after !== before) writeFileSync(path, after)
+}
+
+console.log(`  ${residents} residents, ${guests} guests, ${summonable} summonable — counts written\n`)

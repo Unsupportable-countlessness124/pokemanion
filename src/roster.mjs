@@ -106,6 +106,7 @@ export const ROSTER = [
         'Pokémon Master. Accompanied by his loyal partner Pikachu, he starred in the ' +
         'anime for 25 seasons before finally achieving his goal of becoming a world champion.',
       facts: [
+        ['species', 'Human'],
         ['from', 'Pallet Town'],
         ['partner', 'Pikachu'],
         ['goal', 'Become a "Pokémon Master"'],
@@ -141,6 +142,7 @@ export const ROSTER = [
         'left to travel with Ash as the group\'s cook, nurse and voice of reason. He ' +
         'wants to become the world\'s best Pokémon Breeder.',
       facts: [
+        ['species', 'Human'],
         ['from', 'Pewter City'],
         ['gym', 'Rock type'],
         ['goal', 'Pokémon Breeder'],
