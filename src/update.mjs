@@ -14,6 +14,7 @@
 
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { ROOT, STATE_DIR } from './config.mjs'
 import { isPluginRoot } from './shell.mjs'
@@ -91,11 +92,19 @@ export const versionAt = (root) => {
 
 // What to run, which depends on how it was installed — and telling a plugin user
 // to `git pull` is how a helpful message becomes a confusing one.
-export const updateCommand = (root = ROOT) => {
-  if (!isPluginRoot(root)) return `cd ${root} && git pull && npm run setup`
+export const updateCommand = (root = ROOT, { short = false } = {}) => {
+  const home = homedir()
+  const where = short && root.startsWith(home) ? `~${root.slice(home.length)}` : root
 
+  if (!isPluginRoot(root)) return `cd ${where} && git pull && npm run setup`
+
+  // Codex takes two steps, and the pane has room for one. It gets the first —
+  // the one that fetches — while the message, which has a whole chat window to
+  // itself, carries both. A pane is a status display, not documentation.
   return root.includes('.codex')
-    ? 'codex plugin marketplace upgrade && codex plugin add pokemanion@pokemanion'
+    ? short
+      ? 'codex plugin marketplace upgrade'
+      : 'codex plugin marketplace upgrade && codex plugin add pokemanion@pokemanion'
     : '/plugin update pokemanion@pokemanion'
 }
 
@@ -135,6 +144,28 @@ export const markAnnounced = (version) => {
 // happened to be, so a message built for one install could carry the other's
 // advice. Harmless in production, where they are always the same root — which is
 // exactly the kind of thing that is wrong for months without showing.
+// The same thing the message says, folded to fit beside a sprite.
+//
+// Claude Code prints "Update available! Run: brew upgrade ..." across a whole
+// terminal. The pane has 38 columns and the sprite takes the first several, so
+// the command goes onto its own lines rather than onto one.
+export const updateLines = (latest, width, root = ROOT) => {
+  const words = updateCommand(root, { short: true }).split(' ')
+  const lines = []
+  let line = ''
+
+  for (const word of words) {
+    if (line && line.length + 1 + word.length > width) {
+      lines.push(line)
+      line = word
+    } else line = line ? `${line} ${word}` : word
+  }
+
+  if (line) lines.push(line)
+
+  return [`${latest} available`, ...lines]
+}
+
 export const notice = ({ current, latest, command }, root = ROOT) =>
   `pokemanion ${latest} is out — you have ${current}\n\n  ${command}\n` +
   `${isPluginRoot(root) ? '  then restart the agent\n' : ''}`

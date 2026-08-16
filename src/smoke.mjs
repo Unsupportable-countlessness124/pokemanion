@@ -227,6 +227,26 @@ check(
     const { available } = await import('./update.mjs')
 
     check('the pane can ask whether an update exists without announcing it', available() === null || typeof available() === 'string')
+
+    // The pane version of the command, folded to the width beside the sprite.
+    // A line wider than the pane would run over the edge and wrap onto the row
+    // below, on top of the sprite, and the pane erases by overwriting its own
+    // width — so the overflow would stay after the card had gone.
+    const { updateLines } = await import('./update.mjs')
+
+    for (const [route, root] of [
+      ['claude plugin', '/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'],
+      ['codex plugin', '/x/.codex/plugins/cache/pokemanion/pokemanion/1.2.0'],
+      ['source', ROOT],
+    ]) {
+      const lines = updateLines('1.3.0', 27, root)
+
+      check(
+        `the update card fits beside the sprite (${route})`,
+        lines.length <= 3 && lines.every((line) => line.length <= 27),
+        `${lines.length} lines, longest ${Math.max(...lines.map((l) => l.length))}`,
+      )
+    }
     check('and reads a version off another install', versionAt(ROOT) === JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version)
     check('and says nothing about one that is not there', versionAt(join(home, 'no-such-install')) === null)
   }

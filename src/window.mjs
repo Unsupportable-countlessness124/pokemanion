@@ -22,7 +22,7 @@ import { STATE_DIR, loadConfig, readState } from './config.mjs'
 import { MIN_DELAY, loadSprite } from './sprite.mjs'
 import { alignFor, busyFile, busySpeedFor, flipBusyFor, idleFile, touch, transitionFor } from './roster.mjs'
 import { entry as dexEntry, paneCard } from './dex.mjs'
-import { available as updateAvailable, installedVersion } from './update.mjs'
+import { available as updateAvailable, installedVersion, updateLines } from './update.mjs'
 
 const HIDE_CURSOR = '\x1b[?25l'
 const SHOW_CURSOR = '\x1b[?25h'
@@ -775,7 +775,26 @@ if (sessionArg === 'warm') {
 // The pane opening is an arrival too — the first thing it does is let the
 // Pokemon out, and say what it is.
 evolving = ballFrames()
-showCard(species)
+
+// An update, if there is one, in place of the usual arrival card — the pane is
+// already about to say something, and this is the more useful thing to say. The
+// stats card is what you get every other time.
+const updateNow = (() => {
+  try {
+    return config.showVersion === false ? null : updateAvailable()
+  } catch {
+    return null
+  }
+})()
+
+if (updateNow) {
+  const room = Math.max(12, (process.stdout.columns || config.windowCols || 38) - (idle.cols + CARD_GAP) + 1)
+
+  cardLines = updateLines(updateNow, room).slice(0, paneRows)
+  cardUntil = Date.now() + Math.max(config.cardMs ?? 8000, 12_000)
+} else {
+  showCard(species)
+}
 
 tick()
 
