@@ -1271,6 +1271,52 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
       if (hadNodePath !== null) writeFileSync(nodePath, hadNodePath)
     }
 
+    // Summoning something not yet downloaded must not go to the network.
+    //
+    // A hook is given five seconds. Fetching a guest takes three to five, and
+    // `--random` used to try five candidates in a row, which measured at
+    // fourteen. Claude Code kills a hook that overruns and discards its output,
+    // so `--kyogre` looked like a command that did nothing at all — twice —
+    // before working on the third attempt.
+    //
+    // The bound here is generous on purpose: it is not measuring speed, it is
+    // asking whether anything downloads. Synchronous fetching cannot come back
+    // in two seconds; the background version comes back in fifty milliseconds.
+    {
+      // A real name that is not on disk. Both halves matter: an invented one
+      // would be answered with "no such one" and prove nothing about the
+      // network, which is exactly what the first version of this test did.
+      const { isFetched: onDisk, isKnown: exists } = await import('./roster.mjs')
+      const cold = ['wishiwashi-school', 'necrozma-ultra', 'toxtricity-lowkey', 'sandslash-alola'].find(
+        (name) => exists(name) && !onDisk(name),
+      )
+
+      if (cold) {
+        const coldSession = 'smoke-cold-0001'
+        const began = Date.now()
+        const answered = run('bin/on-activity.mjs', {
+          input: JSON.stringify({ hook_event_name: 'UserPromptSubmit', session_id: coldSession, prompt: `--${cold}` }),
+        })
+        const took = Date.now() - began
+
+        check(`summoning an undownloaded guest does not wait for the network (${cold})`, took < 2000, `${took}ms`)
+        check('and answers rather than failing', answered.status === 2 && /fetching|it is/.test(answered.stderr), answered.stderr.trim().slice(0, 50))
+
+        // Written even though the files are not there yet. The pane ignores a
+        // claim it cannot draw and picks it up when the download rewrites it.
+        let claimed = ''
+
+        try {
+          claimed = read(join(STATE_DIR, `window-${coldSession}.species`), 'utf8').trim()
+        } catch {}
+
+        check('and claims it immediately, for the pane to find later', claimed === cold, claimed)
+
+        rmSync(join(STATE_DIR, `window-${coldSession}.species`), { force: true })
+        rmSync(sessionStateFile(coldSession), { force: true })
+      }
+    }
+
     // Naming the one on screen is the same question as `--dex current`, and used
     // to be answered somewhere else entirely just because it was asked by name.
     // Naming a different one still belongs in the conversation — a card in the

@@ -257,7 +257,7 @@ try {
     }
 
     const { parse, describe } = await import('../src/switch.mjs')
-    const { available, ensure, knownCount } = await import('../src/roster.mjs')
+    const { available, ensure, isFetched, knownCount } = await import('../src/roster.mjs')
     const { speciesFileFor } = await import('../src/companion.mjs')
 
     const asked = parse(payload.prompt)
@@ -422,22 +422,21 @@ try {
       if (asked.kind === 'random') {
         const { pickRandom, entry } = await import('../src/dex.mjs')
 
-        for (let attempt = 0; attempt < 5 && asked.kind === 'random'; attempt++) {
-          const pick = pickRandom()
+        // Whatever it lands on, without going to the network to find out whether
+        // it can be had. The dice roll from names the sprite folder has, so a
+        // miss means a download that has not happened yet rather than a Pokemon
+        // that does not exist — and downloading is the background's job now.
+        //
+        // It used to try five times, fetching each candidate until one worked,
+        // which is how `--random` came to take fourteen seconds against a five
+        // second budget.
+        const pick = pickRandom()
+        const row = entry(pick)
 
-          if (ensure(pick)) {
-            const row = entry(pick)
-
-            asked.kind = 'switch'
-            asked.name = pick
-            asked.rolled = `${row.title} #${row.num || '?'} ${row.types}`
-          }
-        }
-
-        if (asked.kind === 'random') {
-          process.stderr.write('could not fetch a random one\n')
-          process.exit(2)
-        }
+        asked.kind = 'switch'
+        asked.name = pick
+        asked.guest = true
+        asked.rolled = `${row.title} #${row.num || '?'} ${row.types}`
       }
 
       // A guest has to be on disk before the claim names it, because the pane
@@ -445,8 +444,36 @@ try {
       // silently, which would read as the command doing nothing. This is the
       // one place a hook goes to the network, and only the first time a given
       // Pokemon is asked for.
-      if (asked.kind === 'switch' && asked.guest && !ensure(asked.name)) {
-        process.stderr.write(`could not fetch ${asked.name}\n`)
+      // A guest that is not on disk yet is fetched in the background, never here.
+      //
+      // Downloading one takes about three seconds and a hook is allowed five, so
+      // `--kyogre` spent its whole budget on the network and was killed with its
+      // output discarded — the command appearing to do nothing, twice, before
+      // working on the third try. The claim is written either way; the pane
+      // ignores it until the files exist and picks it up when src/fetch.mjs
+      // rewrites it.
+      if (asked.kind === 'switch' && asked.guest && !isFetched(asked.name)) {
+        const { spawn } = await import('node:child_process')
+        const { mkdirSync, writeFileSync } = await import('node:fs')
+        const { STATE_DIR } = await import('../src/config.mjs')
+        const { rememberSpecies } = await import('../src/assigned.mjs')
+
+        mkdirSync(STATE_DIR, { recursive: true })
+        writeFileSync(file, asked.name)
+        rememberSpecies(session, asked.name, asked.rolled ? 'rolled' : 'switched')
+
+        const child = spawn(process.execPath, [join(ROOT, 'src', 'fetch.mjs'), asked.name, file], {
+          detached: true,
+          stdio: 'ignore',
+        })
+
+        child.unref()
+
+        process.stderr.write(
+          asked.rolled
+            ? `rolled ${asked.rolled} — fetching it, back in a moment\n`
+            : `fetching ${asked.name} — it will arrive in a moment\n`,
+        )
         process.exit(2)
       }
 
