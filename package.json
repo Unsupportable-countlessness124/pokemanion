@@ -46,6 +46,7 @@
     "key": "node src/key.mjs",
     "crop": "node src/crop.mjs",
     "update-check": "node src/update.mjs",
-    "add": "node src/add.mjs"
+    "add": "node src/add.mjs",
+    "skill": "node src/skill.mjs"
   }
 }

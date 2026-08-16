@@ -231,6 +231,7 @@ Every file is backed up before the first write, and every one comes back out:
 | `~/.codex/hooks.json` | seven hooks | `npm run uninstall-statusline` |
 | `~/.zshrc` | the `claude()`/`codex()` wrapper | `npm run shell -- --remove` |
 | `~/.config/ghostty/config` | one resize keybind | `npm run ghostty -- --remove` |
+| `~/.claude/skills/` | a link to the add-a-character skill | `npm run skill -- --remove` |
 
 Only the agents you actually have are touched. Undo those, delete the folder,
 and no trace is left.

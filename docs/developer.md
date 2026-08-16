@@ -29,9 +29,17 @@ Then four things no script can do for you:
 
 ## Adding a character
 
-`skills/adding-a-character/SKILL.md` is the long version, written for an agent
-and shipped with the plugin. Ask Claude or Codex to add a character and it has
-the toolbox in front of it.
+`skills/adding-a-character/SKILL.md` is the long version, written for an agent.
+The plugin ships it to both agents; a clone links it in with `npm run setup`, or
+on its own:
+
+```sh
+npm run skill -- --install     # -> ~/.claude/skills, loaded next session
+npm run skill -- --remove
+```
+
+Then ask Claude or Codex to add a character and it has the toolbox in front of
+it, rather than being told about `npm run add` by you every time.
 
 ```sh
 npm run add -- brock ~/Downloads/front.gif ~/Downloads/side.gif

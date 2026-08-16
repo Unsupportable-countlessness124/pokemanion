@@ -465,6 +465,13 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   const missing = [...new Set(taught)].filter((name) => !scripts[name])
 
   check('and every command it teaches exists', missing.length === 0, missing.join(' '))
+
+  // A clone has the skill and no way to offer it, so setup links it into
+  // ~/.claude/skills. Miss that and the plugin's users get the toolbox while
+  // the person editing the project does not.
+  const setup = readFileSync(join(ROOT, 'src', 'setup.mjs'), 'utf8')
+
+  check('and a source install is offered it too', setup.includes('src/skill.mjs'))
 }
 
 // The GIF writer, which `add` leans on to save art it has changed.

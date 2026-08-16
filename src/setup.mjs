@@ -128,6 +128,9 @@ const steps = [
   // keystroke that collapses it is bound to nothing. That read as a layout bug
   // for anyone but the one machine where the keybind had been added by hand.
   ['setting the Ghostty resize keybind', ['src/ghostty.mjs', '--install'], 'so the pane is a strip, not half the window'],
+  // The plugin ships this to both agents; a clone has the same file and no way
+  // to offer it, so it is linked into ~/.claude/skills here.
+  ['teaching your agent to add characters', ['src/skill.mjs', '--install'], 'the skill the plugin ships'],
 ]
 
 let done = 0
