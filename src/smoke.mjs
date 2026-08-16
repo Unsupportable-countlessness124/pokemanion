@@ -232,20 +232,26 @@ check(
     // A line wider than the pane would run over the edge and wrap onto the row
     // below, on top of the sprite, and the pane erases by overwriting its own
     // width — so the overflow would stay after the card had gone.
-    const { updateLines } = await import('./update.mjs')
+    const { updateCommand: commandFor } = await import('./update.mjs')
 
+    // The corner is one line beside the sprite, and the widest working sprite —
+    // Charizard's twenty columns of fire — leaves sixteen. Anything longer would
+    // be silently hidden exactly when it mattered.
+    const CORNER_ROOM = 16
+
+    check(
+      'the update notice fits in the corner beside the widest sprite',
+      `${'1.3.0'} available`.length <= CORNER_ROOM,
+      `${'1.3.0 available'.length} of ${CORNER_ROOM}`,
+    )
+
+    // The command belongs to --update, which answers in the conversation.
     for (const [route, root] of [
       ['claude plugin', '/x/.claude/plugins/cache/pokemanion/pokemanion/1.2.0'],
       ['codex plugin', '/x/.codex/plugins/cache/pokemanion/pokemanion/1.2.0'],
       ['source', ROOT],
     ]) {
-      const lines = updateLines('1.3.0', 27, root)
-
-      check(
-        `the update card fits beside the sprite (${route})`,
-        lines.length <= 3 && lines.every((line) => line.length <= 27),
-        `${lines.length} lines, longest ${Math.max(...lines.map((l) => l.length))}`,
-      )
+      check(`there is an update command for ${route}`, commandFor(root).length > 0)
     }
     check('and reads a version off another install', versionAt(ROOT) === JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version)
     check('and says nothing about one that is not there', versionAt(join(home, 'no-such-install')) === null)
@@ -428,6 +434,7 @@ check('--pikachu switches', parse('--pikachu')?.kind === 'switch')
 // Only meaningful where two installs exist, and parsed here with everything else
 // so it is never mistaken for a Pokemon named "use-plugin".
 check('--use-plugin is its own command', parse('--use-plugin')?.kind === 'use-plugin')
+check('--update is its own command', parse('--update')?.kind === 'update')
 check('--random rolls', parse('--random')?.kind === 'random')
 check('--dex looks up', parse('--dex ghost')?.query === 'ghost')
 // The argument is taken exactly as typed — one spelling to remember, not one

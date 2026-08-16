@@ -186,6 +186,7 @@ never reach the model and cost no tokens:
 --dex current       the one you're looking at — answers in the pane
 --dex random        be shown something
 
+--update            the version, and how to update it
 --use-plugin        switch to the plugin, if you have both installed
 ```
 
@@ -281,18 +282,21 @@ codex plugin marketplace upgrade             # plugin, Codex
 cd pokemanion && git pull && npm run setup   # from source
 ```
 
-The pane says it too. When a session opens and there is a newer version, it
-takes the place of the usual stats card:
+The pane says it too, in its bottom-right corner — `v1.2.0` normally, and
+`1.3.0 available` while there is a newer one:
 
 ```
-######## 1.3.0 available
-######## /plugin update
-######## pokemanion@pokemanion
+┌──────────────────────────────────────┐
+│########                              │
+│########                              │
+│########               1.3.0 available│
+└──────────────────────────────────────┘
 ```
 
-It takes the stats card's turn rather than sharing the pane with it, so only one
-of the two is ever up. The bottom-right corner always shows plain `v1.2.0`,
-which is the answer to "what am I running" and nothing else.
+It sits there rather than taking a card, because the cards are spoken for: the
+stats on arrival, and `--dex` whenever you ask. Sixteen columns is enough to say
+a version exists and not enough to say what to type, so **`--update`** prints
+the command in the conversation.
 
 It never installs anything itself. `"updateCheck": false` turns the checks off,
 `"showVersion": false` hides the corner.

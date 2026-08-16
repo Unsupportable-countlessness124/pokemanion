@@ -22,7 +22,7 @@ import { STATE_DIR, loadConfig, readState } from './config.mjs'
 import { MIN_DELAY, loadSprite } from './sprite.mjs'
 import { alignFor, busyFile, busySpeedFor, flipBusyFor, idleFile, touch, transitionFor } from './roster.mjs'
 import { entry as dexEntry, paneCard } from './dex.mjs'
-import { available as updateAvailable, installedVersion, updateLines } from './update.mjs'
+import { available as updateAvailable, installedVersion } from './update.mjs'
 
 const HIDE_CURSOR = '\x1b[?25l'
 const SHOW_CURSOR = '\x1b[?25h'
@@ -655,29 +655,47 @@ const drawCard = (sprite) => {
 //
 // Re-read on a timer rather than per frame. The pane draws several times a
 // second and this is two small files.
+const VERSION_EVERY = 30_000
 const ourVersion = installedVersion()
 
 let versionText = null
+let versionRead = 0
 let versionDrawn = 0
 
 const drawVersion = (sprite) => {
   if (config.showVersion === false || !ourVersion) return
 
+  const now = Date.now()
+
   // Never on top of something that matters. The card can reach the bottom row,
   // and a wide working sprite — Charizard's fire is twenty columns — can reach
   // across to where this would sit.
-  if (Date.now() < cardUntil) {
+  if (now < cardUntil) {
     versionDrawn = 0
 
     return
   }
 
-  // Only ever which version this is. It said `v1.2.0 -> 1.3.0` when an update was
-  // waiting, which asks you to work out which number is which — and left the
-  // corner answering two questions in the space of one. The update has a card of
-  // its own when the session opens, and a message in the conversation. This
-  // stays the answer to "what am I running".
-  versionText = `v${ourVersion}`
+  // What Claude Code puts on its own line, in the space this pane has for it.
+  //
+  // Claude has a whole terminal width and prints the command; the widest working
+  // sprite leaves sixteen columns here, which is enough to say a version exists
+  // and not enough to say what to type. So the corner carries the fact and
+  // `--update` prints the command in the conversation, where there is room.
+  //
+  // It sits in the corner rather than taking a card, because the cards are
+  // spoken for: the stats card on arrival, and `--dex` whenever you ask.
+  if (now - versionRead > VERSION_EVERY) {
+    versionRead = now
+
+    try {
+      const latest = updateAvailable()
+
+      versionText = latest ? `${latest} available` : `v${ourVersion}`
+    } catch {
+      versionText = `v${ourVersion}`
+    }
+  }
 
   const cols = process.stdout.columns || config.windowCols || 0
   const rows = process.stdout.rows || 0
@@ -765,25 +783,7 @@ if (sessionArg === 'warm') {
 // Pokemon out, and say what it is.
 evolving = ballFrames()
 
-// An update, if there is one, in place of the usual arrival card — the pane is
-// already about to say something, and this is the more useful thing to say. The
-// stats card is what you get every other time.
-const updateNow = (() => {
-  try {
-    return config.showVersion === false ? null : updateAvailable()
-  } catch {
-    return null
-  }
-})()
-
-if (updateNow) {
-  const room = Math.max(12, (process.stdout.columns || config.windowCols || 38) - (idle.cols + CARD_GAP) + 1)
-
-  cardLines = updateLines(updateNow, room).slice(0, paneRows)
-  cardUntil = Date.now() + Math.max(config.cardMs ?? 8000, 12_000)
-} else {
-  showCard(species)
-}
+showCard(species)
 
 tick()
 

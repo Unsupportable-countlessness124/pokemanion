@@ -52,6 +52,10 @@ export const parse = (prompt, pool = available()) => {
   // Pokemon named "use-plugin" and sent looking for a sprite.
   if (word === 'use-plugin') return { kind: 'use-plugin' }
 
+  // The pane's corner can say a version is out but not what to type — sixteen
+  // columns beside the widest sprite. This is where the command goes.
+  if (word === 'update') return { kind: 'update' }
+
   // Resolved to an actual name by the caller, not here, so that parsing stays
   // a pure reading of the text and the dice are rolled once.
   if (word === 'random') return { kind: 'random' }

@@ -274,6 +274,19 @@ try {
 
       // `--dex` answers and changes nothing. It is still blocked, because the
       // point is to look something up without spending a turn on it.
+      // What the pane's corner cannot fit.
+      if (asked.kind === 'update') {
+        const { available, installedVersion, updateCommand } = await import('../src/update.mjs')
+        const latest = available()
+
+        process.stderr.write(
+          latest
+            ? `pokemanion ${latest} is out — you have ${installedVersion()}\n\n  ${updateCommand()}\n`
+            : `pokemanion ${installedVersion()} — nothing newer that I know of\n`,
+        )
+        process.exit(2)
+      }
+
       if (asked.kind === 'dex') {
         const { render, search, detail, entry, exactMatch, paneCard, all } = await import('../src/dex.mjs')
         const { fetchedGuests } = await import('../src/roster.mjs')
