@@ -23,9 +23,30 @@ import { isResident } from './roster.mjs'
 
 const fileFor = (session) => join(STATE_DIR, `adding-${String(session).replace(/[^\w.-]/g, '')}.json`)
 
-export const inProgress = (session) => {
+export const stop = (session) => {
   try {
-    return JSON.parse(readFileSync(fileFor(session), 'utf8'))
+    rmSync(fileFor(session), { force: true })
+  } catch {}
+}
+
+// Half an hour, after which the flow has been abandoned rather than paused.
+//
+// Without this it waits forever. Start an add, get distracted, and a week later
+// the next thing you paste that ends in .gif is read as an answer to a question
+// you have long forgotten asking.
+const FORGET_AFTER = 30 * 60 * 1000
+
+export const inProgress = (session, now = Date.now()) => {
+  try {
+    const state = JSON.parse(readFileSync(fileFor(session), 'utf8'))
+
+    if (now - (state.at ?? 0) > FORGET_AFTER) {
+      stop(session)
+
+      return null
+    }
+
+    return state
   } catch {
     return null
   }
@@ -33,13 +54,7 @@ export const inProgress = (session) => {
 
 const save = (session, state) => {
   mkdirSync(STATE_DIR, { recursive: true })
-  writeFileSync(fileFor(session), JSON.stringify(state))
-}
-
-export const stop = (session) => {
-  try {
-    rmSync(fileFor(session), { force: true })
-  } catch {}
+  writeFileSync(fileFor(session), JSON.stringify({ ...state, at: Date.now() }))
 }
 
 const expand = (text) => (text.startsWith('~') ? join(homedir(), text.slice(1)) : text)

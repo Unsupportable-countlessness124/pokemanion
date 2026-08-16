@@ -482,6 +482,15 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   stop(session)
 
   check('cancelling leaves nothing behind', inProgress(session) === null)
+
+  // An abandoned flow is not a paused one. Without this it waits forever, and
+  // the next thing pasted into that session that happens to end in .gif is read
+  // as an answer to a question asked days ago.
+  begin(session, 'somebodynew')
+
+  check('a flow left for an hour is forgotten', inProgress(session, Date.now() + 3600e3) === null)
+
+  stop(session)
 }
 
 // The GIF writer, which `add` leans on to save art it has changed.
