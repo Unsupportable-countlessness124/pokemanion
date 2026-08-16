@@ -220,21 +220,17 @@ try {
       const { hasGhostty } = await import('../src/bootstrap.mjs')
       const { rcFile } = await import('../src/shell.mjs')
 
+      const { homedir: home } = await import('node:os')
+      const rc = rcFile().startsWith(home()) ? `~${rcFile().slice(home().length)}` : rcFile()
+
       process.stderr.write(
-        'pokemanion is installed.\n\n' +
-          'Four things it cannot do for you:\n\n' +
-          '  1. Restart this agent — it reads its hooks at startup\n' +
-          '  2. Restart Ghostty — it reads its config at startup\n' +
-          '  3. System Settings > Privacy & Security > Accessibility > enable Ghostty\n' +
-          '     Opening the pane means pressing keys, and macOS blocks that until you\n' +
-          '     allow it. Without this no pane appears at all.\n' +
-          `  4. Open a new terminal, or run: source ${rcFile()}\n` +
-          '     A launcher was added there, so you can start a session with a\n' +
-          '     chosen Pokemon: claude --pikachu, codex --random\n\n' +
+        'pokemanion is installed. Three things left, none of them optional:\n\n' +
+          '  1. Allow Ghostty in Accessibility — System Settings > Privacy &\n' +
+          '     Security. No pane appears at all without it.\n' +
+          '  2. Restart this agent, and Ghostty.\n' +
+          `  3. Open a new terminal, or: source ${rc}   (for claude --pikachu)\n\n` +
           (hasGhostty() ? '' : 'Ghostty is missing — the pane is a Ghostty split: https://ghostty.org\n\n') +
-          'Then send that message again and a Pokemon should be sitting beside it.\n' +
-          'Type --pokemon to see who ships, or --random to roll one.\n\n' +
-          'Shown once.\n',
+          'Then send that message again. --pokemon lists who ships. Shown once.\n',
       )
       process.exit(2)
     }
