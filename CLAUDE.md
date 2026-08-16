@@ -74,6 +74,10 @@ At launch, via the shell wrapper: `claude --pikachu`, `claude --random`,
 
 ## If the user wants to add a character
 
+There is a skill for this — `skills/adding-a-character/SKILL.md` — which the
+plugin ships to both agents. It carries the toolbox and the judgements. The
+short version:
+
 ```sh
 npm run add -- <name> <resting> <working> [--resting=0-8] [--working=12-17] [--halo]
 ```

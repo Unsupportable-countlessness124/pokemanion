@@ -29,6 +29,10 @@ Then four things no script can do for you:
 
 ## Adding a character
 
+`skills/adding-a-character/SKILL.md` is the long version, written for an agent
+and shipped with the plugin. Ask Claude or Codex to add a character and it has
+the toolbox in front of it.
+
 ```sh
 npm run add -- brock ~/Downloads/front.gif ~/Downloads/side.gif
 npm run add -- brock sheet.gif sheet.gif --resting=0-8 --working=12-17 --halo

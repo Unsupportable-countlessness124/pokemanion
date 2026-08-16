@@ -443,6 +443,30 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   )
 }
 
+// The skill both agents ship, which is how an agent learns the toolbox.
+//
+// It is a file in a directory with a name, and nothing else validates it: a
+// typo in the frontmatter or a rename of the folder leaves the plugin quietly
+// shipping nothing, and the only symptom is an agent that does not know `npm
+// run add` exists.
+{
+  const skill = join(ROOT, 'skills', 'adding-a-character', 'SKILL.md')
+
+  check('the skill is where a plugin looks for it', existsSync(skill))
+
+  const text = existsSync(skill) ? readFileSync(skill, 'utf8') : ''
+  const frontmatter = text.startsWith('---') ? text.slice(3, text.indexOf('---', 3)) : ''
+
+  check('and declares a name and a description', /\bname:\s*adding-a-character/.test(frontmatter) && /\bdescription:\s*\S/.test(frontmatter))
+
+  // The commands it teaches have to be commands that exist.
+  const scripts = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).scripts
+  const taught = [...text.matchAll(/npm run ([a-z-]+)/g)].map((m) => m[1])
+  const missing = [...new Set(taught)].filter((name) => !scripts[name])
+
+  check('and every command it teaches exists', missing.length === 0, missing.join(' '))
+}
+
 // The GIF writer, which `add` leans on to save art it has changed.
 //
 // Round trip rather than byte comparison: what matters is that a decoder sees
