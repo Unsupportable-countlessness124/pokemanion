@@ -443,6 +443,48 @@ const cardWidth = (paneDefaults.windowCols ?? 34) - (ASH_COLS + CARD_GAP) + 1
   )
 }
 
+// The GIF writer, which `add` leans on to save art it has changed.
+//
+// Round trip rather than byte comparison: what matters is that a decoder sees
+// the frames that went in, at the size they went in, with the transparency they
+// had. Nothing else about the bytes is anyone's business.
+{
+  const { encodeGif } = await import('./gifwrite.mjs')
+  const W = 6
+  const H = 4
+  const made = [0, 1, 2].map((n) => {
+    const pixels = new Uint8Array(W * H * 4)
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      const on = (i / 4) % 3 !== n
+
+      pixels[i] = 200
+      pixels[i + 1] = 40 * (n + 1)
+      pixels[i + 2] = 90
+      pixels[i + 3] = on ? 255 : 0
+    }
+
+    return pixels
+  })
+
+  const { decodeGif: read } = await import('./gif.mjs')
+  const back = read(encodeGif(made, W, H, 80))
+
+  check('the gif writer round trips', back.frames.length === 3 && back.width === W && back.height === H, `${back.frames.length} frames, ${back.width}x${back.height}`)
+
+  const holes = made.map((pixels, f) => {
+    let wrong = 0
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      if ((pixels[i + 3] > 128) !== (back.frames[f].pixels[i + 3] > 128)) wrong++
+    }
+
+    return wrong
+  })
+
+  check('and keeps every transparent pixel transparent', holes.every((n) => n === 0), holes.join(' '))
+}
+
 // Adding a character should be one entry in one file.
 //
 // Ash was not. He went into the roster, and then the launch flag, "did you

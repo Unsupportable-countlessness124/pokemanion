@@ -11,8 +11,14 @@
 // they are judgements, and the pane is the only place to make them — but you
 // should hear about them before you commit the files.
 //
+// It prepares the art as well as installing it. Two GIFs that are already two
+// animations need nothing, but the useful ones rarely are: a sheet holds four
+// directions in one file, and half the sprites worth having sit on a white card.
+// So it can take a range of frames out of a file, and it lifts a flat background
+// off whatever it is given.
+//
 // Usage: npm run add -- <name> <resting.gif> <working.gif>
-//        npm run add -- brock ~/Downloads/front.gif ~/Downloads/side.gif
+//        npm run add -- brock sheet.gif sheet.gif --resting=0-8 --working=12-17
 
 import { copyFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { extname, join } from 'node:path'
@@ -20,8 +26,28 @@ import { ROOT } from './config.mjs'
 import { ROSTER, isKnown, isResident, resolveName } from './roster.mjs'
 import { decodeGif } from './gif.mjs'
 import { decodePng } from './png.mjs'
+import { encodeGif } from './gifwrite.mjs'
 
-const [, , rawName, restingPath, workingPath] = process.argv
+const args = process.argv.slice(2)
+const flag = (key) => {
+  const found = args.find((arg) => arg.startsWith(`--${key}=`))
+
+  return found ? found.slice(key.length + 3) : null
+}
+
+const range = (key) => {
+  const value = flag(key)
+
+  if (!value) return null
+
+  const [from, to] = value.split('-').map(Number)
+
+  if (!Number.isFinite(from) || !Number.isFinite(to) || to < from) die(`--${key}=${value} is not a range like 0-8`)
+
+  return [from, to]
+}
+
+const [rawName, restingPath, workingPath] = args.filter((arg) => !arg.startsWith('--'))
 
 const die = (message) => {
   console.log(`\n  ${message}\n`)
@@ -99,6 +125,9 @@ const soft = (art) => art.modal === 1 && Math.max(art.width, art.height) > NATIV
 
 if (soft(resting)) notes.push('the resting art was resampled rather than upscaled cleanly — no pixel grid to recover, so it will read soft at pane size')
 if (soft(working)) notes.push('the working art was resampled rather than upscaled cleanly — no pixel grid to recover, so it will read soft at pane size')
+if ((soft(resting) || soft(working)) && !args.includes('--halo')) {
+  notes.push('resampled art usually carries a pale halo the background fill cannot reach — add --halo to take it off, unless the sprite has white in it')
+}
 
 if (notes.length > 0) {
   console.log('\n  worth knowing:')
@@ -112,11 +141,168 @@ const used = readdirSync(join(ROOT, 'assets'))
   .filter((n) => Number.isFinite(n))
 
 const next = Math.max(0, ...used) + 1
-const restFile = `${next}-${name}-resting${extname(restingPath).toLowerCase()}`
-const workFile = `${next + 1}-${name}-working${extname(workingPath).toLowerCase()}`
 
-copyFileSync(restingPath, join(ROOT, 'assets', restFile))
-copyFileSync(workingPath, join(ROOT, 'assets', workFile))
+// Preparing the art, which is the part that used to be done by hand.
+//
+// Three things, in the order that makes each one easier: take the frames asked
+// for, lift the background off them, then crop to whatever is left. Cropping
+// last matters — crop first and the box is the size of the card, not of the
+// figure.
+const prepare = (path, keep) => {
+  const bytes = readFileSync(path)
+  const png = extname(path).toLowerCase() === '.png'
+  const image = png ? decodePng(bytes) : decodeGif(bytes)
+  const { width, height } = image
+  const frames = keep ? image.frames.slice(keep[0], keep[1] + 1) : image.frames
+
+  if (frames.length === 0) die(`${path} has ${image.frames.length} frames, so ${keep[0]}-${keep[1]} selects none`)
+
+  // What the background is: the commonest opaque colour around the border. A
+  // sprite touching every edge has none, and then nothing is keyed.
+  const edge = new Map()
+
+  for (const { pixels } of frames.slice(0, 1)) {
+    const sample = (x, y) => {
+      const i = (y * width + x) * 4
+
+      if (pixels[i + 3] < 128) return
+
+      const key = `${pixels[i]},${pixels[i + 1]},${pixels[i + 2]}`
+
+      edge.set(key, (edge.get(key) ?? 0) + 1)
+    }
+
+    for (let x = 0; x < width; x++) { sample(x, 0); sample(x, height - 1) }
+    for (let y = 0; y < height; y++) { sample(0, y); sample(width - 1, y) }
+  }
+
+  const [common] = [...edge.entries()].sort((a, b) => b[1] - a[1])[0] ?? []
+  const border = 2 * (width + height)
+  const card = common && (edge.get(common) ?? 0) > border * 0.3 ? common.split(',').map(Number) : null
+
+  // Flood filled from the edge rather than matched by colour, so a white card
+  // goes and a white shirt stays. The tolerance takes the soft edge an upscale
+  // leaves between the two.
+  const clear = (pixels) => {
+    if (!card) return pixels
+
+    const out = new Uint8Array(pixels)
+    const seen = new Uint8Array(width * height)
+    const queue = []
+    const near = (i) => {
+      if (out[i + 3] < 128) return true
+
+      const d = Math.abs(out[i] - card[0]) + Math.abs(out[i + 1] - card[1]) + Math.abs(out[i + 2] - card[2])
+
+      return d < 90
+    }
+
+    for (let x = 0; x < width; x++) queue.push([x, 0], [x, height - 1])
+    for (let y = 0; y < height; y++) queue.push([0, y], [width - 1, y])
+
+    while (queue.length) {
+      const [x, y] = queue.pop()
+
+      if (x < 0 || y < 0 || x >= width || y >= height) continue
+
+      const at = y * width + x
+
+      if (seen[at] || !near(at * 4)) continue
+
+      seen[at] = 1
+      out[at * 4 + 3] = 0
+      queue.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1])
+    }
+
+    return out
+  }
+
+  // Pockets the fill cannot reach: the gaps between hair spikes, ringed by
+  // figure on every side. They are background to the eye and unreachable to a
+  // flood fill, and the only thing separating them from a sprite's white eyes
+  // is that they match the card. So this is asked for rather than assumed —
+  // `--halo` — because eating a Pokemon's eyes is worse than leaving specks.
+  const halo = args.includes('--halo')
+  const pockets = (pixels) => {
+    if (!halo || !card) return pixels
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] < 128) continue
+
+      const max = Math.max(pixels[i], pixels[i + 1], pixels[i + 2])
+      const min = Math.min(pixels[i], pixels[i + 1], pixels[i + 2])
+
+      if (max > 170 && max - min < 26) pixels[i + 3] = 0
+    }
+
+    return pixels
+  }
+
+  const keyed = frames.map((frame) => pockets(clear(frame.pixels)))
+
+  // One box for every frame, so the figure does not jump between them.
+  let x0 = 1e9
+  let y0 = 1e9
+  let x1 = -1
+  let y1 = -1
+
+  for (const pixels of keyed) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (pixels[(y * width + x) * 4 + 3] < 128) continue
+
+        if (x < x0) x0 = x
+        if (x > x1) x1 = x
+        if (y < y0) y0 = y
+        if (y > y1) y1 = y
+      }
+    }
+  }
+
+  if (x1 < 0) die(`${path} is empty once its background is taken off`)
+
+  const W = x1 - x0 + 1
+  const H = y1 - y0 + 1
+  const cropped = keyed.map((pixels) => {
+    const out = new Uint8Array(W * H * 4)
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const from = ((y0 + y) * width + (x0 + x)) * 4
+        const to = (y * W + x) * 4
+
+        for (let c = 0; c < 4; c++) out[to + c] = pixels[from + c]
+      }
+    }
+
+    return out
+  })
+
+  const touched = Boolean(keep) || Boolean(card) || W !== width || H !== height
+
+  return { frames: cropped, width: W, height: H, delay: frames[0].delay || 100, touched }
+}
+
+const restPrepared = prepare(restingPath, range('resting'))
+const workPrepared = prepare(workingPath, range('working'))
+
+const restFile = `${next}-${name}-resting${restPrepared.touched ? '.gif' : extname(restingPath).toLowerCase()}`
+const workFile = `${next + 1}-${name}-working${workPrepared.touched ? '.gif' : extname(workingPath).toLowerCase()}`
+
+if (restPrepared.touched) {
+  writeFileSync(join(ROOT, 'assets', restFile), encodeGif(restPrepared.frames, restPrepared.width, restPrepared.height, restPrepared.delay))
+} else copyFileSync(restingPath, join(ROOT, 'assets', restFile))
+
+if (workPrepared.touched) {
+  writeFileSync(join(ROOT, 'assets', workFile), encodeGif(workPrepared.frames, workPrepared.width, workPrepared.height, workPrepared.delay))
+} else copyFileSync(workingPath, join(ROOT, 'assets', workFile))
+
+if (restPrepared.touched || workPrepared.touched) {
+  console.log('\n  prepared:')
+
+  if (restPrepared.touched) console.log(`    resting  ${restPrepared.frames.length} frames, ${restPrepared.width}x${restPrepared.height}`)
+  if (workPrepared.touched) console.log(`    working  ${workPrepared.frames.length} frames, ${workPrepared.width}x${workPrepared.height}`)
+}
 
 // A card is what a resident who is not a Pokemon needs — the pokedex is built
 // from Showdown's data and has no people in it, so without one `--dex brock`

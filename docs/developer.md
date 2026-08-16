@@ -31,12 +31,27 @@ Then four things no script can do for you:
 
 ```sh
 npm run add -- brock ~/Downloads/front.gif ~/Downloads/side.gif
+npm run add -- brock sheet.gif sheet.gif --resting=0-8 --working=12-17 --halo
 ```
 
 Two files, one command. It copies them into `assets/` under the next number,
 writes the roster entry, regenerates the gallery, the counts and the credits,
 and stages the art. A character that is not a Pokémon also gets a Pokédex card
 to fill in, since the bundled dex has no people in it.
+
+It prepares the art as well, because the useful files rarely arrive as two clean
+animations:
+
+| | |
+| --- | --- |
+| `--resting=0-8` | take those frames, for a sheet holding several directions |
+| `--working=12-17` | the same for the working half |
+| `--halo` | also lift the pale fringe a resampled upscale leaves behind |
+
+A flat background is always keyed out, by filling in from the edges, so a white
+card goes while a white shirt stays. `--halo` goes further and takes any pale
+colourless pixel, including the pockets a fill cannot reach — say no if the
+sprite has white in it, like eyes.
 
 It says what it thinks of the art first: how many frames the working half has,
 and whether either file was resampled rather than upscaled cleanly. Neither
