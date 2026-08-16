@@ -415,6 +415,35 @@ check('a sentence is left alone', parse('what does --pikachu do?') === null)
 
       check('and passes everything through once the plugin is gone', ask('claude --resume').trim() === 'none', ask('claude --resume'))
 
+      // The writer itself, which is what the plugin's first hook calls. Running
+      // the hook here would open a real pane on whatever machine this is, so the
+      // pane is left out and the file-writing is not.
+      {
+        const { install: writeWrapper } = await import('./shell.mjs')
+        const rcHome = mkdtempSync(join(tempRoot(), 'pokemanion-rc-'))
+        const target = join(rcHome, '.zshrc')
+
+        put(target, '# something that was already here\n')
+
+        const first = writeWrapper([{ name: 'claude' }], target)
+        const once = readFileSync(target, 'utf8')
+        const second = writeWrapper([{ name: 'claude' }], target)
+
+        check(
+          'installing the wrapper keeps what was already in the file',
+          Boolean(first) && once.includes('# something that was already here') && once.includes('claude()'),
+        )
+
+        // Called on every session start, so a second run must be a no-op rather
+        // than a second copy of the function or a backup of a backup.
+        check(
+          'and a second install changes nothing',
+          second === null && readFileSync(target, 'utf8') === once && (once.match(/^claude\(\)/gm) ?? []).length === 1,
+        )
+
+        drop(rcHome, { recursive: true, force: true })
+      }
+
       drop(home, { recursive: true, force: true })
     }
   }
