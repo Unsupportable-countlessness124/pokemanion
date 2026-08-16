@@ -80,8 +80,12 @@ export const otherInstalls = (ours) => {
 
     // The command is a quoted path to bin/run.sh. Whatever sits before it is a
     // root, and any root that is not this one is another install.
+    // Only installs that are still there. Deleting a clone by hand leaves its
+    // hooks behind in the config, and counting those would have the plugin
+    // stand down for something that no longer exists — leaving no pane at all,
+    // which is worse than the two panes this whole check exists to prevent.
     for (const [, root] of text.matchAll(/"?([^"\s]+)\/bin\/run\.sh"?/g)) {
-      if (root !== ours) roots.add(root)
+      if (root !== ours && existsSync(join(root, 'bin', 'run.sh'))) roots.add(root)
     }
   }
 

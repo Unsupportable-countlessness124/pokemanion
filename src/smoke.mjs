@@ -158,19 +158,30 @@ check(
   shopDir(join(home, '.claude'), { recursive: true })
   shopDir(join(home, '.codex'), { recursive: true })
 
+  // Two installs that genuinely exist, because an install is only counted if it
+  // is still on disk. Pointing the fixture at invented paths tested nothing —
+  // both were skipped as missing and the check passed for the wrong reason.
+  const cloneA = join(home, 'clone-a')
+  const cloneB = join(home, 'clone-b')
+
+  for (const root of [cloneA, cloneB]) {
+    shopDir(join(root, 'bin'), { recursive: true })
+    shopPut(join(root, 'bin', 'run.sh'), '#!/bin/sh\n')
+  }
+
   // Claude's shape: hooks buried in a settings file holding much else besides.
   shopPut(
     join(home, '.claude', 'settings.json'),
     JSON.stringify({
       model: 'something-else',
-      hooks: { Stop: [{ hooks: [{ type: 'command', command: '"/Users/someone/pokemanion/bin/run.sh" on-activity.mjs' }] }] },
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: `"${cloneA}/bin/run.sh" on-activity.mjs` }] }] },
     }),
   )
 
   // Codex's shape: a file that is nothing but hooks.
   shopPut(
     join(home, '.codex', 'hooks.json'),
-    JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: 'command', command: '"/opt/elsewhere/pokemanion/bin/run.sh" on-activity.mjs' }] }] } }),
+    JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: 'command', command: `"${cloneB}/bin/run.sh" on-activity.mjs` }] }] } }),
   )
 
   const ask = (ours) =>
@@ -190,13 +201,26 @@ check(
 
   check(
     'another install is found in either agent config shape',
-    seen.includes('/Users/someone/pokemanion') && seen.includes('/opt/elsewhere/pokemanion'),
+    seen.includes(cloneA) && seen.includes(cloneB),
     seen.join(' '),
   )
 
   // The point of the check is finding *other* installs. One that counted itself
   // would stand down against its own hooks and never run at all.
-  check('and the one asking is not one of them', !ask('/Users/someone/pokemanion').includes('/Users/someone/pokemanion'))
+  check('and the one asking is not one of them', !ask(cloneA).includes(cloneA))
+
+  // A clone deleted by hand leaves its hooks behind in the config. Standing
+  // down for a path that is gone leaves no pane at all, which is worse than the
+  // two panes this check exists to prevent.
+  shopDrop(cloneA, { recursive: true, force: true })
+
+  const afterDelete = ask('/Users/me/somewhere-else')
+
+  check(
+    'an install whose folder is gone stops counting',
+    !afterDelete.includes(cloneA) && afterDelete.includes(cloneB),
+    afterDelete.join(' '),
+  )
 
   shopDrop(home, { recursive: true, force: true })
 }
